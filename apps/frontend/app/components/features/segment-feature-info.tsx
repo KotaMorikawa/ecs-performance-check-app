@@ -82,6 +82,64 @@ const segmentFeatures = {
         'Static Generation at Build Time',
       ],
     },
+    nested: {
+      title: 'ネストされたレイアウト',
+      description: '複数のレイアウトを階層的に組み合わせる機能',
+      capabilities: [
+        'Nested Layouts',
+        'Layout Groups',
+        'Shared UI Components',
+        'State Preservation',
+        'Partial Re-rendering',
+      ],
+      verificationSteps: [
+        {
+          step: 'レイアウト階層確認',
+          description: '/features/routing/nested-layout にアクセスしてレイアウト構造を確認',
+          expected: '複数のレイアウトが階層的に適用され、共通要素が継承される',
+        },
+        {
+          step: 'ナビゲーション確認',
+          description: '他のページに移動時の共通要素の動作を確認',
+          expected: '共通レイアウト部分は再レンダリングされず、状態が保持される',
+        },
+      ],
+      technicalDetails: [
+        'Layout Composition Patterns',
+        'React Server Components',
+        'Client-side State Management',
+        'Partial Hydration',
+      ],
+    },
+    loading: {
+      title: 'ローディング・エラーハンドリング',
+      description: 'loading.tsxとerror.tsxによる自動UI制御機能',
+      capabilities: [
+        'Loading UI',
+        'Error Boundaries',
+        'Automatic Error Recovery',
+        'Progressive Enhancement',
+        'Fallback UI Patterns',
+      ],
+      verificationSteps: [
+        {
+          step: 'ローディング確認',
+          description: '/features/routing/loading-error にアクセスして各種ローディング状態を確認',
+          expected: 'loading.tsxによる自動ローディングUIと手動制御が正常に動作する',
+        },
+        {
+          step: 'エラーハンドリング確認',
+          description: 'エラー発生ボタンでエラーバウンダリの動作を確認',
+          expected: 'error.tsxによる自動エラーUIが表示され、回復操作が可能',
+        },
+      ],
+      technicalDetails: [
+        'Automatic Loading States',
+        'Error Boundary Components',
+        'React Suspense Integration',
+        'Error Recovery Patterns',
+      ],
+    },
   },
   'server-actions': {
     basic: {

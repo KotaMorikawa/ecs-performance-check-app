@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import BasicRoutingPage from '../basic/page';
+import BasicRoutingPage from '../page';
 
-// TDD: 基本的なルーティング機能のテスト
-describe('Basic Routing Page', () => {
+// TDD: 基本ルーティング機能の統合テスト
+describe('Basic Routing Page - Integration Tests', () => {
   it('ページタイトルを表示すべき', () => {
     render(<BasicRoutingPage />);
     
@@ -42,14 +42,12 @@ describe('Basic Routing Page', () => {
   it('レンダリング時間を測定・表示すべき', () => {
     render(<BasicRoutingPage />);
     
-    expect(
-      screen.getByTestId('render-time')
-    ).toBeInTheDocument();
+    const renderTimeElement = screen.getByTestId('render-time');
+    expect(renderTimeElement).toBeInTheDocument();
     
-    // レンダリング時間の値が表示されていることを確認
-    expect(
-      screen.getByText(/ms/)
-    ).toBeInTheDocument();
+    // レンダリング時間の具体的な表示を確認
+    expect(renderTimeElement).toHaveTextContent(/クライアントレンダリング時間:/);
+    expect(renderTimeElement).toHaveTextContent(/サーバータイムスタンプ:/);
   });
 
   it('Core Web Vitalsメトリクスを表示すべき', () => {
@@ -59,11 +57,19 @@ describe('Basic Routing Page', () => {
     const metricsSection = screen.getByTestId('performance-metrics');
     expect(metricsSection).toBeInTheDocument();
     
-    // メトリクス名の確認（Badgeコンポーネント内）
-    expect(screen.getAllByText('LCP')).toHaveLength(1);
-    expect(screen.getAllByText('FID')).toHaveLength(1);
-    expect(screen.getAllByText('CLS')).toHaveLength(1);
-    expect(screen.getAllByText('INP')).toHaveLength(1);
+    // Core Web Vitalsセクションの確認（複数要素があるため getAllByText を使用）
+    const coreWebVitalsElements = screen.getAllByText('Core Web Vitals');
+    expect(coreWebVitalsElements.length).toBeGreaterThan(0);
+    
+    // メトリクス名の確認（大文字表記）
+    expect(screen.getByText('LCP')).toBeInTheDocument();
+    expect(screen.getByText('CLS')).toBeInTheDocument();
+    expect(screen.getByText('INP')).toBeInTheDocument();
+    
+    // 追加のパフォーマンスメトリクスセクションの確認
+    expect(screen.getByText('追加のパフォーマンスメトリクス')).toBeInTheDocument();
+    expect(screen.getByText('FCP')).toBeInTheDocument();
+    expect(screen.getByText('TTFB')).toBeInTheDocument();
   });
 
   it('機能説明セクションを表示すべき', () => {
