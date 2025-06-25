@@ -70,7 +70,6 @@ services:
       - POSTGRES_DB=appdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../../apps/backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - ecs-performance-network
     healthcheck:
