@@ -10,10 +10,12 @@
     "lint": "eslint . --ext .ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
+    "test:db": "NODE_ENV=test vitest run",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:test:push": "DATABASE_URL=\"postgresql://postgres:password@localhost:5433/appdb_test\" prisma db push"
   },
   "dependencies": {
     "@hono/node-server": "^1.8.2",
