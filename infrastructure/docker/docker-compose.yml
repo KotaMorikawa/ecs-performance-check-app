@@ -4,8 +4,8 @@ services:
   nextjs:
     container_name: ecs-performance-nextjs
     build:
-      context: ../../apps/frontend
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: apps/frontend/Dockerfile
       target: development
     ports:
       - "3000:3000"
@@ -15,9 +15,9 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
       - REVALIDATE_SECRET=dev-secret-key-12345
     volumes:
-      - ../../apps/frontend:/app
+      - ../../apps/frontend:/app/apps/frontend
       - /app/node_modules
-      - /app/.next
+      - /app/apps/frontend/.next
     depends_on:
       - backend
     networks:
@@ -33,8 +33,8 @@ services:
   backend:
     container_name: ecs-performance-backend
     build:
-      context: ../../apps/backend
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: apps/backend/Dockerfile
       target: development
     ports:
       - "8000:8000"
@@ -44,7 +44,7 @@ services:
       - NEXTJS_URL=http://nextjs:3000
       - REVALIDATE_SECRET=dev-secret-key-12345
     volumes:
-      - ../../apps/backend:/app
+      - ../../apps/backend:/app/apps/backend
       - /app/node_modules
     depends_on:
       postgres:

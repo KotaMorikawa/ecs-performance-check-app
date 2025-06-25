@@ -6,16 +6,16 @@ WORKDIR /app
 # =============== Dependencies Stage ===============
 FROM base AS deps
 # Copy root package files for workspace support
-COPY ../../package*.json ./
-COPY package*.json ./backend/
-COPY prisma ./backend/prisma/
+COPY package*.json ./
+COPY apps/backend/package*.json ./apps/backend/
+COPY apps/backend/prisma ./apps/backend/prisma/
 RUN npm ci --workspace @ecs-performance/backend
-RUN npx prisma generate --schema=./backend/prisma/schema.prisma
+RUN npx prisma generate --schema=./apps/backend/prisma/schema.prisma
 
 # =============== Builder Stage ===============
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY apps/backend .
 
 # ビルド実行
 RUN npm run build
@@ -49,10 +49,18 @@ CMD ["node", "dist/index.js"]
 
 # =============== Development Stage ===============
 FROM base AS development
+# Copy workspace root package.json first
 COPY package*.json ./
-RUN npm install
-COPY prisma ./prisma/
-RUN npx prisma generate
-WORKDIR /app
+COPY apps/backend/package*.json ./apps/backend/
+# Copy prisma schema
+COPY apps/backend/prisma ./apps/backend/prisma/
+# Install all workspace dependencies at root level
+RUN npm ci
+# Generate Prisma client
+RUN npx prisma generate --schema=./apps/backend/prisma/schema.prisma
+# Copy backend source code
+COPY apps/backend ./apps/backend
+# Set working directory to backend app
+WORKDIR /app/apps/backend
 EXPOSE 8000
 CMD ["npm", "run", "dev"]

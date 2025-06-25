@@ -1,103 +1,165 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink, CheckCircle, Clock, Github } from 'lucide-react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const implementedFeatures = [
+    {
+      title: '基本ルーティング',
+      description: 'App Routerによるファイルベースルーティング',
+      path: '/features/routing/basic',
+      status: 'implemented'
+    }
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const plannedFeatures = [
+    { name: 'Server Actions', description: 'フォーム処理とサーバーサイドアクション' },
+    { name: 'データフェッチング', description: 'SSG/SSR/ISRパターンの実装' },
+    { name: 'キャッシュ戦略', description: '多層キャッシュシステムの構築' },
+    { name: 'ストリーミング', description: 'Suspenseによるストリーミングレンダリング' },
+    { name: 'Middleware', description: 'リクエスト処理とルートガード' },
+    { name: '画像最適化', description: 'Next.js Image コンポーネント活用' },
+    { name: 'メタデータ', description: 'SEO対応とOpen Graphタグ' }
+  ];
+
+  const techStack = [
+    { name: 'Next.js 15.3.4', type: 'framework' },
+    { name: 'React 18', type: 'library' },
+    { name: 'TypeScript', type: 'language' },
+    { name: 'Tailwind CSS', type: 'styling' },
+    { name: 'shadcn/ui', type: 'components' },
+    { name: 'Hono', type: 'backend' },
+    { name: 'PostgreSQL', type: 'database' },
+    { name: 'AWS ECS', type: 'infrastructure' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* ヘッダー */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            ECS Performance Check App
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-6">
+            Next.js 15.3.4の主要機能をAWS ECS環境で動作させ、パフォーマンスメトリクスを可視化するデモアプリケーション
+          </p>
+          <Button asChild size="lg" className="mr-4">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+              <Github className="mr-2 h-4 w-4" />
+              GitHub で見る
+            </a>
+          </Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          {/* 実装済み機能 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                実装済み機能
+              </CardTitle>
+              <CardDescription>現在利用可能な機能デモ</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {implementedFeatures.map((feature, index) => (
+                <Card key={index} className="border-l-4 border-l-green-500">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center justify-between">
+                      {feature.title}
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        実装済み
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>{feature.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={feature.path as `/features/routing/basic`}>
+                        基本ルーティング
+                        <ExternalLink className="ml-2 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* 実装予定機能 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-600" />
+                実装予定機能
+              </CardTitle>
+              <CardDescription>順次実装予定の機能</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {plannedFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
+                    <div>
+                      <div className="font-medium">{feature.name}</div>
+                      <div className="text-sm text-muted-foreground">{feature.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* プロジェクト概要 */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>プロジェクト概要</CardTitle>
+            <CardDescription>システム構成と特徴</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-semibold mb-2">AWS ECSサイドカーパターン構成</h3>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li>• Next.js Container (3000): メインアプリケーション</li>
+                  <li>• Hono Backend Container (8000): バックエンドAPI</li>
+                  <li>• PostgreSQL Container (5432): データベース</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">パフォーマンス監視</h3>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li>• Core Web Vitals測定</li>
+                  <li>• レンダリング時間追跡</li>
+                  <li>• キャッシュ効率監視</li>
+                  <li>• コンテナ間通信レイテンシー</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 技術スタック */}
+        <Card>
+          <CardHeader>
+            <CardTitle>技術スタック</CardTitle>
+            <CardDescription>使用しているテクノロジー</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {techStack.map((tech, index) => (
+                <Badge key={index} variant="outline" className="text-sm">
+                  {tech.name}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
