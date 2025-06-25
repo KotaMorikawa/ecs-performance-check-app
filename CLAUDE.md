@@ -56,6 +56,84 @@ import { UserProfile } from './user-profile';
 import styles from './page.module.css';
 ```
 
+#### コンポーネント構成とファイル配置
+
+##### 基本ディレクトリ構造
+```
+app/
+├── [segment]/                # 各機能セグメント
+│   ├── page.tsx             # ページコンポーネント
+│   ├── loading.tsx          # ローディングUI
+│   ├── _components/         # セグメント固有UIコンポーネント
+│   ├── _containers/         # データ取得・統合レイヤー
+│   │   ├── container.tsx    # Server Component（データ取得）
+│   │   └── presentational.tsx # Client Component（レイアウト・UI）
+│   ├── _actions/            # セグメント特化 Server Actions
+│   └── _lib/               # セグメント特化ユーティリティ
+│
+├── components/ui/           # プロジェクト共通コンポーネント
+└── lib/                    # プロジェクト共通ライブラリ
+```
+
+##### ファイル命名規則
+
+**必須事項**: 以下の命名規則を厳守する
+
+- `_containers/container.tsx` - Server Componentでデータ取得用
+- `_containers/presentational.tsx` - Client Componentでレイアウト・UI・ユーザー操作ロジック用
+- `_components/` - セグメント内専用のUIコンポーネント用ディレクトリ
+
+**禁止事項**: 以下の命名は使用禁止
+
+- ❌ `*.container.tsx` (セグメント名を含む冗長な命名)
+- ❌ `*.presentational.tsx` (セグメント名を含む冗長な命名)
+- ❌ `_components/presentational.tsx` (presentationalは_containers/に配置)
+
+##### 責務分離パターン
+
+```typescript
+// _containers/container.tsx (Server Component)
+import { PresentationalComponent } from './presentational';
+
+export function ContainerComponent() {
+  // Server Componentでデータ取得
+  const serverData = await fetchData();
+  
+  return <PresentationalComponent data={serverData} />;
+}
+
+// _containers/presentational.tsx (Client Component)
+'use client';
+
+import { useState } from 'react';
+
+interface Props {
+  data: ServerData;
+}
+
+export function PresentationalComponent({ data }: Props) {
+  // Client側のUI状態管理
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div>
+      {/* UIレンダリング */}
+    </div>
+  );
+}
+```
+
+##### 配置判断基準
+
+**使用範囲による判断**:
+- 単一セグメント内のみ → `app/[segment]/_components/`
+- プロジェクト共通 → `app/components/ui/`
+
+**責務による判断**:
+- データ取得・統合 → `_containers/container.tsx`
+- レイアウト・UI・ユーザー操作 → `_containers/presentational.tsx`
+- 再利用可能なUIパーツ → `_components/`
+
 ### 開発フロー
 
 #### ブランチ戦略
