@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import LoadingErrorPage from '../loading-error/page';
+import LoadingErrorPage from '../page';
 
 // console.errorをモック
 const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
