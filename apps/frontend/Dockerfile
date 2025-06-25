@@ -6,14 +6,14 @@ WORKDIR /app
 # =============== Dependencies Stage ===============
 FROM base AS deps
 # Copy root package files for workspace support
-COPY ../../package*.json ./
-COPY package*.json ./frontend/
+COPY package*.json ./
+COPY apps/frontend/package*.json ./apps/frontend/
 RUN npm ci --workspace @ecs-performance/frontend
 
 # =============== Builder Stage ===============
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY apps/frontend .
 
 # 環境変数設定
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -52,10 +52,14 @@ CMD ["node", "server.js"]
 
 # =============== Development Stage ===============
 FROM base AS development
-# Copy root package files for workspace support
-COPY ../../package*.json ./
-COPY package*.json ./frontend/
-RUN npm ci --workspace @ecs-performance/frontend
-WORKDIR /app
+# Copy workspace root package.json first
+COPY package*.json ./
+COPY apps/frontend/package*.json ./apps/frontend/
+# Install all workspace dependencies at root level
+RUN npm ci
+# Copy frontend source code
+COPY apps/frontend ./apps/frontend
+# Set working directory to frontend app
+WORKDIR /app/apps/frontend
 EXPOSE 3000
-CMD ["npm", "run", "dev", "--workspace", "@ecs-performance/frontend"]
+CMD ["npm", "run", "dev"]
