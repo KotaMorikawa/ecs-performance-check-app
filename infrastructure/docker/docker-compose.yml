@@ -58,7 +58,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # PostgreSQL Container
+  # PostgreSQL Container (開発用)
   postgres:
     container_name: ecs-performance-postgres
     image: postgres:15-alpine
@@ -78,10 +78,32 @@ services:
       timeout: 5s
       retries: 5
 
+  # PostgreSQL Container (テスト用)
+  postgres-test:
+    container_name: ecs-performance-postgres-test
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=appdb_test
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - ecs-performance-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   ecs-performance-network:
     driver: bridge
 
 volumes:
   postgres_data:
+    driver: local
+  postgres_test_data:
     driver: local
