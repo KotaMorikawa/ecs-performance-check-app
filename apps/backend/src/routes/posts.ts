@@ -250,6 +250,20 @@ postsRoutes.delete('/:id', async (c) => {
 
     await dbClient.post.delete({ where: { id } });
 
+    // Next.jsキャッシュを無効化（リバリデート通知）
+    try {
+      await fetch(`${process.env.NEXTJS_URL}/api/revalidate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tag: 'getPosts',
+          secret: process.env.REVALIDATE_SECRET,
+        }),
+      });
+    } catch (revalidateError) {
+      console.warn('Revalidation failed:', revalidateError);
+    }
+
     return c.json({
       success: true,
       message: 'Post deleted successfully',

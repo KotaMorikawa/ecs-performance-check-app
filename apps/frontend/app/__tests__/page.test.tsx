@@ -31,7 +31,10 @@ describe('Home Page', () => {
   it('基本ルーティング機能へのリンクを表示すべき', () => {
     render(<Home />);
     
-    const routingLink = screen.getByRole('link', { name: /基本ルーティング/i });
+    const routingLinks = screen.getAllByRole('link', { name: /デモを見る/i });
+    const routingLink = routingLinks.find(link => 
+      link.getAttribute('href') === '/features/routing/basic'
+    );
     expect(routingLink).toBeInTheDocument();
     expect(routingLink).toHaveAttribute('href', '/features/routing/basic');
   });
@@ -44,11 +47,21 @@ describe('Home Page', () => {
     ).toBeInTheDocument();
   });
 
+  it('Server Actions機能へのリンクを表示すべき', () => {
+    render(<Home />);
+    
+    const serverActionLinks = screen.getAllByRole('link', { name: /デモを見る/i });
+    const serverActionLink = serverActionLinks.find(link => 
+      link.getAttribute('href') === '/features/server-actions/basic'
+    );
+    expect(serverActionLink).toBeInTheDocument();
+    expect(serverActionLink).toHaveAttribute('href', '/features/server-actions/basic');
+  });
+
   it('実装予定機能のリストを表示すべき', () => {
     render(<Home />);
     
-    // 実装予定の機能名を確認
-    expect(screen.getByText('Server Actions')).toBeInTheDocument();
+    // 実装予定の機能名を確認（Server Actionsは実装済みなので除外）
     expect(screen.getByText('データフェッチング')).toBeInTheDocument();
     expect(screen.getByText('キャッシュ戦略')).toBeInTheDocument();
     expect(screen.getByText('Middleware')).toBeInTheDocument();
