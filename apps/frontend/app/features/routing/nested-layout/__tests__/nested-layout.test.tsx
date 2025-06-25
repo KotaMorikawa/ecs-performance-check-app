@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import NestedLayoutPage from '../nested-layout/page';
+import NestedLayoutPage from '../page';
 
 describe('Nested Layout Page', () => {
   it('ページタイトルを表示すべき', () => {

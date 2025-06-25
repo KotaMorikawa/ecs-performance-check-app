@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import DynamicRoutingPage from '../dynamic/[id]/page';
+import DynamicRoutingPage from '../[id]/page';
 
 // Next.js のルーティングパラメータをモック
 vi.mock('next/navigation', () => ({

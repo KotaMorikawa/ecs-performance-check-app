@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import PublicPage from '../(route-groups)/public/page';
-import AdminPage from '../(route-groups)/admin/page';
+import PublicPage from '../public/page';
+import AdminPage from '../admin/page';
 
 describe('Route Groups', () => {
   describe('Public Page', () => {

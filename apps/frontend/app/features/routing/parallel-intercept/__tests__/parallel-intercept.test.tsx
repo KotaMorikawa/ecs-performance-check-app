@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import ParallelInterceptPage from '../parallel-intercept/page';
+import ParallelInterceptPage from '../page';
 
 describe('Parallel & Intercepting Routes Page', () => {
   it('ページタイトルを表示すべき', () => {
