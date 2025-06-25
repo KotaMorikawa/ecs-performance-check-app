@@ -2,6 +2,8 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { testDatabaseConnection, closeDatabaseConnection } from './lib/database.js';
+import { postsRoutes } from './routes/posts.js';
 
 const app = new Hono();
 
@@ -13,15 +15,20 @@ app.use('*', cors({
 }));
 
 // Health check endpoint
-app.get('/health', (c) => {
+app.get('/health', async (c) => {
+  const dbStatus = await testDatabaseConnection();
+  
   return c.json({
-    status: 'ok',
+    status: dbStatus ? 'ok' : 'error',
     timestamp: new Date().toISOString(),
     service: 'hono-backend',
     version: process.env.npm_package_version || '0.1.0',
-    database: 'connected', // TODO: 実際のDB接続状態をチェック
+    database: dbStatus ? 'connected' : 'disconnected',
   });
 });
+
+// Posts routes
+app.route('/api/posts', postsRoutes);
 
 // Root endpoint
 app.get('/', (c) => {
@@ -76,7 +83,23 @@ app.onError((err, c) => {
 
 const port = parseInt(process.env.PORT || '8000', 10);
 
-console.log(`Server is running on port ${port}`);
+// データベース接続テスト
+testDatabaseConnection().then(() => {
+  console.log(`Server is running on port ${port}`);
+});
+
+// グレースフルシャットダウン
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  await closeDatabaseConnection();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Shutting down gracefully...');
+  await closeDatabaseConnection();
+  process.exit(0);
+});
 
 serve({
   fetch: app.fetch,
