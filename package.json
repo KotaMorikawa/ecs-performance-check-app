@@ -1,0 +1,40 @@
+{
+  "name": "ecs-performance-check-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ECS Performance Check App - Next.js 15.3.4 demo with AWS ECS deployment",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:docker",
+    "dev:docker": "docker-compose -f infrastructure/docker/docker-compose.yml up",
+    "dev:frontend": "npm run dev -w @ecs-performance/frontend",
+    "dev:backend": "npm run dev -w @ecs-performance/backend",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "npm run build -w @ecs-performance/frontend",
+    "build:backend": "npm run build -w @ecs-performance/backend",
+    "lint": "npm run lint -ws",
+    "typecheck": "npm run typecheck -ws",
+    "test": "npm run test -ws",
+    "test:e2e": "npm run test:e2e -w @ecs-performance/frontend",
+    "db:migrate": "npm run db:migrate -w @ecs-performance/backend",
+    "db:seed": "npm run db:seed -w @ecs-performance/backend",
+    "deploy:ecr": "bash infrastructure/scripts/deploy-ecr.sh",
+    "deploy:ecs": "bash infrastructure/scripts/deploy-ecs.sh",
+    "deploy:all": "npm run deploy:ecr && npm run deploy:ecs",
+    "clean": "npm run clean -ws && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

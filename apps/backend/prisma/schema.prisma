@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// パフォーマンステスト用のサンプルモデル
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String?
+  slug        String   @unique
+  published   Boolean  @default(false)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  authorId    Int?
+  author      User?    @relation(fields: [authorId], references: [id])
+  tags        Tag[]    @relation("PostTags")
+  
+  @@map("posts")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[] @relation("PostTags")
+  
+  @@map("tags")
+}
+
+// パフォーマンス測定用のメトリクステーブル
+model PerformanceMetric {
+  id            Int      @id @default(autoincrement())
+  page          String
+  metric        String   // 'LCP', 'FID', 'CLS', 'INP', 'TTFB'
+  value         Float
+  timestamp     DateTime @default(now())
+  userAgent     String?
+  connectionType String?  // '4g', 'wifi', etc.
+  
+  @@map("performance_metrics")
+}
+
+// キャッシュ効率測定用のテーブル
+model CacheMetric {
+  id          Int      @id @default(autoincrement())
+  type        String   // 'nextjs', 'cloudfront', 'api'
+  key         String
+  hit         Boolean
+  timestamp   DateTime @default(now())
+  responseTime Int?    // ミリ秒
+  
+  @@map("cache_metrics")
+}
