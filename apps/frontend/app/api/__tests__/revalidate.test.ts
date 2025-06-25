@@ -22,11 +22,8 @@ describe('/api/revalidate', () => {
 
   describe('GET /api/revalidate', () => {
     it('APIの情報を返すべき', async () => {
-      // Arrange
-      const request = new NextRequest('http://localhost:3000/api/revalidate');
-
-      // Act
-      const response = await GET(request);
+      // Arrange & Act
+      const response = await GET();
       const data = await response.json();
 
       // Assert
@@ -182,7 +179,7 @@ describe('/api/revalidate', () => {
 
     it('revalidatePathがエラーを投げた場合、エラー情報を含むべき', async () => {
       // Arrange
-      (revalidatePath as jest.MockedFunction<typeof revalidatePath>).mockImplementationOnce(() => {
+      vi.mocked(revalidatePath).mockImplementationOnce(() => {
         throw new Error('Revalidation failed');
       });
 

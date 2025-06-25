@@ -11,11 +11,16 @@ export default function Home() {
       description: 'App Routerによるファイルベースルーティング',
       path: '/features/routing/basic',
       status: 'implemented'
+    },
+    {
+      title: 'Server Actions',
+      description: 'フォーム処理とサーバーサイドアクション',
+      path: '/features/server-actions/basic',
+      status: 'implemented'
     }
   ];
 
   const plannedFeatures = [
-    { name: 'Server Actions', description: 'フォーム処理とサーバーサイドアクション' },
     { name: 'データフェッチング', description: 'SSG/SSR/ISRパターンの実装' },
     { name: 'キャッシュ戦略', description: '多層キャッシュシステムの構築' },
     { name: 'ストリーミング', description: 'Suspenseによるストリーミングレンダリング' },
@@ -78,8 +83,8 @@ export default function Home() {
                   </CardHeader>
                   <CardContent>
                     <Button asChild variant="outline" size="sm">
-                      <Link href={feature.path as `/features/routing/basic`}>
-                        基本ルーティング
+                      <Link href={feature.path as '/features/routing/basic' | '/features/server-actions/basic'}>
+                        デモを見る
                         <ExternalLink className="ml-2 h-3 w-3" />
                       </Link>
                     </Button>
