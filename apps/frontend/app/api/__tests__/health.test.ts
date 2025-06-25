@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET } from '../health/route';
-import { NextRequest } from 'next/server';
 
 // fetchのモック
 global.fetch = vi.fn();
@@ -10,7 +9,7 @@ describe('/api/health', () => {
     vi.clearAllMocks();
     // 環境変数のモック
     process.env.API_URL = 'http://localhost:8000';
-    process.env.NODE_ENV = 'test';
+    vi.stubEnv('NODE_ENV', 'test');
   });
 
   afterEach(() => {
@@ -25,15 +24,13 @@ describe('/api/health', () => {
       timestamp: '2024-01-01T00:00:00.000Z',
     };
 
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(mockBackendResponse),
-    });
-
-    const request = new NextRequest('http://localhost:3000/api/health');
+    } as Response);
 
     // Act
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     // Assert
@@ -53,15 +50,13 @@ describe('/api/health', () => {
       database: 'disconnected',
     };
 
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       json: () => Promise.resolve(mockBackendResponse),
-    });
-
-    const request = new NextRequest('http://localhost:3000/api/health');
+    } as Response);
 
     // Act
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     // Assert
@@ -73,12 +68,10 @@ describe('/api/health', () => {
 
   it('バックエンドAPIに接続できない場合、エラーを返すべき', async () => {
     // Arrange
-    (fetch as jest.MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('Connection refused'));
-
-    const request = new NextRequest('http://localhost:3000/api/health');
+    vi.mocked(fetch).mockRejectedValueOnce(new Error('Connection refused'));
 
     // Act
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     // Assert
@@ -93,15 +86,13 @@ describe('/api/health', () => {
     // Arrange
     delete process.env.API_URL;
     
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ status: 'ok', database: 'connected' }),
-    });
-
-    const request = new NextRequest('http://localhost:3000/api/health');
+    } as Response);
 
     // Act
-    await GET(request);
+    await GET();
 
     // Assert
     expect(fetch).toHaveBeenCalledWith(
