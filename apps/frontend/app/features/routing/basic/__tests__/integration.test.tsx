@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import BasicRoutingPage from '../basic/page';
+import BasicRoutingPage from '../page';
 
-// TDD: 基本的なルーティング機能のテスト
-describe('Basic Routing Page', () => {
+// TDD: 基本ルーティング機能の統合テスト
+describe('Basic Routing Page - Integration Tests', () => {
   it('ページタイトルを表示すべき', () => {
     render(<BasicRoutingPage />);
     
@@ -46,8 +46,8 @@ describe('Basic Routing Page', () => {
     expect(renderTimeElement).toBeInTheDocument();
     
     // レンダリング時間の具体的な表示を確認
-    expect(renderTimeElement).toHaveTextContent(/レンダリング時間:/);
-    expect(renderTimeElement).toHaveTextContent(/ms$/);
+    expect(renderTimeElement).toHaveTextContent(/クライアントレンダリング時間:/);
+    expect(renderTimeElement).toHaveTextContent(/サーバータイムスタンプ:/);
   });
 
   it('Core Web Vitalsメトリクスを表示すべき', () => {
