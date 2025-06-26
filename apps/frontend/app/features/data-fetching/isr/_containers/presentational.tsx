@@ -17,11 +17,7 @@ interface IsrPresentationalProps {
   error: string | null;
 }
 
-export function IsrPresentational({ 
-  categories, 
-  metrics, 
-  error 
-}: IsrPresentationalProps) {
+export function IsrPresentational({ categories, metrics, error }: IsrPresentationalProps) {
   const [showCode, setShowCode] = useState(false);
 
   const isrExampleCode = `// ISR Implementation (Server Component)
@@ -85,32 +81,26 @@ async function revalidateCategories() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRevalidate}
-          >
+          <Button variant="outline" onClick={handleRevalidate}>
             Force Revalidate
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setShowCode(!showCode)}
-          >
+          <Button variant="outline" onClick={() => setShowCode(!showCode)}>
             {showCode ? 'Hide Code' : 'Show Code'}
           </Button>
         </div>
       </div>
 
       {showCode && (
-        <CodeDisplay 
+        <CodeDisplay
           title="ISR Implementation"
           description="Incremental Static Regeneration の実装例"
           files={[
             {
-              filename: "container.tsx",
-              language: "typescript",
+              filename: 'container.tsx',
+              language: 'typescript',
               content: isrExampleCode,
-              description: "ISRを使用したServer Componentの実装"
-            }
+              description: 'ISRを使用したServer Componentの実装',
+            },
           ]}
         />
       )}
@@ -133,9 +123,7 @@ async function revalidateCategories() {
             <CardContent>
               {error ? (
                 <Alert variant="destructive">
-                  <AlertDescription>
-                    Error loading ISR content: {error}
-                  </AlertDescription>
+                  <AlertDescription>Error loading ISR content: {error}</AlertDescription>
                 </Alert>
               ) : categories.length > 0 ? (
                 <div className="space-y-4">
@@ -145,9 +133,7 @@ async function revalidateCategories() {
                         <CardHeader className="pb-3">
                           <CardTitle className="text-lg flex items-center justify-between">
                             {category.name}
-                            <Badge variant="secondary">
-                              {category.postCount} posts
-                            </Badge>
+                            <Badge variant="secondary">{category.postCount} posts</Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -165,9 +151,9 @@ async function revalidateCategories() {
 
                   <Alert>
                     <AlertDescription>
-                      <strong>ISR Behavior:</strong> This content is statically generated at build time 
-                      and revalidated every 60 seconds. The first visitor after the revalidation 
-                      period will trigger a background regeneration.
+                      <strong>ISR Behavior:</strong> This content is statically generated at build
+                      time and revalidated every 60 seconds. The first visitor after the
+                      revalidation period will trigger a background regeneration.
                     </AlertDescription>
                   </Alert>
 
@@ -177,10 +163,9 @@ async function revalidateCategories() {
                       <div>
                         <span className="text-muted-foreground">Page Generated:</span>
                         <span className="ml-2 font-mono">
-                          {metrics && metrics.timestamp ? 
-                            new Date(metrics.timestamp).toISOString().split('T')[0] : 
-                            'Build time'
-                          }
+                          {metrics && metrics.timestamp
+                            ? new Date(metrics.timestamp).toISOString().split('T')[0]
+                            : 'Build time'}
                         </span>
                       </div>
                       <div>
@@ -211,7 +196,7 @@ async function revalidateCategories() {
 
         <TabsContent value="performance">
           {metrics ? (
-            <EnhancedPerformanceDisplay 
+            <EnhancedPerformanceDisplay
               metrics={{
                 network: {
                   totalRequests: 1,
@@ -238,9 +223,7 @@ async function revalidateCategories() {
             />
           ) : (
             <Alert>
-              <AlertDescription>
-                Performance metrics not available
-              </AlertDescription>
+              <AlertDescription>Performance metrics not available</AlertDescription>
             </Alert>
           )}
         </TabsContent>
@@ -254,20 +237,27 @@ async function revalidateCategories() {
               <div>
                 <h4 className="font-semibold mb-2">1. Static Generation + Revalidation</h4>
                 <p className="text-sm text-muted-foreground">
-                  Pages are pre-rendered at build time and cached. After the revalidation period, 
-                  the next request triggers a background regeneration while serving the cached version.
+                  Pages are pre-rendered at build time and cached. After the revalidation period,
+                  the next request triggers a background regeneration while serving the cached
+                  version.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">2. Revalidation Strategies</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• <strong>Time-based:</strong> revalidate: 60 (every 60 seconds)</li>
-                  <li>• <strong>On-demand:</strong> revalidateTag() or revalidatePath()</li>
-                  <li>• <strong>Tag-based:</strong> Cache tags for selective invalidation</li>
+                  <li>
+                    • <strong>Time-based:</strong> revalidate: 60 (every 60 seconds)
+                  </li>
+                  <li>
+                    • <strong>On-demand:</strong> revalidateTag() or revalidatePath()
+                  </li>
+                  <li>
+                    • <strong>Tag-based:</strong> Cache tags for selective invalidation
+                  </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">3. Benefits</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">

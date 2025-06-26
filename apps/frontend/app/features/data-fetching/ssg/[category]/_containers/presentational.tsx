@@ -8,17 +8,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
 import { CodeDisplay } from '@/components/code-display';
-import type { Category, DataFetchMetrics } from '../../_shared/types';
+import type { Category, DataFetchMetrics } from '../../../_shared/types';
 import { formatDateTime } from '@/utils/date-formatter';
 
 interface SsgPresentationalProps {
   categories: Category[];
+  selectedCategory: Category | null;
+  currentSlug: string;
   metrics: DataFetchMetrics | null;
   error: string | null;
 }
 
 export function SsgPresentational({ 
   categories, 
+  selectedCategory,
+  currentSlug,
   metrics, 
   error 
 }: SsgPresentationalProps) {
@@ -63,10 +67,15 @@ async function getAll(options: FetchOptions = {}) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">SSG Data Fetching Demo</h1>
+          <h1 className="text-3xl font-bold">SSG Category: {currentSlug}</h1>
           <p className="text-muted-foreground mt-2">
             Static Site Generation with build-time data pre-rendering
           </p>
+          {selectedCategory && (
+            <p className="text-sm text-blue-600 mt-1">
+              Showing category: {selectedCategory.name}
+            </p>
+          )}
         </div>
         <Button
           variant="outline"
@@ -99,25 +108,45 @@ async function getAll(options: FetchOptions = {}) {
         </TabsList>
 
         <TabsContent value="content" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Badge variant="default">SSG</Badge>
-                Categories (Build-time generated)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {error ? (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    Error loading SSG content: {error}
-                  </AlertDescription>
-                </Alert>
-              ) : categories.length > 0 ? (
+          {selectedCategory ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Badge variant="default">SSG</Badge>
+                  {selectedCategory.name} (Static Generated)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
+                  <Card className="border-2 border-blue-200 bg-blue-50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center justify-between">
+                        {selectedCategory.name}
+                        <Badge variant="secondary">
+                          {selectedCategory.postCount} posts
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {selectedCategory.description}
+                      </p>
+                      <div className="flex justify-between items-center text-xs text-muted-foreground">
+                        <span>Slug: {selectedCategory.slug}</span>
+                        <span>Created: {formatDateTime(selectedCategory.createdAt)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <h3 className="col-span-full text-lg font-semibold">All Categories (for reference):</h3>
                     {categories.map((category) => (
-                      <Card key={category.id} className="hover:shadow-md transition-shadow">
+                      <Card 
+                        key={category.id} 
+                        className={`hover:shadow-md transition-shadow ${
+                          category.slug === currentSlug ? 'border-blue-500 bg-blue-50' : ''
+                        }`}
+                      >
                         <CardHeader className="pb-3">
                           <CardTitle className="text-lg flex items-center justify-between">
                             {category.name}
@@ -138,47 +167,59 @@ async function getAll(options: FetchOptions = {}) {
                       </Card>
                     ))}
                   </div>
-
-                  <Alert>
-                    <AlertDescription>
-                      <strong>SSG Behavior:</strong> This content was pre-rendered at build time 
-                      and served as static HTML. Perfect for content that doesn&apos;t change frequently.
-                    </AlertDescription>
-                  </Alert>
-
-                  <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">SSG Status</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Generation Time:</span>
-                        <span className="ml-2 font-mono">Build time</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Cache Status:</span>
-                        <Badge variant="default" className="ml-2">
-                          Static
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Total Categories:</span>
-                        <span className="ml-2 font-mono">{categories.length}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Data Source:</span>
-                        <Badge variant="outline" className="ml-2">
-                          Pre-rendered
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No categories available</p>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Alert variant="destructive">
+              <AlertDescription>
+                Error loading SSG content: {error}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert variant="destructive">
+              <AlertDescription>
+                Category &quot;{currentSlug}&quot; not found. This page was statically generated but the category doesn&apos;t exist.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {selectedCategory && (
+            <Alert>
+              <AlertDescription>
+                <strong>SSG Behavior:</strong> This content was pre-rendered at build time 
+                and served as static HTML. Perfect for content that doesn&apos;t change frequently.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {selectedCategory && (
+            <div className="mt-4 p-4 bg-muted rounded-lg">
+              <h4 className="font-semibold mb-2">SSG Status</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Current Category:</span>
+                  <span className="ml-2 font-mono">{selectedCategory.name}</span>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <div>
+                  <span className="text-muted-foreground">Cache Status:</span>
+                  <Badge variant="default" className="ml-2">
+                    Static
+                  </Badge>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Total Categories:</span>
+                  <span className="ml-2 font-mono">{categories.length}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Data Source:</span>
+                  <Badge variant="outline" className="ml-2">
+                    Pre-rendered
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="performance">

@@ -1,11 +1,16 @@
 import { Suspense } from 'react';
 import { SsgPresentational } from './presentational';
-import { categoriesApi } from '../../_shared/api-client';
-import type { Category, DataFetchMetrics } from '../../_shared/types';
+import { categoriesApi } from '../../../_shared/api-client';
+import type { Category, DataFetchMetrics } from '../../../_shared/types';
+
+interface SsgContainerProps {
+  category: string;
+}
 
 // Server Component（データ取得・統合レイヤー）
-export async function SsgContainer() {
+export async function SsgContainer({ category }: SsgContainerProps) {
   let categories: Category[] = [];
+  let selectedCategory: Category | null = null;
   let metrics: DataFetchMetrics | null = null;
   let error: string | null = null;
 
@@ -19,6 +24,7 @@ export async function SsgContainer() {
     }, 'ssg');
 
     categories = result.data;
+    selectedCategory = categories.find(cat => cat.slug === category) || null;
     metrics = result.metrics;
   } catch (err) {
     console.error('SSG fetch error:', err);
@@ -29,6 +35,8 @@ export async function SsgContainer() {
     <Suspense fallback={<div>Loading SSG demo...</div>}>
       <SsgPresentational 
         categories={categories}
+        selectedCategory={selectedCategory}
+        currentSlug={category}
         metrics={metrics}
         error={error}
       />
