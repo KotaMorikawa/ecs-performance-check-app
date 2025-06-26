@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Edit, Calendar, Eye, User } from 'lucide-react';
 import { DeleteButton } from './delete-button';
-import { format } from 'date-fns';
-import { ja } from 'date-fns/locale';
+// date-fns removed to prevent hydration issues
 
 interface Post {
   id: number;
@@ -70,11 +69,11 @@ export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = '
                 <CardDescription className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    {format(new Date(post.createdAt), 'yyyy年MM月dd日', { locale: ja })}
+                    {post.createdAt.slice(0, 10)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    {post.views.toLocaleString()} 回表示
+                    {post.views} 回表示
                   </span>
                   {post.author && (
                     <span className="flex items-center gap-1">
@@ -102,6 +101,7 @@ export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = '
                   postTitle={post.title} 
                   variant="outline" 
                   size="sm"
+                  experienceMode={experienceMode}
                   onOptimisticDelete={isOptimisticMode ? onOptimisticDelete : undefined}
                 />
               </div>
@@ -132,7 +132,7 @@ export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = '
                 </span>
                 {post.updatedAt !== post.createdAt && (
                   <span className="text-sm text-muted-foreground">
-                    最終更新: {format(new Date(post.updatedAt), 'MM/dd HH:mm', { locale: ja })}
+                    最終更新: {post.updatedAt.slice(5, 10)} {post.updatedAt.slice(11, 16)}
                   </span>
                 )}
               </div>

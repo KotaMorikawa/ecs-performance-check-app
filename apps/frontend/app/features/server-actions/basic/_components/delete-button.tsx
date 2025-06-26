@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
 import { deletePostWithState } from '../_actions/post-actions';
+import { usePerformanceMeasurement } from '../_hooks/use-performance-measurement';
 import { INITIAL_DELETE_STATE } from '../_lib/validation';
 
 interface DeleteButtonProps {
@@ -25,6 +26,7 @@ interface DeleteButtonProps {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  experienceMode?: 'optimistic' | 'traditional' | 'comparison';
   onOptimisticDelete?: (postId: number) => void;
 }
 
@@ -34,10 +36,17 @@ export function DeleteButton({
   variant = 'destructive',
   size = 'default',
   className,
+  experienceMode = 'optimistic',
   onOptimisticDelete,
 }: DeleteButtonProps) {
+  const isOptimisticMode = experienceMode === 'optimistic' || experienceMode === 'comparison';
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPendingTransition, startTransition] = useTransition();
+  
+  // パフォーマンス測定フック
+  const { measureAction, startMeasurement, endMeasurement } = usePerformanceMeasurement();
+  const [currentMeasurementId, setCurrentMeasurementId] = useState<string | null>(null);
 
   // useActionStateで削除状態管理
   const [deleteState, deleteAction, isPending] = useActionState(
@@ -48,6 +57,12 @@ export function DeleteButton({
   // Server Actionの結果を監視してトースト通知とダイアログクローズ
   useEffect(() => {
     if (!deleteState.timestamp) return; // 初期状態では何もしない
+    
+    // 従来動作での測定終了
+    if (currentMeasurementId && !isOptimisticMode) {
+      endMeasurement(currentMeasurementId, deleteState.success);
+      setCurrentMeasurementId(null);
+    }
     
     if (deleteState.success && deleteState.message) {
       toast({
@@ -62,12 +77,24 @@ export function DeleteButton({
         variant: 'destructive',
       });
     }
-  }, [deleteState, toast]);
+  }, [deleteState, toast, currentMeasurementId, isOptimisticMode, endMeasurement]);
 
   // 楽観的削除ハンドラー
-  const handleOptimisticDelete = () => {
-    if (onOptimisticDelete) {
-      onOptimisticDelete(postId);
+  const handleOptimisticDelete = async () => {
+    if (isOptimisticMode) {
+      // 楽観的更新のパフォーマンス測定
+      await measureAction('delete', 'optimistic', async () => {
+        if (onOptimisticDelete) {
+          startTransition(() => {
+            onOptimisticDelete(postId);
+          });
+        }
+        return Promise.resolve();
+      });
+    } else {
+      // 従来動作のパフォーマンス測定開始
+      const measurementId = startMeasurement('delete', 'traditional');
+      setCurrentMeasurementId(measurementId);
     }
     setIsOpen(false); // ダイアログを閉じる
   };
@@ -102,8 +129,8 @@ export function DeleteButton({
           {/* Server Action フォーム */}
           <form action={deleteAction} onSubmit={handleOptimisticDelete} className="w-full">
             <input type="hidden" name="id" value={postId} />
-            <Button type="submit" variant="destructive" disabled={isPending} className="w-full">
-              {isPending ? (
+            <Button type="submit" variant="destructive" disabled={isPending || isPendingTransition} className="w-full">
+              {(isPending || isPendingTransition) ? (
                 <>
                   <Trash2 className="mr-2 h-4 w-4 animate-spin" />
                   削除中...

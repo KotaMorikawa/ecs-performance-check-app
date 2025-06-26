@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useOptimistic } from 'react';
+import { useState, useOptimistic, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,8 +52,15 @@ export function ServerActionsPresentational({
     'optimistic'
   );
 
-  // パフォーマンス測定
-  const { calculateStats, getTodayStats } = usePerformanceMeasurement();
+  // パフォーマンス測定（リアルタイム統計用）
+  const { calculateStats, getTodayStats, operationHistory, latestMetrics, clearHistory } = usePerformanceMeasurement();
+  
+  // Hydration エラー対策のためクライアント側でマウント後に有効化
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // 楽観的更新のためのuseOptimistic（体験モードに応じて適用）
   const [optimisticPosts, addOptimisticPost] = useOptimistic(
@@ -75,7 +82,7 @@ export function ServerActionsPresentational({
           return [
             {
               ...post,
-              id: Date.now(), // 一時的なIDを生成
+              id: Math.floor(Math.random() * 1000000) + state.length, // 一時的なIDを生成
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             },
@@ -91,9 +98,13 @@ export function ServerActionsPresentational({
     setEditingPost(post);
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingPost(null);
-  };
+  }, []);
+
+  const handleEditComplete = useCallback(() => {
+    setEditingPost(null);
+  }, []);
 
   // 楽観的更新ハンドラー（体験モードに応じて制御）
   const handleOptimisticCreate = (
@@ -245,6 +256,7 @@ export function ServerActionsPresentational({
                         experienceMode={experienceMode}
                         onOptimisticCreate={handleOptimisticCreate}
                         onOptimisticUpdate={handleOptimisticUpdate}
+                        onEditComplete={handleEditComplete}
                       />
                     </ServerActionsErrorBoundary>
                   </CardContent>
@@ -253,15 +265,43 @@ export function ServerActionsPresentational({
                 {/* 下部: リアルタイム比較メトリクス */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="h-5 w-5" />
-                      📊 リアルタイム比較
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5" />
+                        📊 リアルタイム比較
+                      </CardTitle>
+                      {isClient && operationHistory.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={clearHistory}
+                          className="text-xs"
+                        >
+                          統計クリア
+                        </Button>
+                      )}
+                    </div>
                     <CardDescription>現在の操作パフォーマンス測定</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {(() => {
                       const stats = calculateStats();
+                      
+                      if (stats.totalOperations === 0) {
+                        return (
+                          <div className="text-center py-8">
+                            <div className="text-4xl mb-4">📊</div>
+                            <div className="text-lg font-medium text-muted-foreground mb-2">
+                              パフォーマンス統計を開始
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              フォームから投稿を作成・編集・削除すると、<br />
+                              楽観的更新と従来動作の体感速度差が表示されます
+                            </div>
+                          </div>
+                        );
+                      }
+                      
                       return (
                         <>
                           <div className="grid grid-cols-2 gap-4">
@@ -278,17 +318,28 @@ export function ServerActionsPresentational({
                               <div className="text-sm text-muted-foreground">従来動作</div>
                             </div>
                           </div>
-                          <div className="mt-4 text-center">
-                            <div className="text-xl font-bold text-blue-600">
-                              {stats.improvementRate}%
+                          <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+                            <div>
+                              <div className="text-xl font-bold text-blue-600">
+                                {stats.improvementRate}%
+                              </div>
+                              <div className="text-sm text-muted-foreground">体感速度改善</div>
                             </div>
-                            <div className="text-sm text-muted-foreground">体感速度改善</div>
+                            <div>
+                              <div className="text-xl font-bold text-green-600">
+                                {Math.round((operationHistory.filter(m => m.success).length / operationHistory.length) * 100)}%
+                              </div>
+                              <div className="text-sm text-muted-foreground">成功率</div>
+                            </div>
                           </div>
-                          {stats.totalOperations > 0 && (
-                            <div className="mt-4 text-center text-xs text-muted-foreground">
-                              {stats.totalOperations} 回の操作に基づく統計
-                            </div>
-                          )}
+                          <div className="mt-4 text-center text-xs text-muted-foreground">
+                            {stats.totalOperations} 回の操作に基づく統計
+                            {latestMetrics.length > 0 && (
+                              <div className="mt-2">
+                                最新: {latestMetrics[0].operation} ({latestMetrics[0].mode}) - {latestMetrics[0].userPerceivedTime}ms
+                              </div>
+                            )}
+                          </div>
                         </>
                       );
                     })()}
@@ -336,19 +387,35 @@ export function ServerActionsPresentational({
                     {(() => {
                       const todayStats = getTodayStats();
                       return (
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                          <div>
-                            <div className="text-lg font-bold">{optimisticPosts.length}</div>
-                            <div className="text-sm text-muted-foreground">総投稿数</div>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div>
+                              <div className="text-lg font-bold">{optimisticPosts.length}</div>
+                              <div className="text-sm text-muted-foreground">総投稿数</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-green-600">{todayStats.creates}</div>
+                              <div className="text-sm text-muted-foreground">今日の作成</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-blue-600">{todayStats.updates}</div>
+                              <div className="text-sm text-muted-foreground">今日の編集</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-red-600">{todayStats.deletes}</div>
+                              <div className="text-sm text-muted-foreground">今日の削除</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-lg font-bold text-green-600">{todayStats.creates}</div>
-                            <div className="text-sm text-muted-foreground">今日の作成</div>
-                          </div>
-                          <div>
-                            <div className="text-lg font-bold text-blue-600">{todayStats.updates}</div>
-                            <div className="text-sm text-muted-foreground">今日の編集</div>
-                          </div>
+                          {isClient && operationHistory.length > 0 && (
+                            <div className="text-center text-xs text-muted-foreground border-t pt-2">
+                              総操作回数: {operationHistory.length} 回
+                              {latestMetrics.length > 0 && (
+                                <div className="mt-1">
+                                  最新操作: {latestMetrics[0].timestamp.slice(11, 19)}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
@@ -516,7 +583,7 @@ export function ServerActionsPresentational({ posts, serverData }) {
         }
       }
       // 新規投稿の場合
-      return [{ ...newPost, id: Date.now() }, ...state];
+      return [{ ...newPost, id: Math.floor(Math.random() * 1000000) }, ...state];
     }
   );
 

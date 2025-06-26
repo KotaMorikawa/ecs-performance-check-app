@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 interface OperationMetric {
   id: string;
@@ -32,9 +32,41 @@ interface PerformanceStats {
  * - リアルタイム統計計算
  * - 操作履歴の管理
  */
+const STORAGE_KEY = 'performance-measurement-history';
+
+// ローカルストレージからデータを読み込み
+const loadHistoryFromStorage = (): OperationMetric[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.warn('Failed to load performance history from storage:', error);
+    return [];
+  }
+};
+
+// ローカルストレージにデータを保存
+const saveHistoryToStorage = (history: OperationMetric[]) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  } catch (error) {
+    console.warn('Failed to save performance history to storage:', error);
+  }
+};
+
 export function usePerformanceMeasurement() {
   const [operationHistory, setOperationHistory] = useState<OperationMetric[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  
+  // クライアント側でのみlocalStorageから読み込み
+  useEffect(() => {
+    const storedHistory = loadHistoryFromStorage();
+    if (storedHistory.length > 0) {
+      setOperationHistory(storedHistory);
+    }
+  }, []);
   const currentOperation = useRef<{
     id: string;
     operation: string;
@@ -88,7 +120,11 @@ export function usePerformanceMeasurement() {
       timestamp: new Date().toISOString(),
     };
 
-    setOperationHistory(prev => [...prev, metric]);
+    setOperationHistory(prev => {
+      const newHistory = [...prev, metric];
+      saveHistoryToStorage(newHistory);
+      return newHistory;
+    });
     setIsRecording(false);
     currentOperation.current = null;
 
@@ -195,6 +231,9 @@ export function usePerformanceMeasurement() {
   // 履歴クリア
   const clearHistory = useCallback(() => {
     setOperationHistory([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   // 最新メトリクス（リアルタイム表示用）
