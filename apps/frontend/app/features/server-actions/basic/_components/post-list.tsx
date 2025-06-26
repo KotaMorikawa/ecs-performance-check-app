@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Edit, Calendar, Eye, User } from 'lucide-react';
 import { DeleteButton } from './delete-button';
-import { format } from 'date-fns';
-import { ja } from 'date-fns/locale';
+// date-fns removed to prevent hydration issues
 
 interface Post {
   id: number;
@@ -32,10 +31,14 @@ interface Post {
 interface PostListProps {
   posts: Post[];
   onEdit?: (post: Post) => void;
+  onOptimisticDelete?: (postId: number) => void;
+  experienceMode?: 'optimistic' | 'traditional' | 'comparison';
   emptyMessage?: string;
 }
 
-export function PostList({ posts, onEdit, emptyMessage = '投稿がありません' }: PostListProps) {
+export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = 'optimistic', emptyMessage = '投稿がありません' }: PostListProps) {
+  // 体験モードに応じた表示調整
+  const isOptimisticMode = experienceMode === 'optimistic' || experienceMode === 'comparison';
   if (posts.length === 0) {
     return (
       <Alert>
@@ -66,11 +69,11 @@ export function PostList({ posts, onEdit, emptyMessage = '投稿がありませ�
                 <CardDescription className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    {format(new Date(post.createdAt), 'yyyy年MM月dd日', { locale: ja })}
+                    {post.createdAt.slice(0, 10)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    {post.views.toLocaleString()} 回表示
+                    {post.views} 回表示
                   </span>
                   {post.author && (
                     <span className="flex items-center gap-1">
@@ -93,7 +96,14 @@ export function PostList({ posts, onEdit, emptyMessage = '投稿がありませ�
                     編集
                   </Button>
                 )}
-                <DeleteButton postId={post.id} postTitle={post.title} variant="outline" size="sm" />
+                <DeleteButton 
+                  postId={post.id} 
+                  postTitle={post.title} 
+                  variant="outline" 
+                  size="sm"
+                  experienceMode={experienceMode}
+                  onOptimisticDelete={isOptimisticMode ? onOptimisticDelete : undefined}
+                />
               </div>
             </div>
           </CardHeader>
@@ -122,7 +132,7 @@ export function PostList({ posts, onEdit, emptyMessage = '投稿がありませ�
                 </span>
                 {post.updatedAt !== post.createdAt && (
                   <span className="text-sm text-muted-foreground">
-                    最終更新: {format(new Date(post.updatedAt), 'MM/dd HH:mm', { locale: ja })}
+                    最終更新: {post.updatedAt.slice(5, 10)} {post.updatedAt.slice(11, 16)}
                   </span>
                 )}
               </div>

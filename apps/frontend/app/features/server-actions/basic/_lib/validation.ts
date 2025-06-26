@@ -82,14 +82,27 @@ export const INITIAL_DELETE_STATE: DeletePostState = {
   success: false,
 };
 
-// スラッグ生成ユーティリティ
+// スラッグ生成ユーティリティ（日本語対応版）
 export function generateSlug(title: string): string {
-  return title
+  const timestamp = Date.now();
+  
+  // 基本的なクリーニング
+  const cleaned = title
     .toLowerCase()
+    .normalize('NFD') // Unicode正規化
+    .replace(/[\u0300-\u036f]/g, '') // ダイアクリティカルマーク削除
     .replace(/[^a-z0-9\s-]/g, '') // 英数字、スペース、ハイフン以外を削除
     .replace(/\s+/g, '-') // スペースをハイフンに変換
     .replace(/-+/g, '-') // 連続するハイフンを単一に
-    .replace(/^-|-$/g, ''); // 先頭と末尾のハイフンを削除
+    .replace(/^-|-$/g, '') // 先頭と末尾のハイフンを削除
+    .substring(0, 50); // 長さ制限
+  
+  // 日本語などで空文字になった場合はタイムスタンプベースのスラッグを生成
+  if (!cleaned) {
+    return `post-${timestamp}`;
+  }
+  
+  return cleaned;
 }
 
 // フォームバリデーション（クライアント側）

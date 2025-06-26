@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Save, Plus } from 'lucide-react';
 import { createPostWithState, updatePostWithState } from '../_actions/post-actions';
+import { usePerformanceMeasurement } from '../_hooks/use-performance-measurement';
 import {
   generateSlug,
   type PostFormData,
@@ -21,20 +22,39 @@ import {
 
 interface PostFormProps {
   mode: 'create' | 'edit';
-  post?: {
+  post?: Post;
+  experienceMode?: 'optimistic' | 'traditional' | 'comparison';
+  onOptimisticCreate?: (post: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => void;
+  onOptimisticUpdate?: (post: Post) => void;
+  onEditComplete?: () => void;
+}
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  slug: string;
+  published: boolean;
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+  author?: {
     id: number;
-    title: string;
-    content: string;
-    slug: string;
-    published: boolean;
-  };
+    name: string | null;
+    email: string;
+  } | null;
+  tags?: {
+    id: number;
+    name: string;
+  }[];
 }
 
 // フォーム送信ボタンコンポーネント（useActionStateのisPendingを使用）
-function SubmitButton({ mode, isPending }: { mode: 'create' | 'edit'; isPending: boolean }) {
+function SubmitButton({ mode, isPending, isPendingTransition }: { mode: 'create' | 'edit'; isPending: boolean; isPendingTransition?: boolean }) {
+  const isSubmitting = isPending || isPendingTransition;
   return (
-    <Button type="submit" disabled={isPending} className="w-full">
-      {isPending ? (
+    <Button type="submit" disabled={isSubmitting} className="w-full">
+      {isSubmitting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           {mode === 'create' ? '作成中...' : '更新中...'}
@@ -53,8 +73,15 @@ function SubmitButton({ mode, isPending }: { mode: 'create' | 'edit'; isPending:
   );
 }
 
-export function PostForm({ mode, post }: PostFormProps) {
+export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimisticCreate, onOptimisticUpdate, onEditComplete }: PostFormProps) {
+  // experienceModeを使用してフォームの動作を調整
+  const isOptimisticMode = experienceMode === 'optimistic' || experienceMode === 'comparison';
   const { toast } = useToast();
+  const [isPendingTransition, startTransition] = useTransition();
+  
+  // パフォーマンス測定フック
+  const { measureAction, startMeasurement, endMeasurement } = usePerformanceMeasurement();
+  const [currentMeasurementId, setCurrentMeasurementId] = useState<string | null>(null);
 
   // useActionStateで状態管理
   const [createState, createAction, isCreatePending] = useActionState(
@@ -80,6 +107,28 @@ export function PostForm({ mode, post }: PostFormProps) {
 
   const [autoGenerateSlug, setAutoGenerateSlug] = useState(!post?.slug);
 
+  // postプロパティが変更された時にフォームデータを更新
+  useEffect(() => {
+    if (post) {
+      setFormData({
+        title: post.title,
+        content: post.content,
+        slug: post.slug,
+        published: post.published,
+      });
+      setAutoGenerateSlug(false); // 編集モードでは自動生成を無効
+    } else {
+      // 新規作成モードの場合は空のフォームにリセット
+      setFormData({
+        title: '',
+        content: '',
+        slug: '',
+        published: false,
+      });
+      setAutoGenerateSlug(true); // 新規作成モードでは自動生成を有効
+    }
+  }, [post]);
+
   // タイトルからスラッグを自動生成
   useEffect(() => {
     if (autoGenerateSlug && formData.title) {
@@ -91,6 +140,12 @@ export function PostForm({ mode, post }: PostFormProps) {
   // Server Actionの結果を監視してトースト通知とフォームリセット
   useEffect(() => {
     if (!currentState.timestamp) return; // 初期状態では何もしない
+
+    // 従来動作での測定終了
+    if (currentMeasurementId && !isOptimisticMode) {
+      endMeasurement(currentMeasurementId, currentState.success);
+      setCurrentMeasurementId(null);
+    }
 
     if (currentState.success && currentState.message) {
       toast({
@@ -107,6 +162,9 @@ export function PostForm({ mode, post }: PostFormProps) {
           published: false,
         });
         setAutoGenerateSlug(true);
+      } else if (mode === 'edit') {
+        // 編集モードの場合、編集完了をコールバック
+        onEditComplete?.();
       }
     } else if (currentState.error) {
       toast({
@@ -115,7 +173,7 @@ export function PostForm({ mode, post }: PostFormProps) {
         variant: 'destructive',
       });
     }
-  }, [currentState, mode, toast]);
+  }, [currentState, mode, toast, onEditComplete, currentMeasurementId, isOptimisticMode, endMeasurement]);
 
   // フォームデータの更新
   const updateFormField = (field: keyof PostFormData, value: string | boolean) => {
@@ -130,6 +188,57 @@ export function PostForm({ mode, post }: PostFormProps) {
   // エラー表示（useActionStateの状態から取得）
   const errors = currentState.fieldErrors || {};
   const generalError = currentState.error;
+
+  // 楽観的更新を実行するフォーム送信ハンドラー
+  const handleSubmit = async () => {
+    // パフォーマンス測定開始
+    const operationType = mode === 'create' ? 'create' : 'update';
+    
+    // 楽観的更新モードの場合
+    if (isOptimisticMode) {
+      // 楽観的更新用のデータを作成
+      if (mode === 'create' && onOptimisticCreate) {
+        startTransition(() => {
+          onOptimisticCreate({
+            title: formData.title,
+            content: formData.content,
+            slug: formData.slug,
+            published: formData.published,
+            author: null,
+            tags: [],
+          });
+        });
+      } else if (mode === 'edit' && post && onOptimisticUpdate) {
+        startTransition(() => {
+          onOptimisticUpdate({
+            ...post,
+            title: formData.title,
+            content: formData.content,
+            slug: formData.slug,
+            published: formData.published,
+            updatedAt: new Date().toISOString(),
+            views: post.views,
+            createdAt: post.createdAt,
+            author: null,
+            tags: [],
+          });
+        });
+      }
+      
+      // 楽観的更新のパフォーマンス測定（体感時間0ms）
+      await measureAction(operationType, 'optimistic', async () => {
+        // 楽観的更新では即座に完了
+        return Promise.resolve();
+      });
+    } else {
+      // 従来動作のパフォーマンス測定
+      // Server Action実行開始の測定
+      const measurementId = startMeasurement(operationType, 'traditional');
+      setCurrentMeasurementId(measurementId);
+    }
+    
+    // フォームのactionによりServer Actionが実行される
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -164,6 +273,7 @@ export function PostForm({ mode, post }: PostFormProps) {
         <form
           role="form"
           action={currentAction}
+          onSubmit={handleSubmit}
           noValidate // クライアント側のHTML5バリデーションを無効化
           className="space-y-6"
         >
@@ -255,7 +365,7 @@ export function PostForm({ mode, post }: PostFormProps) {
           </div>
 
           {/* 送信ボタン */}
-          <SubmitButton mode={mode} isPending={isPending} />
+          <SubmitButton mode={mode} isPending={isPending} isPendingTransition={isPendingTransition} />
         </form>
 
         {/* Progressive Enhancement の説明 */}

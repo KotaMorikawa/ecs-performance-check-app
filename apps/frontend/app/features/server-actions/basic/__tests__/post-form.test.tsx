@@ -85,6 +85,11 @@ describe('PostForm Component', () => {
       content: 'Existing content',
       slug: 'existing-post',
       published: true,
+      views: 100,
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      author: null,
+      tags: [],
     };
 
     it('should render edit form with existing post data', () => {
