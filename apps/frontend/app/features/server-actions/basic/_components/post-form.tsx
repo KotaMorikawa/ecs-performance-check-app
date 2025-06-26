@@ -21,13 +21,30 @@ import {
 
 interface PostFormProps {
   mode: 'create' | 'edit';
-  post?: {
+  post?: Post;
+  experienceMode?: 'optimistic' | 'traditional' | 'comparison';
+  onOptimisticCreate?: (post: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => void;
+  onOptimisticUpdate?: (post: Post) => void;
+}
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  slug: string;
+  published: boolean;
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+  author?: {
     id: number;
-    title: string;
-    content: string;
-    slug: string;
-    published: boolean;
-  };
+    name: string | null;
+    email: string;
+  } | null;
+  tags?: {
+    id: number;
+    name: string;
+  }[];
 }
 
 // フォーム送信ボタンコンポーネント（useActionStateのisPendingを使用）
@@ -53,7 +70,7 @@ function SubmitButton({ mode, isPending }: { mode: 'create' | 'edit'; isPending:
   );
 }
 
-export function PostForm({ mode, post }: PostFormProps) {
+export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimisticCreate, onOptimisticUpdate }: PostFormProps) {
   const { toast } = useToast();
 
   // useActionStateで状態管理
@@ -131,6 +148,35 @@ export function PostForm({ mode, post }: PostFormProps) {
   const errors = currentState.fieldErrors || {};
   const generalError = currentState.error;
 
+  // 楽観的更新を実行するフォーム送信ハンドラー
+  const handleSubmit = () => {
+    // フォームデータから楽観的更新用のデータを作成
+    if (mode === 'create' && onOptimisticCreate) {
+      onOptimisticCreate({
+        title: formData.title,
+        content: formData.content,
+        slug: formData.slug,
+        published: formData.published,
+        author: null,
+        tags: [],
+      });
+    } else if (mode === 'edit' && post && onOptimisticUpdate) {
+      onOptimisticUpdate({
+        ...post,
+        title: formData.title,
+        content: formData.content,
+        slug: formData.slug,
+        published: formData.published,
+        updatedAt: new Date().toISOString(),
+        views: post.views,
+        createdAt: post.createdAt,
+        author: null,
+        tags: [],
+      });
+    }
+    // formのactionによりServer Actionが実行される
+  };
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -164,6 +210,7 @@ export function PostForm({ mode, post }: PostFormProps) {
         <form
           role="form"
           action={currentAction}
+          onSubmit={handleSubmit}
           noValidate // クライアント側のHTML5バリデーションを無効化
           className="space-y-6"
         >

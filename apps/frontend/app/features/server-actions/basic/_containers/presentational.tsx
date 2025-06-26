@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useOptimistic } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { SegmentFeatureInfo } from '@/components/features/segment-feature-info';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
 import { CodeDisplay } from '@/components/code-display';
 import { PostForm } from '../_components/post-form';
 import { PostList } from '../_components/post-list';
-import { Activity, Clock, Plus, List, Server, Database, Zap, Save } from 'lucide-react';
+import { ServerActionsErrorBoundary } from '../_components/error-boundary';
+import { usePerformanceMeasurement } from '../_hooks/use-performance-measurement';
+import { Activity, Plus, List, Database, Zap, Save } from 'lucide-react';
 
 interface Post {
   id: number;
@@ -46,31 +46,79 @@ export function ServerActionsPresentational({
   posts,
   serverData,
 }: ServerActionsPresentationalProps) {
-  const [activeTab, setActiveTab] = useState('create');
   const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [clientRenderTime, setClientRenderTime] = useState<number>(0);
-  const [formattedTimestamp, setFormattedTimestamp] = useState<string>('');
 
-  useEffect(() => {
-    const startTime = performance.now();
-    const endTime = performance.now();
+  // 体験モード状態管理
+  const [experienceMode, setExperienceMode] = useState<'optimistic' | 'traditional' | 'comparison'>(
+    'optimistic'
+  );
 
-    // クライアントサイドでのみ時刻をフォーマット
-    if (serverData.timestamp) {
-      setFormattedTimestamp(new Date(serverData.timestamp).toLocaleTimeString());
-    }
-    setClientRenderTime(endTime - startTime);
-  }, [serverData.timestamp]);
+  // パフォーマンス測定
+  const { calculateStats, getTodayStats, measureAction, startMeasurement, endMeasurement } =
+    usePerformanceMeasurement();
+
+  // 楽観的更新のためのuseOptimistic（体験モードに応じて適用）
+  const [optimisticPosts, addOptimisticPost] = useOptimistic(
+    posts,
+    experienceMode === 'optimistic' || experienceMode === 'comparison'
+      ? (
+          state: Post[],
+          newPost: Post | { type: 'delete'; id: number } | { type: 'update'; post: Post }
+        ) => {
+          if ('type' in newPost) {
+            if (newPost.type === 'delete') {
+              return state.filter((post) => post.id !== newPost.id);
+            } else if (newPost.type === 'update') {
+              return state.map((post) => (post.id === newPost.post.id ? newPost.post : post));
+            }
+          }
+          // 新規投稿の場合
+          const post = newPost as Post;
+          return [
+            {
+              ...post,
+              id: Date.now(), // 一時的なIDを生成
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            ...state,
+          ];
+        }
+      : (state: Post[]) => state // 従来動作では楽観的更新を無効化
+  );
+
 
   // 編集モードの切り替え
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
-    setActiveTab('edit');
   };
 
   const handleCancelEdit = () => {
     setEditingPost(null);
-    setActiveTab('create');
+  };
+
+  // 楽観的更新ハンドラー（体験モードに応じて制御）
+  const handleOptimisticCreate = (
+    newPost: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>
+  ) => {
+    if (experienceMode === 'optimistic' || experienceMode === 'comparison') {
+      addOptimisticPost({
+        ...newPost,
+        views: 0,
+      } as Post);
+    }
+  };
+
+  const handleOptimisticUpdate = (updatedPost: Post) => {
+    if (experienceMode === 'optimistic' || experienceMode === 'comparison') {
+      addOptimisticPost({ type: 'update', post: updatedPost });
+    }
+  };
+
+  const handleOptimisticDelete = (postId: number) => {
+    if (experienceMode === 'optimistic' || experienceMode === 'comparison') {
+      addOptimisticPost({ type: 'delete', id: postId });
+    }
   };
 
   return (
@@ -82,41 +130,68 @@ export function ServerActionsPresentational({
         </p>
       </header>
 
-      {/* パフォーマンスメトリクス */}
-      <section className="mb-8">
-        <Card data-testid="performance-metrics">
+      {/* 体験モード切り替えバー */}
+      <section className="mb-6">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              パフォーマンスメトリクス
-            </CardTitle>
-            <CardDescription>Server Actions の動作とリアルタイムパフォーマンス測定</CardDescription>
+            <CardTitle className="flex items-center gap-2">🔄 体験モード</CardTitle>
+            <CardDescription>Server Actionsの異なる実装方式を体験・比較できます</CardDescription>
           </CardHeader>
           <CardContent>
-            <EnhancedPerformanceDisplay />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button
+                variant={experienceMode === 'optimistic' ? 'default' : 'outline'}
+                onClick={() => setExperienceMode('optimistic')}
+                className="flex items-center gap-2 h-auto p-4"
+              >
+                <span className="text-lg">🚀</span>
+                <div className="text-left">
+                  <div className="font-semibold">楽観的更新</div>
+                  <div className="text-sm opacity-80">瞬時のUI反応</div>
+                </div>
+              </Button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t">
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span>クライアントレンダリング: {clientRenderTime.toFixed(2)} ms</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Server className="h-4 w-4 text-muted-foreground" />
-                <span>サーバータイムスタンプ: {formattedTimestamp || serverData.timestamp}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Database className="h-4 w-4 text-muted-foreground" />
-                <span>投稿数: {serverData.postsCount} 件</span>
-                <Badge variant="outline" className="ml-1">
-                  {serverData.cacheStatus}
-                </Badge>
+              <Button
+                variant={experienceMode === 'traditional' ? 'default' : 'outline'}
+                onClick={() => setExperienceMode('traditional')}
+                className="flex items-center gap-2 h-auto p-4"
+              >
+                <span className="text-lg">⏳</span>
+                <div className="text-left">
+                  <div className="font-semibold">従来動作</div>
+                  <div className="text-sm opacity-80">サーバー待機型</div>
+                </div>
+              </Button>
+
+              <Button
+                variant={experienceMode === 'comparison' ? 'default' : 'outline'}
+                onClick={() => setExperienceMode('comparison')}
+                className="flex items-center gap-2 h-auto p-4"
+              >
+                <span className="text-lg">📊</span>
+                <div className="text-left">
+                  <div className="font-semibold">比較デモ</div>
+                  <div className="text-sm opacity-80">パフォーマンス測定</div>
+                </div>
+              </Button>
+            </div>
+
+            {/* 現在のモード表示 */}
+            <div className="mt-4 p-3 bg-muted rounded-lg">
+              <div className="text-sm font-medium">
+                現在のモード:{' '}
+                {experienceMode === 'optimistic'
+                  ? '🚀 楽観的更新 - useOptimistic による瞬時のUI反応'
+                  : experienceMode === 'traditional'
+                    ? '⏳ 従来動作 - サーバーレスポンス待機型'
+                    : '📊 比較デモ - 両方式のパフォーマンス測定'}
               </div>
             </div>
           </CardContent>
         </Card>
       </section>
 
-      {/* Server Actions 機能デモ */}
+      {/* Server Actions 機能デモ - 左右分割レイアウト */}
       <section className="mb-8">
         <Card>
           <CardHeader>
@@ -125,58 +200,164 @@ export function ServerActionsPresentational({
               Server Actions デモ
             </CardTitle>
             <CardDescription>
-              Progressive Enhancement で動作するフォーム送信とCRUD操作
+              楽観的更新と従来動作の比較体験が可能なインタラクティブデモ
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="create" className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  投稿作成
-                </TabsTrigger>
-                <TabsTrigger value="list" className="flex items-center gap-2">
-                  <List className="h-4 w-4" />
-                  投稿一覧
-                </TabsTrigger>
-                {editingPost && (
-                  <TabsTrigger value="edit" className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    編集中
-                  </TabsTrigger>
-                )}
-              </TabsList>
-
-              <TabsContent value="create" className="space-y-4">
-                <PostForm mode="create" />
-              </TabsContent>
-
-              <TabsContent value="edit" className="space-y-4">
-                {editingPost && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">投稿を編集</h3>
-                      <Button variant="outline" onClick={handleCancelEdit}>
-                        キャンセル
-                      </Button>
+            {/* 左右分割レイアウト */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 左側: 投稿管理エリア */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      📝 投稿管理
+                    </CardTitle>
+                    <CardDescription>
+                      {editingPost ? '投稿を編集中' : '新しい投稿を作成'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {/* フォーム切り替えボタン */}
+                    <div className="flex items-center gap-2 mb-4">
+                      {!editingPost ? (
+                        <Badge variant="default" className="flex items-center gap-1">
+                          <Plus className="h-3 w-3" />
+                          新規作成モード
+                        </Badge>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <Save className="h-3 w-3" />
+                            編集モード
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                            新規作成に戻る
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <PostForm mode="edit" post={editingPost} />
-                  </div>
-                )}
-              </TabsContent>
 
-              <TabsContent value="list" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">投稿一覧</h3>
-                  <Badge variant="secondary">{posts.length} 件の投稿</Badge>
-                </div>
-                <PostList
-                  posts={posts}
-                  onEdit={handleEditPost}
-                  emptyMessage="まだ投稿がありません。新しい投稿を作成してみましょう。"
-                />
-              </TabsContent>
-            </Tabs>
+                    {/* フォームエリア */}
+                    <ServerActionsErrorBoundary>
+                      <PostForm
+                        mode={editingPost ? 'edit' : 'create'}
+                        post={editingPost || undefined}
+                        experienceMode={experienceMode}
+                        onOptimisticCreate={handleOptimisticCreate}
+                        onOptimisticUpdate={handleOptimisticUpdate}
+                      />
+                    </ServerActionsErrorBoundary>
+                  </CardContent>
+                </Card>
+
+                {/* 下部: リアルタイム比較メトリクス */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5" />
+                      📊 リアルタイム比較
+                    </CardTitle>
+                    <CardDescription>現在の操作パフォーマンス測定</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(() => {
+                      const stats = calculateStats();
+                      return (
+                        <>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-green-600">
+                                {stats.optimisticAvg}ms
+                              </div>
+                              <div className="text-sm text-muted-foreground">楽観的更新</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-orange-600">
+                                {stats.traditionalAvg}ms
+                              </div>
+                              <div className="text-sm text-muted-foreground">従来動作</div>
+                            </div>
+                          </div>
+                          <div className="mt-4 text-center">
+                            <div className="text-xl font-bold text-blue-600">
+                              {stats.improvementRate}%
+                            </div>
+                            <div className="text-sm text-muted-foreground">体感速度改善</div>
+                          </div>
+                          {stats.totalOperations > 0 && (
+                            <div className="mt-4 text-center text-xs text-muted-foreground">
+                              {stats.totalOperations} 回の操作に基づく統計
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 右側: 投稿一覧エリア */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <List className="h-5 w-5" />
+                        📋 投稿一覧
+                      </div>
+                      <Badge variant="secondary">{optimisticPosts.length} 件の投稿</Badge>
+                    </CardTitle>
+                    <CardDescription>リアルタイム更新される投稿データ</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-[500px] overflow-y-auto">
+                      <ServerActionsErrorBoundary>
+                        <PostList
+                          posts={optimisticPosts}
+                          onEdit={handleEditPost}
+                          onOptimisticDelete={handleOptimisticDelete}
+                          experienceMode={experienceMode}
+                          emptyMessage="まだ投稿がありません。左側のフォームから新しい投稿を作成してみましょう。"
+                        />
+                      </ServerActionsErrorBoundary>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 操作統計 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5" />
+                      📊 操作統計
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {(() => {
+                      const todayStats = getTodayStats();
+                      return (
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-lg font-bold">{optimisticPosts.length}</div>
+                            <div className="text-sm text-muted-foreground">総投稿数</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-green-600">{todayStats.creates}</div>
+                            <div className="text-sm text-muted-foreground">今日の作成</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-blue-600">{todayStats.updates}</div>
+                            <div className="text-sm text-muted-foreground">今日の編集</div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </section>
@@ -207,7 +388,8 @@ export function ServerActionsPresentational({
                     <li>• リアルタイムバリデーション</li>
                     <li>• スラッグ自動生成</li>
                     <li>• 送信状態表示</li>
-                    <li>• 楽観的更新</li>
+                    <li>• 楽観的更新（useOptimistic）</li>
+                    <li>• エラーバウンダリーによる例外処理</li>
                   </ul>
                 </div>
 
@@ -311,6 +493,85 @@ export function PostForm() {
       <SubmitButton />
     </form>
   );
+}`,
+            },
+            {
+              filename: '_containers/presentational.tsx',
+              language: 'tsx',
+              description: 'useOptimistic を使用した楽観的更新',
+              content: `'use client';
+
+import { useOptimistic } from 'react';
+
+export function ServerActionsPresentational({ posts, serverData }) {
+  // 楽観的更新のためのuseOptimistic
+  const [optimisticPosts, addOptimisticPost] = useOptimistic(
+    posts,
+    (state, newPost) => {
+      if ('type' in newPost) {
+        if (newPost.type === 'delete') {
+          return state.filter(post => post.id !== newPost.id);
+        } else if (newPost.type === 'update') {
+          return state.map(post => 
+            post.id === newPost.post.id ? newPost.post : post
+          );
+        }
+      }
+      // 新規投稿の場合
+      return [{ ...newPost, id: Date.now() }, ...state];
+    }
+  );
+
+  const handleOptimisticCreate = (newPost) => {
+    addOptimisticPost(newPost);
+  };
+
+  return (
+    <PostList 
+      posts={optimisticPosts} 
+      onOptimisticCreate={handleOptimisticCreate} 
+    />
+  );
+}`,
+            },
+            {
+              filename: '_components/error-boundary.tsx',
+              language: 'tsx',
+              description: 'Server Actions用Error Boundary',
+              content: `'use client';
+
+import { Component } from 'react';
+
+export class ServerActionsErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Server Actions Error:', error, errorInfo);
+  }
+
+  resetError = () => {
+    this.setState({ hasError: false, error: null });
+    window.location.reload();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <ErrorFallback 
+          error={this.state.error} 
+          resetError={this.resetError} 
+        />
+      );
+    }
+    return this.props.children;
+  }
 }`,
             },
             {

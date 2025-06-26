@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { ServerActionsPresentational } from './presentational';
+import { ServerActionsErrorBoundary } from '../_components/error-boundary';
 
 interface Post {
   id: number;
@@ -69,8 +70,10 @@ export async function ServerActionsContainer() {
   };
 
   return (
-    <Suspense fallback={<div>Loading Server Actions demo...</div>}>
-      <ServerActionsPresentational posts={posts} serverData={serverData} />
-    </Suspense>
+    <ServerActionsErrorBoundary>
+      <Suspense fallback={<div>Loading Server Actions demo...</div>}>
+        <ServerActionsPresentational posts={posts} serverData={serverData} />
+      </Suspense>
+    </ServerActionsErrorBoundary>
   );
 }

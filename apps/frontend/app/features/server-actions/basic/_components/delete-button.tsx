@@ -25,6 +25,7 @@ interface DeleteButtonProps {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  onOptimisticDelete?: (postId: number) => void;
 }
 
 export function DeleteButton({
@@ -33,6 +34,7 @@ export function DeleteButton({
   variant = 'destructive',
   size = 'default',
   className,
+  onOptimisticDelete,
 }: DeleteButtonProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -62,6 +64,14 @@ export function DeleteButton({
     }
   }, [deleteState, toast]);
 
+  // 楽観的削除ハンドラー
+  const handleOptimisticDelete = () => {
+    if (onOptimisticDelete) {
+      onOptimisticDelete(postId);
+    }
+    setIsOpen(false); // ダイアログを閉じる
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
@@ -90,7 +100,7 @@ export function DeleteButton({
           <AlertDialogCancel>キャンセル</AlertDialogCancel>
 
           {/* Server Action フォーム */}
-          <form action={deleteAction} className="w-full">
+          <form action={deleteAction} onSubmit={handleOptimisticDelete} className="w-full">
             <input type="hidden" name="id" value={postId} />
             <Button type="submit" variant="destructive" disabled={isPending} className="w-full">
               {isPending ? (

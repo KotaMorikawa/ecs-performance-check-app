@@ -32,10 +32,12 @@ interface Post {
 interface PostListProps {
   posts: Post[];
   onEdit?: (post: Post) => void;
+  onOptimisticDelete?: (postId: number) => void;
+  experienceMode?: 'optimistic' | 'traditional' | 'comparison';
   emptyMessage?: string;
 }
 
-export function PostList({ posts, onEdit, emptyMessage = '投稿がありません' }: PostListProps) {
+export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = 'optimistic', emptyMessage = '投稿がありません' }: PostListProps) {
   if (posts.length === 0) {
     return (
       <Alert>
@@ -93,7 +95,13 @@ export function PostList({ posts, onEdit, emptyMessage = '投稿がありませ�
                     編集
                   </Button>
                 )}
-                <DeleteButton postId={post.id} postTitle={post.title} variant="outline" size="sm" />
+                <DeleteButton 
+                  postId={post.id} 
+                  postTitle={post.title} 
+                  variant="outline" 
+                  size="sm"
+                  onOptimisticDelete={onOptimisticDelete}
+                />
               </div>
             </div>
           </CardHeader>
