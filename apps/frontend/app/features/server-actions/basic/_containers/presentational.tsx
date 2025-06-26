@@ -44,7 +44,6 @@ interface ServerActionsPresentationalProps {
 
 export function ServerActionsPresentational({
   posts,
-  serverData,
 }: ServerActionsPresentationalProps) {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
@@ -54,8 +53,7 @@ export function ServerActionsPresentational({
   );
 
   // パフォーマンス測定
-  const { calculateStats, getTodayStats, measureAction, startMeasurement, endMeasurement } =
-    usePerformanceMeasurement();
+  const { calculateStats, getTodayStats } = usePerformanceMeasurement();
 
   // 楽観的更新のためのuseOptimistic（体験モードに応じて適用）
   const [optimisticPosts, addOptimisticPost] = useOptimistic(

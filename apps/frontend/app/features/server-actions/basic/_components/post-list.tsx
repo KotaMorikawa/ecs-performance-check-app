@@ -38,6 +38,8 @@ interface PostListProps {
 }
 
 export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = 'optimistic', emptyMessage = '投稿がありません' }: PostListProps) {
+  // 体験モードに応じた表示調整
+  const isOptimisticMode = experienceMode === 'optimistic' || experienceMode === 'comparison';
   if (posts.length === 0) {
     return (
       <Alert>
@@ -100,7 +102,7 @@ export function PostList({ posts, onEdit, onOptimisticDelete, experienceMode = '
                   postTitle={post.title} 
                   variant="outline" 
                   size="sm"
-                  onOptimisticDelete={onOptimisticDelete}
+                  onOptimisticDelete={isOptimisticMode ? onOptimisticDelete : undefined}
                 />
               </div>
             </div>

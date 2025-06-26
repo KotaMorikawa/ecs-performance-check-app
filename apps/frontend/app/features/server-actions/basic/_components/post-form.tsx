@@ -71,6 +71,8 @@ function SubmitButton({ mode, isPending }: { mode: 'create' | 'edit'; isPending:
 }
 
 export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimisticCreate, onOptimisticUpdate }: PostFormProps) {
+  // experienceModeを使用してフォームの動作を調整
+  const isOptimisticMode = experienceMode === 'optimistic' || experienceMode === 'comparison';
   const { toast } = useToast();
 
   // useActionStateで状態管理
@@ -150,6 +152,9 @@ export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimist
 
   // 楽観的更新を実行するフォーム送信ハンドラー
   const handleSubmit = () => {
+    // 楽観的更新モードの場合のみ実行
+    if (!isOptimisticMode) return;
+    
     // フォームデータから楽観的更新用のデータを作成
     if (mode === 'create' && onOptimisticCreate) {
       onOptimisticCreate({
