@@ -61,18 +61,11 @@ export async function ServerActionsContainer() {
   // 投稿データを取得
   const posts = await fetchPosts();
 
-  // パフォーマンス測定用のサーバーデータ
-  const serverData = {
-    timestamp: new Date().toISOString(),
-    serverRenderTime: Date.now(),
-    postsCount: posts.length,
-    cacheStatus: 'fresh', // 実際のキャッシュ状態を確認する場合は動的に設定
-  };
 
   return (
     <ServerActionsErrorBoundary>
       <Suspense fallback={<div>Loading Server Actions demo...</div>}>
-        <ServerActionsPresentational posts={posts} serverData={serverData} />
+        <ServerActionsPresentational posts={posts} />
       </Suspense>
     </ServerActionsErrorBoundary>
   );
