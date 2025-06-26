@@ -102,9 +102,10 @@ describe('Post Validation Utils', () => {
     });
 
     it('should handle empty or invalid input', () => {
-      expect(generateSlug('')).toBe('');
-      expect(generateSlug('!!!')).toBe('');
-      expect(generateSlug('   ')).toBe('');
+      // 空文字や無効な入力の場合はタイムスタンプベースのスラッグを生成
+      expect(generateSlug('')).toMatch(/^post-\d+$/);
+      expect(generateSlug('!!!')).toMatch(/^post-\d+$/);
+      expect(generateSlug('   ')).toMatch(/^post-\d+$/);
     });
   });
 

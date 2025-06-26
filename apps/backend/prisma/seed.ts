@@ -5,22 +5,91 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 シードデータの投入を開始...');
 
+  // カテゴリを作成
+  const categories = await Promise.all([
+    prisma.category.upsert({
+      where: { slug: 'technology' },
+      update: {},
+      create: {
+        name: 'Technology',
+        slug: 'technology',
+        description: 'Latest tech news and tutorials',
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'design' },
+      update: {},
+      create: {
+        name: 'Design',
+        slug: 'design',
+        description: 'UI/UX design patterns and inspiration',
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'business' },
+      update: {},
+      create: {
+        name: 'Business',
+        slug: 'business',
+        description: 'Business strategies and insights',
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'development' },
+      update: {},
+      create: {
+        name: 'Development',
+        slug: 'development',
+        description: 'Software development best practices',
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'marketing' },
+      update: {},
+      create: {
+        name: 'Marketing',
+        slug: 'marketing',
+        description: 'Digital marketing tips and strategies',
+      },
+    }),
+  ]);
+
+  console.log(`✅ ${categories.length}個のカテゴリを作成しました`);
+
   // テストユーザーを作成
   const user1 = await prisma.user.upsert({
     where: { email: 'john@example.com' },
-    update: {},
+    update: {
+      bio: 'Senior Full-Stack Developer with 10+ years of experience',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john',
+      role: 'ADMIN',
+      lastActiveAt: new Date(),
+    },
     create: {
       email: 'john@example.com',
       name: 'John Doe',
+      bio: 'Senior Full-Stack Developer with 10+ years of experience',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john',
+      role: 'ADMIN',
+      lastActiveAt: new Date(),
     },
   });
 
   const user2 = await prisma.user.upsert({
     where: { email: 'jane@example.com' },
-    update: {},
+    update: {
+      bio: 'UX Designer passionate about creating beautiful interfaces',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jane',
+      role: 'USER',
+      lastActiveAt: new Date(),
+    },
     create: {
       email: 'jane@example.com',
       name: 'Jane Smith',
+      bio: 'UX Designer passionate about creating beautiful interfaces',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jane',
+      role: 'USER',
+      lastActiveAt: new Date(),
     },
   });
 
@@ -62,6 +131,7 @@ async function main() {
       published: true,
       authorId: user1.id,
       tagIds: [nextjsTag.id, reactTag.id],
+      categoryId: categories[0].id,
     },
     {
       title: 'AWS ECSでのパフォーマンス最適化',
@@ -70,6 +140,7 @@ async function main() {
       published: true,
       authorId: user2.id,
       tagIds: [ecsTag.id, performanceTag.id],
+      categoryId: categories[3].id,
     },
     {
       title: 'Core Web Vitalsの測定と改善',
@@ -78,6 +149,7 @@ async function main() {
       published: true,
       authorId: user1.id,
       tagIds: [performanceTag.id, nextjsTag.id],
+      categoryId: categories[0].id,
     },
     {
       title: 'Docker Composeによる開発環境構築',
@@ -86,6 +158,7 @@ async function main() {
       published: false,
       authorId: user2.id,
       tagIds: [ecsTag.id],
+      categoryId: categories[3].id,
     },
     {
       title: 'Prismaを使用したデータベース設計',
@@ -94,11 +167,12 @@ async function main() {
       published: true,
       authorId: user1.id,
       tagIds: [nextjsTag.id],
+      categoryId: categories[3].id,
     },
   ];
 
   for (const postData of posts) {
-    const { tagIds, ...postInfo } = postData;
+    const { tagIds, categoryId, ...postInfo } = postData;
     
     const post = await prisma.post.upsert({
       where: { slug: postInfo.slug },
@@ -107,6 +181,9 @@ async function main() {
         ...postInfo,
         tags: {
           connect: tagIds.map(id => ({ id }))
+        },
+        categories: {
+          connect: { id: categoryId }
         }
       },
     });

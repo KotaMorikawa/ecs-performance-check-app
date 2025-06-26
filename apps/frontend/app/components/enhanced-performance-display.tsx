@@ -21,6 +21,35 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface PerformanceMetrics {
+  network: {
+    totalRequests: number;
+    avgResponseTime: number;
+    cacheHitRate: number;
+    totalDataTransferred: number;
+    errors: number;
+  };
+  render: {
+    serverRenderTime?: number;
+    clientRenderTime: number;
+    hydrationTime?: number;
+    totalRenderTime: number;
+  };
+  cache: {
+    nextjsCacheHits: number;
+    nextjsCacheMisses: number;
+    browserCacheHits: number;
+    browserCacheMisses: number;
+    cacheEfficiency: number;
+  };
+  lastUpdated: string;
+}
+
+interface EnhancedPerformanceDisplayProps {
+  metrics?: PerformanceMetrics;
+  title?: string;
+}
+
 interface MetricCardProps {
   title: string;
   value: string;
@@ -65,9 +94,15 @@ function MetricCard({ title, value, icon, trend, status = 'good', description }:
   );
 }
 
-export function EnhancedPerformanceDisplay() {
-  const { metrics, isCollecting, refreshMetrics } = usePerformanceMetrics();
+export function EnhancedPerformanceDisplay({ 
+  metrics: externalMetrics, 
+  title = "Performance Metrics" 
+}: EnhancedPerformanceDisplayProps = {}) {
+  const { metrics: hookMetrics, isCollecting, refreshMetrics } = usePerformanceMetrics();
   useWebVitals();
+  
+  // 外部から渡されたmetricsを優先、なければhookからのmetricsを使用
+  const metrics = externalMetrics || hookMetrics;
 
   if (!metrics) {
     return (
@@ -94,7 +129,15 @@ export function EnhancedPerformanceDisplay() {
 
   return (
     <div className="space-y-8">
-      {/* Core Web Vitals */}
+      {/* Main Title */}
+      <div className="border-b pb-4">
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <p className="text-sm text-gray-600 mt-1">
+          最終更新: {new Date(metrics.lastUpdated).toLocaleString('ja-JP')}
+        </p>
+      </div>
+
+      {/* Core Web Vitals */} 
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Core Web Vitals</h3>
