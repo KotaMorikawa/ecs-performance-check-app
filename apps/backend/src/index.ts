@@ -4,6 +4,10 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { testDatabaseConnection, closeDatabaseConnection } from './lib/database.js';
 import { postsRoutes } from './routes/posts.js';
+import { categoriesRoutes } from './routes/categories.js';
+import { userProfileRoutes } from './routes/user-profile.js';
+import { dashboardStatsRoutes } from './routes/dashboard-stats.js';
+import { cacheTestRoutes } from './routes/cache-test.js';
 
 const app = new Hono();
 
@@ -27,8 +31,12 @@ app.get('/health', async (c) => {
   });
 });
 
-// Posts routes
+// API routes
 app.route('/api/posts', postsRoutes);
+app.route('/api/categories', categoriesRoutes);
+app.route('/api/user-profile', userProfileRoutes);
+app.route('/api/dashboard-stats', dashboardStatsRoutes);
+app.route('/api/cache-test', cacheTestRoutes);
 
 // Root endpoint
 app.get('/', (c) => {
@@ -37,6 +45,9 @@ app.get('/', (c) => {
     endpoints: [
       '/health',
       '/api/posts',
+      '/api/categories',
+      '/api/user-profile',
+      '/api/dashboard-stats',
       '/api/cache-test',
       '/api/revalidate',
     ],

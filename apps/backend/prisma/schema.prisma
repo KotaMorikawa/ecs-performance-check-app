@@ -12,30 +12,40 @@ datasource db {
 
 // パフォーマンステスト用のサンプルモデル
 model Post {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   content     String?
-  slug        String   @unique
-  published   Boolean  @default(false)
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slug        String     @unique
+  published   Boolean    @default(false)
+  views       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   authorId    Int?
-  author      User?    @relation(fields: [authorId], references: [id])
-  tags        Tag[]    @relation("PostTags")
+  author      User?      @relation(fields: [authorId], references: [id])
+  tags        Tag[]      @relation("PostTags")
+  categories  Category[] @relation("PostCategories")
   
   @@map("posts")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  posts     Post[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  name         String?
+  bio          String?
+  avatar       String?
+  role         Role      @default(USER)
+  lastActiveAt DateTime?
+  posts        Post[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   
   @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Tag {
@@ -44,6 +54,18 @@ model Tag {
   posts Post[] @relation("PostTags")
   
   @@map("tags")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String   @default("")
+  posts       Post[]   @relation("PostCategories")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("categories")
 }
 
 // パフォーマンス測定用のメトリクステーブル

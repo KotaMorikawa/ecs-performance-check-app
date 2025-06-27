@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useOptimistic, useCallback, useEffect } from 'react';
+import { useState, useOptimistic, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,8 +9,7 @@ import { CodeDisplay } from '@/components/code-display';
 import { PostForm } from '../_components/post-form';
 import { PostList } from '../_components/post-list';
 import { ServerActionsErrorBoundary } from '../_components/error-boundary';
-import { usePerformanceMeasurement } from '../_hooks/use-performance-measurement';
-import { Activity, Plus, List, Database, Zap, Save } from 'lucide-react';
+import { Plus, List, Zap, Save } from 'lucide-react';
 
 interface Post {
   id: number;
@@ -34,12 +33,6 @@ interface Post {
 
 interface ServerActionsPresentationalProps {
   posts: Post[];
-  serverData: {
-    timestamp: string;
-    serverRenderTime: number;
-    postsCount: number;
-    cacheStatus: string;
-  };
 }
 
 export function ServerActionsPresentational({
@@ -47,49 +40,32 @@ export function ServerActionsPresentational({
 }: ServerActionsPresentationalProps) {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
-  // 体験モード状態管理
-  const [experienceMode, setExperienceMode] = useState<'optimistic' | 'traditional' | 'comparison'>(
-    'optimistic'
-  );
-
-  // パフォーマンス測定（リアルタイム統計用）
-  const { calculateStats, getTodayStats, operationHistory, latestMetrics, clearHistory } = usePerformanceMeasurement();
-  
-  // Hydration エラー対策のためクライアント側でマウント後に有効化
-  const [isClient, setIsClient] = useState(false);
-  
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // 楽観的更新のためのuseOptimistic（体験モードに応じて適用）
+  // 楽観的更新のためのuseOptimistic
   const [optimisticPosts, addOptimisticPost] = useOptimistic(
     posts,
-    experienceMode === 'optimistic' || experienceMode === 'comparison'
-      ? (
-          state: Post[],
-          newPost: Post | { type: 'delete'; id: number } | { type: 'update'; post: Post }
-        ) => {
-          if ('type' in newPost) {
-            if (newPost.type === 'delete') {
-              return state.filter((post) => post.id !== newPost.id);
-            } else if (newPost.type === 'update') {
-              return state.map((post) => (post.id === newPost.post.id ? newPost.post : post));
-            }
-          }
-          // 新規投稿の場合
-          const post = newPost as Post;
-          return [
-            {
-              ...post,
-              id: Math.floor(Math.random() * 1000000) + state.length, // 一時的なIDを生成
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            ...state,
-          ];
+    (
+      state: Post[],
+      newPost: Post | { type: 'delete'; id: number } | { type: 'update'; post: Post }
+    ) => {
+      if ('type' in newPost) {
+        if (newPost.type === 'delete') {
+          return state.filter((post) => post.id !== newPost.id);
+        } else if (newPost.type === 'update') {
+          return state.map((post) => (post.id === newPost.post.id ? newPost.post : post));
         }
-      : (state: Post[]) => state // 従来動作では楽観的更新を無効化
+      }
+      // 新規投稿の場合
+      const post = newPost as Post;
+      return [
+        {
+          ...post,
+          id: Math.floor(Math.random() * 1000000) + state.length, // 一時的なIDを生成
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        ...state,
+      ];
+    }
   );
 
 
@@ -106,28 +82,22 @@ export function ServerActionsPresentational({
     setEditingPost(null);
   }, []);
 
-  // 楽観的更新ハンドラー（体験モードに応じて制御）
+  // 楽観的更新ハンドラー
   const handleOptimisticCreate = (
     newPost: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>
   ) => {
-    if (experienceMode === 'optimistic' || experienceMode === 'comparison') {
-      addOptimisticPost({
-        ...newPost,
-        views: 0,
-      } as Post);
-    }
+    addOptimisticPost({
+      ...newPost,
+      views: 0,
+    } as Post);
   };
 
   const handleOptimisticUpdate = (updatedPost: Post) => {
-    if (experienceMode === 'optimistic' || experienceMode === 'comparison') {
-      addOptimisticPost({ type: 'update', post: updatedPost });
-    }
+    addOptimisticPost({ type: 'update', post: updatedPost });
   };
 
   const handleOptimisticDelete = (postId: number) => {
-    if (experienceMode === 'optimistic' || experienceMode === 'comparison') {
-      addOptimisticPost({ type: 'delete', id: postId });
-    }
+    addOptimisticPost({ type: 'delete', id: postId });
   };
 
   return (
@@ -135,70 +105,9 @@ export function ServerActionsPresentational({
       <header className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Server Actions デモ</h1>
         <p className="text-lg text-gray-600">
-          Next.js 15.3.4 の Server Actions を使用したサーバーサイドアクション機能
+          Next.js 15.3.4 の Server Actions と useOptimistic による楽観的更新のデモ
         </p>
       </header>
-
-      {/* 体験モード切り替えバー */}
-      <section className="mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">🔄 体験モード</CardTitle>
-            <CardDescription>Server Actionsの異なる実装方式を体験・比較できます</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button
-                variant={experienceMode === 'optimistic' ? 'default' : 'outline'}
-                onClick={() => setExperienceMode('optimistic')}
-                className="flex items-center gap-2 h-auto p-4"
-              >
-                <span className="text-lg">🚀</span>
-                <div className="text-left">
-                  <div className="font-semibold">楽観的更新</div>
-                  <div className="text-sm opacity-80">瞬時のUI反応</div>
-                </div>
-              </Button>
-
-              <Button
-                variant={experienceMode === 'traditional' ? 'default' : 'outline'}
-                onClick={() => setExperienceMode('traditional')}
-                className="flex items-center gap-2 h-auto p-4"
-              >
-                <span className="text-lg">⏳</span>
-                <div className="text-left">
-                  <div className="font-semibold">従来動作</div>
-                  <div className="text-sm opacity-80">サーバー待機型</div>
-                </div>
-              </Button>
-
-              <Button
-                variant={experienceMode === 'comparison' ? 'default' : 'outline'}
-                onClick={() => setExperienceMode('comparison')}
-                className="flex items-center gap-2 h-auto p-4"
-              >
-                <span className="text-lg">📊</span>
-                <div className="text-left">
-                  <div className="font-semibold">比較デモ</div>
-                  <div className="text-sm opacity-80">パフォーマンス測定</div>
-                </div>
-              </Button>
-            </div>
-
-            {/* 現在のモード表示 */}
-            <div className="mt-4 p-3 bg-muted rounded-lg">
-              <div className="text-sm font-medium">
-                現在のモード:{' '}
-                {experienceMode === 'optimistic'
-                  ? '🚀 楽観的更新 - useOptimistic による瞬時のUI反応'
-                  : experienceMode === 'traditional'
-                    ? '⏳ 従来動作 - サーバーレスポンス待機型'
-                    : '📊 比較デモ - 両方式のパフォーマンス測定'}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
 
       {/* Server Actions 機能デモ - 左右分割レイアウト */}
       <section className="mb-8">
@@ -209,7 +118,7 @@ export function ServerActionsPresentational({
               Server Actions デモ
             </CardTitle>
             <CardDescription>
-              楽観的更新と従来動作の比較体験が可能なインタラクティブデモ
+              useOptimistic による楽観的更新を体験できるインタラクティブデモ
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -253,96 +162,11 @@ export function ServerActionsPresentational({
                       <PostForm
                         mode={editingPost ? 'edit' : 'create'}
                         post={editingPost || undefined}
-                        experienceMode={experienceMode}
                         onOptimisticCreate={handleOptimisticCreate}
                         onOptimisticUpdate={handleOptimisticUpdate}
                         onEditComplete={handleEditComplete}
                       />
                     </ServerActionsErrorBoundary>
-                  </CardContent>
-                </Card>
-
-                {/* 下部: リアルタイム比較メトリクス */}
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="h-5 w-5" />
-                        📊 リアルタイム比較
-                      </CardTitle>
-                      {isClient && operationHistory.length > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={clearHistory}
-                          className="text-xs"
-                        >
-                          統計クリア
-                        </Button>
-                      )}
-                    </div>
-                    <CardDescription>現在の操作パフォーマンス測定</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {(() => {
-                      const stats = calculateStats();
-                      
-                      if (stats.totalOperations === 0) {
-                        return (
-                          <div className="text-center py-8">
-                            <div className="text-4xl mb-4">📊</div>
-                            <div className="text-lg font-medium text-muted-foreground mb-2">
-                              パフォーマンス統計を開始
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              フォームから投稿を作成・編集・削除すると、<br />
-                              楽観的更新と従来動作の体感速度差が表示されます
-                            </div>
-                          </div>
-                        );
-                      }
-                      
-                      return (
-                        <>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-green-600">
-                                {stats.optimisticAvg}ms
-                              </div>
-                              <div className="text-sm text-muted-foreground">楽観的更新</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-orange-600">
-                                {stats.traditionalAvg}ms
-                              </div>
-                              <div className="text-sm text-muted-foreground">従来動作</div>
-                            </div>
-                          </div>
-                          <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-                            <div>
-                              <div className="text-xl font-bold text-blue-600">
-                                {stats.improvementRate}%
-                              </div>
-                              <div className="text-sm text-muted-foreground">体感速度改善</div>
-                            </div>
-                            <div>
-                              <div className="text-xl font-bold text-green-600">
-                                {Math.round((operationHistory.filter(m => m.success).length / operationHistory.length) * 100)}%
-                              </div>
-                              <div className="text-sm text-muted-foreground">成功率</div>
-                            </div>
-                          </div>
-                          <div className="mt-4 text-center text-xs text-muted-foreground">
-                            {stats.totalOperations} 回の操作に基づく統計
-                            {latestMetrics.length > 0 && (
-                              <div className="mt-2">
-                                最新: {latestMetrics[0].operation} ({latestMetrics[0].mode}) - {latestMetrics[0].userPerceivedTime}ms
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      );
-                    })()}
                   </CardContent>
                 </Card>
               </div>
@@ -358,7 +182,7 @@ export function ServerActionsPresentational({
                       </div>
                       <Badge variant="secondary">{optimisticPosts.length} 件の投稿</Badge>
                     </CardTitle>
-                    <CardDescription>リアルタイム更新される投稿データ</CardDescription>
+                    <CardDescription>楽観的更新でリアルタイム更新される投稿データ</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="max-h-[500px] overflow-y-auto">
@@ -367,58 +191,10 @@ export function ServerActionsPresentational({
                           posts={optimisticPosts}
                           onEdit={handleEditPost}
                           onOptimisticDelete={handleOptimisticDelete}
-                          experienceMode={experienceMode}
                           emptyMessage="まだ投稿がありません。左側のフォームから新しい投稿を作成してみましょう。"
                         />
                       </ServerActionsErrorBoundary>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* 操作統計 */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Database className="h-5 w-5" />
-                      📊 操作統計
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {(() => {
-                      const todayStats = getTodayStats();
-                      return (
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                            <div>
-                              <div className="text-lg font-bold">{optimisticPosts.length}</div>
-                              <div className="text-sm text-muted-foreground">総投稿数</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-green-600">{todayStats.creates}</div>
-                              <div className="text-sm text-muted-foreground">今日の作成</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-blue-600">{todayStats.updates}</div>
-                              <div className="text-sm text-muted-foreground">今日の編集</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-red-600">{todayStats.deletes}</div>
-                              <div className="text-sm text-muted-foreground">今日の削除</div>
-                            </div>
-                          </div>
-                          {isClient && operationHistory.length > 0 && (
-                            <div className="text-center text-xs text-muted-foreground border-t pt-2">
-                              総操作回数: {operationHistory.length} 回
-                              {latestMetrics.length > 0 && (
-                                <div className="mt-1">
-                                  最新操作: {latestMetrics[0].timestamp.slice(11, 19)}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
                   </CardContent>
                 </Card>
               </div>
@@ -566,9 +342,9 @@ export function PostForm() {
               description: 'useOptimistic を使用した楽観的更新',
               content: `'use client';
 
-import { useOptimistic } from 'react';
+import { useState, useOptimistic } from 'react';
 
-export function ServerActionsPresentational({ posts, serverData }) {
+export function ServerActionsPresentational({ posts }) {
   // 楽観的更新のためのuseOptimistic
   const [optimisticPosts, addOptimisticPost] = useOptimistic(
     posts,
@@ -583,19 +359,35 @@ export function ServerActionsPresentational({ posts, serverData }) {
         }
       }
       // 新規投稿の場合
-      return [{ ...newPost, id: Math.floor(Math.random() * 1000000) }, ...state];
+      return [{ 
+        ...newPost, 
+        id: Math.floor(Math.random() * 1000000),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }, ...state];
     }
   );
 
   const handleOptimisticCreate = (newPost) => {
-    addOptimisticPost(newPost);
+    addOptimisticPost({ ...newPost, views: 0 });
+  };
+
+  const handleOptimisticUpdate = (updatedPost) => {
+    addOptimisticPost({ type: 'update', post: updatedPost });
+  };
+
+  const handleOptimisticDelete = (postId) => {
+    addOptimisticPost({ type: 'delete', id: postId });
   };
 
   return (
-    <PostList 
-      posts={optimisticPosts} 
-      onOptimisticCreate={handleOptimisticCreate} 
-    />
+    <div>
+      <PostForm onOptimisticCreate={handleOptimisticCreate} />
+      <PostList 
+        posts={optimisticPosts} 
+        onOptimisticDelete={handleOptimisticDelete} 
+      />
+    </div>
   );
 }`,
             },
@@ -645,8 +437,8 @@ export class ServerActionsErrorBoundary extends Component {
               description: 'メインページコンポーネント',
               content: `import { ServerActionsContainer } from './_containers/container';
 
-export default function ServerActionsPage({ searchParams }) {
-  return <ServerActionsContainer searchParams={searchParams} />;
+export default function ServerActionsPage() {
+  return <ServerActionsContainer />;
 }`,
             },
           ]}

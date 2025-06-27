@@ -737,12 +737,12 @@ apps/api/src/
 
 ```yaml
 # docker-compose.yml
-version: "3.8"
+version: '3.8'
 services:
   nextjs:
     build: ./apps/frontend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - API_URL=http://api:8000
     depends_on:
@@ -751,7 +751,7 @@ services:
   api:
     build: ./apps/api
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - DATABASE_URL=postgresql://postgres:devpassword@postgres:5432/appdb
     depends_on:
@@ -761,7 +761,7 @@ services:
   postgres:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=devpassword
@@ -769,7 +769,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -853,8 +853,8 @@ infrastructure/cdk/
 
 ```typescript
 // lib/stacks/network-stack.ts
-import * as cdk from "aws-cdk-lib";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as cdk from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
 export class NetworkStack extends cdk.Stack {
   public readonly vpc: ec2.Vpc;
@@ -862,17 +862,17 @@ export class NetworkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.vpc = new ec2.Vpc(this, "VPC", {
+    this.vpc = new ec2.Vpc(this, 'VPC', {
       maxAzs: 2,
       natGateways: 0, // NAT Gateway不要
       subnetConfiguration: [
         {
-          name: "Public",
+          name: 'Public',
           subnetType: ec2.SubnetType.PUBLIC,
           cidrMask: 24,
         },
         {
-          name: "Private",
+          name: 'Private',
           subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
           cidrMask: 24,
         },
@@ -880,12 +880,12 @@ export class NetworkStack extends cdk.Stack {
     });
 
     // S3 VPCエンドポイント
-    this.vpc.addGatewayEndpoint("S3Endpoint", {
+    this.vpc.addGatewayEndpoint('S3Endpoint', {
       service: ec2.GatewayVpcEndpointAwsService.S3,
     });
 
     // CloudWatch Logs VPCエンドポイント
-    this.vpc.addInterfaceEndpoint("CloudWatchLogsEndpoint", {
+    this.vpc.addInterfaceEndpoint('CloudWatchLogsEndpoint', {
       service: ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
     });
   }
@@ -896,141 +896,160 @@ export class NetworkStack extends cdk.Stack {
 
 ```typescript
 // lib/stacks/ecs-stack.ts
-import * as cdk from "aws-cdk-lib";
-import * as ecs from "aws-cdk-lib/aws-ecs";
-import * as iam from "aws-cdk-lib/aws-iam";
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import { EcsStackProps } from './types'; // ← props 型は各自定義
 
 export class EcsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: EcsStackProps) {
     super(scope, id, props);
 
-    const cluster = new ecs.Cluster(this, "Cluster", {
+    /* =======================================================
+     * 1. クラスター作成
+     * ======================================================= */
+    const cluster = new ecs.Cluster(this, 'Cluster', {
       vpc: props.vpc,
       containerInsights: true,
     });
 
-    const taskDefinition = new ecs.FargateTaskDefinition(this, "TaskDef", {
-      memoryLimitMiB: 2048,
+    /* =======================================================
+     * 2. タスク定義（ExecutionRole ＋ TaskRole）
+     * ======================================================= */
+    const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef', {
       cpu: 1024,
+      memoryLimitMiB: 2048,
     });
 
-    // Task Role (S3アクセス権限)
+    // (2-a) ExecutionRole: イメージ Pull & CloudWatch Logs 用
+    taskDefinition
+      .obtainExecutionRole()
+      .addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
+      );
+
+    // (2-b) TaskRole: S3 などアプリが直接触るリソース
     taskDefinition.addToTaskRolePolicy(
       new iam.PolicyStatement({
-        actions: ["s3:GetObject", "s3:PutObject"],
+        actions: ['s3:GetObject', 's3:PutObject'],
         resources: [`${props.s3Bucket.bucketArn}/*`],
       })
     );
 
-    // Next.js Container
-    const nextjsContainer = taskDefinition.addContainer("nextjs", {
-      image: ecs.ContainerImage.fromEcrRepository(props.nextjsRepo),
-      cpu: 512,
-      memoryLimitMiB: 768,
-      environment: {
-        API_URL: "http://localhost:8000",
-        NODE_ENV: "production",
-        S3_BUCKET_NAME: props.s3Bucket.bucketName,
-        CLOUDFRONT_URL: props.cloudfrontUrl,
-      },
-      logging: ecs.LogDrivers.awsLogs({
-        streamPrefix: "nextjs",
-      }),
-    });
+    /* =======================================================
+     * 3. コンテナ定義
+     * ======================================================= */
 
-    nextjsContainer.addPortMappings({
-      containerPort: 3000,
-      protocol: ecs.Protocol.TCP,
-    });
-
-    // Hono API Container
-    const apiContainer = taskDefinition.addContainer("api", {
-      image: ecs.ContainerImage.fromEcrRepository(props.apiRepo),
-      cpu: 256,
-      memoryLimitMiB: 512,
-      environment: {
-        DATABASE_URL: "postgresql://postgres:devpassword@localhost:5432/appdb",
-        NEXTJS_URL: "http://localhost:3000",
-        S3_BUCKET_NAME: props.s3Bucket.bucketName,
-      },
-      logging: ecs.LogDrivers.awsLogs({
-        streamPrefix: "api",
-      }),
-    });
-
-    apiContainer.addPortMappings({
-      containerPort: 8000,
-      protocol: ecs.Protocol.TCP,
-    });
-
-    // PostgreSQL Container
-    const postgresContainer = taskDefinition.addContainer("postgres", {
-      image: ecs.ContainerImage.fromRegistry("postgres:15-alpine"),
+    // PostgreSQL
+    const postgresContainer = taskDefinition.addContainer('postgres', {
+      image: ecs.ContainerImage.fromRegistry('postgres:15-alpine'),
       cpu: 256,
       memoryLimitMiB: 768,
       environment: {
-        POSTGRES_USER: "postgres",
-        POSTGRES_PASSWORD: "devpassword",
-        POSTGRES_DB: "appdb",
-        PGDATA: "/var/lib/postgresql/data/pgdata",
+        POSTGRES_USER: 'postgres',
+        POSTGRES_PASSWORD: 'devpassword',
+        POSTGRES_DB: 'appdb',
+        PGDATA: '/var/lib/postgresql/data/pgdata',
       },
       healthCheck: {
-        command: ["CMD-SHELL", "pg_isready -U postgres"],
+        command: ['CMD-SHELL', 'pg_isready -U postgres'],
         interval: cdk.Duration.seconds(10),
         timeout: cdk.Duration.seconds(5),
         retries: 5,
         startPeriod: cdk.Duration.seconds(30),
       },
-      logging: ecs.LogDrivers.awsLogs({
-        streamPrefix: "postgres",
-      }),
+      logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'postgres' }),
     });
 
-    // EFSマウント
-    taskDefinition.addVolume({
-      name: "postgres-data",
-      efsVolumeConfiguration: {
-        fileSystemId: props.fileSystem.fileSystemId,
-        transitEncryption: "ENABLED",
-        authorizationConfig: {
-          accessPointId: props.accessPoint.accessPointId,
-        },
+    // Hono API
+    const apiContainer = taskDefinition.addContainer('api', {
+      image: ecs.ContainerImage.fromEcrRepository(props.apiRepo, 'latest'),
+      cpu: 256,
+      memoryLimitMiB: 512,
+      environment: {
+        DATABASE_URL: 'postgresql://postgres:devpassword@localhost:5432/appdb',
+        NEXTJS_URL: 'http://localhost:3000',
+        S3_BUCKET_NAME: props.s3Bucket.bucketName,
       },
+      logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'api' }),
     });
 
-    postgresContainer.addMountPoints({
-      sourceVolume: "postgres-data",
-      containerPath: "/var/lib/postgresql/data",
-      readOnly: false,
+    // Next.js
+    const nextjsContainer = taskDefinition.addContainer('nextjs', {
+      image: ecs.ContainerImage.fromEcrRepository(props.nextjsRepo, 'latest'),
+      cpu: 512,
+      memoryLimitMiB: 768,
+      // ★ ルート FS を読み取り専用に
+      readOnlyRootFilesystem: true,
+      environment: {
+        API_URL: 'http://localhost:8000',
+        NODE_ENV: 'production',
+        S3_BUCKET_NAME: props.s3Bucket.bucketName,
+        CLOUDFRONT_URL: props.cloudfrontUrl,
+      },
+      logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'nextjs' }),
     });
+
+    // ポートマッピング
+    postgresContainer.addPortMappings({ containerPort: 5432 });
+    apiContainer.addPortMappings({ containerPort: 8000 });
+    nextjsContainer.addPortMappings({ containerPort: 3000 });
 
     // コンテナ依存関係
     apiContainer.addContainerDependencies({
       container: postgresContainer,
       condition: ecs.ContainerDependencyCondition.HEALTHY,
     });
-
     nextjsContainer.addContainerDependencies({
       container: apiContainer,
       condition: ecs.ContainerDependencyCondition.START,
     });
 
-    // ECSサービス
-    const service = new ecs.FargateService(this, "Service", {
+    /* =======================================================
+     * 4. ボリューム（EFS）＆ SG
+     * ======================================================= */
+    taskDefinition.addVolume({
+      name: 'postgres-data',
+      efsVolumeConfiguration: {
+        fileSystemId: props.fileSystem.fileSystemId,
+        transitEncryption: 'ENABLED',
+        authorizationConfig: {
+          accessPointId: props.accessPoint.accessPointId,
+        },
+      },
+    });
+    postgresContainer.addMountPoints({
+      sourceVolume: 'postgres-data',
+      containerPath: '/var/lib/postgresql/data',
+      readOnly: false,
+    });
+
+    // Security Groups
+    const taskSG = new ec2.SecurityGroup(this, 'TaskSG', { vpc: props.vpc });
+    const efsSG = new ec2.SecurityGroup(this, 'EfsSG', { vpc: props.vpc });
+    efsSG.addIngressRule(taskSG, ec2.Port.tcp(2049), 'Allow NFS from tasks');
+
+    /* =======================================================
+     * 5. Fargate Service ＋ ALB Target
+     * ======================================================= */
+    const service = new ecs.FargateService(this, 'Service', {
       cluster,
       taskDefinition,
       desiredCount: 1,
       assignPublicIp: false,
-      securityGroups: [props.securityGroup],
+      securityGroups: [taskSG],
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED }, // ★プライベート配置
     });
 
-    // ALB設定
-    const targetGroup = props.alb.addTargets("ECS", {
+    props.alb.addTargets('EcsTarget', {
       port: 3000,
       protocol: elbv2.ApplicationProtocol.HTTP,
       targets: [service],
       healthCheck: {
-        path: "/api/health",
+        path: '/api/health',
         interval: cdk.Duration.seconds(30),
       },
     });

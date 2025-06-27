@@ -31,7 +31,7 @@ describe('Home Page', () => {
   it('基本ルーティング機能へのリンクを表示すべき', () => {
     render(<Home />);
     
-    const routingLinks = screen.getAllByRole('link', { name: /デモを見る/i });
+    const routingLinks = screen.getAllByRole('link', { name: /メイン機能を見る/i });
     const routingLink = routingLinks.find(link => 
       link.getAttribute('href') === '/features/routing/basic'
     );
@@ -50,7 +50,7 @@ describe('Home Page', () => {
   it('Server Actions機能へのリンクを表示すべき', () => {
     render(<Home />);
     
-    const serverActionLinks = screen.getAllByRole('link', { name: /デモを見る/i });
+    const serverActionLinks = screen.getAllByRole('link', { name: /メイン機能を見る/i });
     const serverActionLink = serverActionLinks.find(link => 
       link.getAttribute('href') === '/features/server-actions/basic'
     );
@@ -61,10 +61,10 @@ describe('Home Page', () => {
   it('実装予定機能のリストを表示すべき', () => {
     render(<Home />);
     
-    // 実装予定の機能名を確認（Server Actionsは実装済みなので除外）
-    expect(screen.getByText('データフェッチング')).toBeInTheDocument();
+    // 実装予定の機能名を確認
     expect(screen.getByText('キャッシュ戦略')).toBeInTheDocument();
     expect(screen.getByText('Middleware')).toBeInTheDocument();
+    expect(screen.getByText('ストリーミング')).toBeInTheDocument();
   });
 
   it('プロジェクト概要セクションを表示すべき', () => {

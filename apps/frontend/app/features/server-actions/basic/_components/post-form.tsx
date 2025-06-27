@@ -12,7 +12,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Save, Plus } from 'lucide-react';
 import { createPostWithState, updatePostWithState } from '../_actions/post-actions';
-import { usePerformanceMeasurement } from '../_hooks/use-performance-measurement';
 import {
   generateSlug,
   type PostFormData,
@@ -23,7 +22,6 @@ import {
 interface PostFormProps {
   mode: 'create' | 'edit';
   post?: Post;
-  experienceMode?: 'optimistic' | 'traditional' | 'comparison';
   onOptimisticCreate?: (post: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => void;
   onOptimisticUpdate?: (post: Post) => void;
   onEditComplete?: () => void;
@@ -73,15 +71,9 @@ function SubmitButton({ mode, isPending, isPendingTransition }: { mode: 'create'
   );
 }
 
-export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimisticCreate, onOptimisticUpdate, onEditComplete }: PostFormProps) {
-  // experienceModeを使用してフォームの動作を調整
-  const isOptimisticMode = experienceMode === 'optimistic' || experienceMode === 'comparison';
+export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, onEditComplete }: PostFormProps) {
   const { toast } = useToast();
   const [isPendingTransition, startTransition] = useTransition();
-  
-  // パフォーマンス測定フック
-  const { measureAction, startMeasurement, endMeasurement } = usePerformanceMeasurement();
-  const [currentMeasurementId, setCurrentMeasurementId] = useState<string | null>(null);
 
   // useActionStateで状態管理
   const [createState, createAction, isCreatePending] = useActionState(
@@ -141,12 +133,6 @@ export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimist
   useEffect(() => {
     if (!currentState.timestamp) return; // 初期状態では何もしない
 
-    // 従来動作での測定終了
-    if (currentMeasurementId && !isOptimisticMode) {
-      endMeasurement(currentMeasurementId, currentState.success);
-      setCurrentMeasurementId(null);
-    }
-
     if (currentState.success && currentState.message) {
       toast({
         title: '成功',
@@ -173,7 +159,7 @@ export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimist
         variant: 'destructive',
       });
     }
-  }, [currentState, mode, toast, onEditComplete, currentMeasurementId, isOptimisticMode, endMeasurement]);
+  }, [currentState, mode, toast, onEditComplete]);
 
   // フォームデータの更新
   const updateFormField = (field: keyof PostFormData, value: string | boolean) => {
@@ -190,54 +176,35 @@ export function PostForm({ mode, post, experienceMode = 'optimistic', onOptimist
   const generalError = currentState.error;
 
   // 楽観的更新を実行するフォーム送信ハンドラー
-  const handleSubmit = async () => {
-    // パフォーマンス測定開始
-    const operationType = mode === 'create' ? 'create' : 'update';
-    
-    // 楽観的更新モードの場合
-    if (isOptimisticMode) {
-      // 楽観的更新用のデータを作成
-      if (mode === 'create' && onOptimisticCreate) {
-        startTransition(() => {
-          onOptimisticCreate({
-            title: formData.title,
-            content: formData.content,
-            slug: formData.slug,
-            published: formData.published,
-            author: null,
-            tags: [],
-          });
+  const handleSubmit = () => {
+    // 楽観的更新用のデータを作成
+    if (mode === 'create' && onOptimisticCreate) {
+      startTransition(() => {
+        onOptimisticCreate({
+          title: formData.title,
+          content: formData.content,
+          slug: formData.slug,
+          published: formData.published,
+          author: null,
+          tags: [],
         });
-      } else if (mode === 'edit' && post && onOptimisticUpdate) {
-        startTransition(() => {
-          onOptimisticUpdate({
-            ...post,
-            title: formData.title,
-            content: formData.content,
-            slug: formData.slug,
-            published: formData.published,
-            updatedAt: new Date().toISOString(),
-            views: post.views,
-            createdAt: post.createdAt,
-            author: null,
-            tags: [],
-          });
-        });
-      }
-      
-      // 楽観的更新のパフォーマンス測定（体感時間0ms）
-      await measureAction(operationType, 'optimistic', async () => {
-        // 楽観的更新では即座に完了
-        return Promise.resolve();
       });
-    } else {
-      // 従来動作のパフォーマンス測定
-      // Server Action実行開始の測定
-      const measurementId = startMeasurement(operationType, 'traditional');
-      setCurrentMeasurementId(measurementId);
+    } else if (mode === 'edit' && post && onOptimisticUpdate) {
+      startTransition(() => {
+        onOptimisticUpdate({
+          ...post,
+          title: formData.title,
+          content: formData.content,
+          slug: formData.slug,
+          published: formData.published,
+          updatedAt: new Date().toISOString(),
+          views: post.views,
+          createdAt: post.createdAt,
+          author: null,
+          tags: [],
+        });
+      });
     }
-    
-    // フォームのactionによりServer Actionが実行される
   };
 
   return (

@@ -1,27 +1,61 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, CheckCircle, Clock, Github } from 'lucide-react';
 
+interface SubFeature {
+  name: string;
+  path: string;
+}
+
+interface Feature {
+  title: string;
+  description: string;
+  path: string;
+  status: 'implemented';
+  subFeatures?: SubFeature[];
+}
+
 export default function Home() {
-  const implementedFeatures = [
+  const implementedFeatures: Feature[] = [
     {
-      title: '基本ルーティング',
+      title: 'ルーティング機能',
       description: 'App Routerによるファイルベースルーティング',
       path: '/features/routing/basic',
-      status: 'implemented'
+      status: 'implemented',
+      subFeatures: [
+        { name: '基本ルーティング', path: '/features/routing/basic' },
+        { name: 'ダイナミックルート', path: '/features/routing/dynamic/1' },
+        { name: 'ネストレイアウト', path: '/features/routing/nested-layout' },
+        { name: 'ローディング・エラー', path: '/features/routing/loading-error' },
+        { name: 'ルートグループ', path: '/features/routing/(route-groups)/public' },
+        { name: 'パラレル・インターセプト', path: '/features/routing/parallel-intercept' }
+      ]
     },
     {
       title: 'Server Actions',
       description: 'フォーム処理とサーバーサイドアクション',
       path: '/features/server-actions/basic',
       status: 'implemented'
+    },
+    {
+      title: 'データフェッチング',
+      description: 'SSG/SSR/ISR/クライアントサイド/パラレルフェッチング',
+      path: '/features/data-fetching',
+      status: 'implemented',
+      subFeatures: [
+        { name: 'SSG (Static Site Generation)', path: '/features/data-fetching/ssg' },
+        { name: 'SSR (Server-Side Rendering)', path: '/features/data-fetching/ssr' },
+        { name: 'ISR (Incremental Static Regeneration)', path: '/features/data-fetching/isr' },
+        { name: 'クライアントサイド', path: '/features/data-fetching/client-side' },
+        { name: 'パラレルフェッチング', path: '/features/data-fetching/parallel' }
+      ]
     }
   ];
 
   const plannedFeatures = [
-    { name: 'データフェッチング', description: 'SSG/SSR/ISRパターンの実装' },
     { name: 'キャッシュ戦略', description: '多層キャッシュシステムの構築' },
     { name: 'ストリーミング', description: 'Suspenseによるストリーミングレンダリング' },
     { name: 'Middleware', description: 'リクエスト処理とルートガード' },
@@ -81,13 +115,34 @@ export default function Home() {
                     </CardTitle>
                     <CardDescription>{feature.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     <Button asChild variant="outline" size="sm">
-                      <Link href={feature.path as '/features/routing/basic' | '/features/server-actions/basic'}>
-                        デモを見る
+                      <Link href={feature.path as Route}>
+                        メイン機能を見る
                         <ExternalLink className="ml-2 h-3 w-3" />
                       </Link>
                     </Button>
+                    {feature.subFeatures && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-muted-foreground">サブ機能:</p>
+                        <div className="grid grid-cols-1 gap-2">
+                          {feature.subFeatures.map((subFeature, subIndex) => (
+                            <Button
+                              key={subIndex}
+                              asChild
+                              variant="ghost"
+                              size="sm"
+                              className="justify-start h-8 text-xs"
+                            >
+                              <Link href={subFeature.path as Route}>
+                                {subFeature.name}
+                                <ExternalLink className="ml-1 h-3 w-3" />
+                              </Link>
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
