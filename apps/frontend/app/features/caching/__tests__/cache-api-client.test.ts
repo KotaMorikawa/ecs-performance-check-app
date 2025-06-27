@@ -64,6 +64,131 @@ describe('Cache API Client', () => {
     vi.restoreAllMocks();
   });
 
+  describe('revalidationApi', () => {
+    it('should handle revalidateTag API calls', async () => {
+      // Arrange
+      const mockResponse = {
+        id: 'revalidation-1',
+        type: 'tag' as const,
+        target: 'categories',
+        success: true,
+        timestamp: new Date().toISOString(),
+        duration: 150,
+        triggeredBy: 'user',
+        strategy: 'on-demand',
+      };
+      
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      // Act
+      const result = await revalidationApi.revalidateTag('categories');
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/revalidate'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tag: 'categories' }),
+        })
+      );
+    });
+
+    it('should handle revalidatePath API calls', async () => {
+      // Arrange
+      const mockResponse = {
+        id: 'revalidation-2',
+        type: 'path' as const,
+        target: '/features/caching',
+        success: true,
+        timestamp: new Date().toISOString(),
+        duration: 200,
+        triggeredBy: 'user',
+        strategy: 'on-demand',
+      };
+      
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      // Act
+      const result = await revalidationApi.revalidatePath('/features/caching');
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/revalidate'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: '/features/caching' }),
+        })
+      );
+    });
+  });
+
+  describe('cacheStatsApi', () => {
+    it('should fetch cache statistics', async () => {
+      // Arrange
+      const mockStats = {
+        layers: {
+          'data-cache': { hits: 100, misses: 20 },
+          'full-route-cache': { hits: 80, misses: 10 },
+        },
+        overall: { hitRate: 85 },
+      };
+      
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockStats),
+      });
+
+      // Act
+      const result = await cacheStatsApi.getStats();
+
+      // Assert
+      expect(result).toEqual(mockStats);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/cache-stats')
+      );
+    });
+  });
+
+  describe('cloudfrontSimulationApi', () => {
+    it('should simulate CloudFront cache behavior', async () => {
+      // Arrange
+      const mockSimulation = {
+        status: 'simulated',
+        hitRate: 95,
+        responseTime: 50,
+      };
+      
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockSimulation),
+      });
+
+      // Act
+      const result = await cloudfrontSimulationApi.simulate({ region: 'us-east-1' });
+
+      // Assert
+      expect(result).toEqual(mockSimulation);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/cloudfront-simulation'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ region: 'us-east-1' }),
+        })
+      );
+    });
+  });
+
   describe('calculateCacheMetrics', () => {
     it('should calculate metrics from cache responses', () => {
       const responses = [mockCacheResponse];
