@@ -38,6 +38,7 @@ interface CacheComparisonPresentationalProps {
   overallMetrics: CacheMetrics | null;
   health: CacheHealthStatus | null;
   recommendations: PerformanceRecommendation[];
+  renderTime: number;
   error: string | null;
 }
 

@@ -5,12 +5,19 @@ import { render, screen } from '@testing-library/react';
 import { CacheComparisonContainer } from '../container';
 import { cacheTestApi } from '../../../_shared/cache-api-client';
 import { compareStrategies, generateRecommendations, evaluateCacheHealth } from '../../../_shared/cache-metrics';
+import type { 
+  CacheComparisonResult, 
+  CacheHealthStatus, 
+  CacheStrategy,
+  CacheApiResponse,
+  CacheTestData
+} from '../../../_shared/types';
 
 // モック設定
 vi.mock('../../../_shared/cache-api-client');
 vi.mock('../../../_shared/cache-metrics');
 vi.mock('../presentational', () => ({
-  CacheComparisonPresentational: ({ comparisonData, error }: any) => (
+  CacheComparisonPresentational: ({ comparisonData, error }: { comparisonData?: Record<string, unknown>; error?: string }) => (
     <div data-testid="presentational">
       {error && <div data-testid="error">{error}</div>}
       <div data-testid="comparison-count">{Object.keys(comparisonData || {}).length}</div>
@@ -25,6 +32,9 @@ Object.defineProperty(global, 'performance', {
   writable: true,
 });
 
+// console.error のモック
+vi.spyOn(console, 'error').mockImplementation(() => {});
+
 const mockCacheTestApi = vi.mocked(cacheTestApi);
 const mockCompareStrategies = vi.mocked(compareStrategies);
 const mockGenerateRecommendations = vi.mocked(generateRecommendations);
@@ -33,7 +43,18 @@ const mockEvaluateCacheHealth = vi.mocked(evaluateCacheHealth);
 // モックデータ
 const mockComparisonData = {
   'data-cache': {
-    data: [{ id: 1, name: 'Data Cache Test' }],
+    data: [{
+      id: 1,
+      title: 'Data Cache Test',
+      content: 'Test content',
+      category: 'test',
+      timestamp: '2023-01-01T00:00:00Z',
+      size: 1024,
+      views: 100,
+      name: 'Data Cache Test',
+      postCount: 5,
+      description: 'Test description',
+    }],
     metadata: {
       cached: true,
       cacheStatus: 'fresh',
@@ -50,7 +71,18 @@ const mockComparisonData = {
     },
   },
   'full-route-cache': {
-    data: [{ id: 2, name: 'Full Route Cache Test' }],
+    data: [{
+      id: 2,
+      title: 'Full Route Cache Test',
+      content: 'Test content',
+      category: 'test',
+      timestamp: '2023-01-01T00:00:00Z',
+      size: 2048,
+      views: 200,
+      name: 'Full Route Cache Test',
+      postCount: 10,
+      description: 'Test description',
+    }],
     metadata: {
       cached: true,
       cacheStatus: 'fresh',
@@ -66,34 +98,193 @@ const mockComparisonData = {
       cacheHit: true,
     },
   },
-};
+  'router-cache': {
+    data: [{
+      id: 3,
+      title: 'Router Cache Test',
+      content: 'Test content',
+      category: 'test',
+      timestamp: '2023-01-01T00:00:00Z',
+      size: 512,
+      views: 300,
+      name: 'Router Cache Test',
+      postCount: 15,
+      description: 'Test description',
+    }],
+    metadata: {
+      cached: true,
+      cacheStatus: 'hit',
+      strategy: 'router-cache',
+      timestamp: '2023-01-01T00:00:00Z',
+      source: 'cache',
+      ttl: 30,
+      tags: ['test'],
+    },
+    metrics: {
+      fetchTime: 5,
+      dataSize: 512,
+      cacheHit: true,
+    },
+  },
+  'request-memoization': {
+    data: [{
+      id: 4,
+      title: 'Request Memoization Test',
+      content: 'Test content',
+      category: 'test',
+      timestamp: '2023-01-01T00:00:00Z',
+      size: 256,
+      views: 400,
+      name: 'Request Memoization Test',
+      postCount: 20,
+      description: 'Test description',
+    }],
+    metadata: {
+      cached: true,
+      cacheStatus: 'hit',
+      strategy: 'request-memoization',
+      timestamp: '2023-01-01T00:00:00Z',
+      source: 'cache',
+      ttl: 0,
+      tags: ['test'],
+    },
+    metrics: {
+      fetchTime: 1,
+      dataSize: 256,
+      cacheHit: true,
+    },
+  },
+  'cloudfront-cache': {
+    data: [{
+      id: 5,
+      title: 'CloudFront Cache Test',
+      content: 'Test content',
+      category: 'test',
+      timestamp: '2023-01-01T00:00:00Z',
+      size: 4096,
+      views: 500,
+      name: 'CloudFront Cache Test',
+      postCount: 25,
+      description: 'Test description',
+    }],
+    metadata: {
+      cached: true,
+      cacheStatus: 'hit',
+      strategy: 'cloudfront-cache',
+      timestamp: '2023-01-01T00:00:00Z',
+      source: 'cache',
+      ttl: 86400,
+      tags: ['test'],
+    },
+    metrics: {
+      fetchTime: 50,
+      dataSize: 4096,
+      cacheHit: true,
+    },
+  },
+} as Record<CacheStrategy, CacheApiResponse<CacheTestData[]>>;
 
-const mockComparison = {
-  winner: 'full-route-cache' as const,
-  rankings: ['full-route-cache', 'data-cache'],
-  scores: {
-    'full-route-cache': 95,
-    'data-cache': 85,
+const mockComparison: CacheComparisonResult = {
+  strategies: ['full-route-cache', 'data-cache'],
+  metrics: {
+    'full-route-cache': {
+      performance: 95,
+      efficiency: 90,
+      reliability: 88,
+      complexity: 75,
+    },
+    'data-cache': {
+      performance: 85,
+      efficiency: 80,
+      reliability: 85,
+      complexity: 60,
+    },
+    'router-cache': {
+      performance: 70,
+      efficiency: 75,
+      reliability: 90,
+      complexity: 80,
+    },
+    'request-memoization': {
+      performance: 60,
+      efficiency: 85,
+      reliability: 95,
+      complexity: 90,
+    },
+    'cloudfront-cache': {
+      performance: 85,
+      efficiency: 95,
+      reliability: 80,
+      complexity: 70,
+    },
+  },
+  recommendations: [
+    {
+      bestFor: 'Static content',
+      worstFor: 'Dynamic data',
+      useCase: 'Blog posts',
+      pros: ['Fast loading'],
+      cons: ['Memory usage'],
+    },
+  ],
+  winner: {
+    strategy: 'full-route-cache',
+    score: 95,
+    reason: 'Best overall performance',
   },
 };
 
 const mockRecommendations = [
   {
-    strategy: 'full-route-cache' as const,
+    type: 'cache-strategy' as const,
     priority: 'high' as const,
-    reason: 'Best performance',
-    impact: 'High performance improvement',
+    title: 'Use Full Route Cache',
+    description: 'Best performance for static content',
+    expectedImprovement: '50% faster loading',
+    implementation: {
+      complexity: 'easy' as const,
+      timeRequired: '1 hour',
+      steps: ['Enable route caching'],
+    },
+    metrics: {
+      before: 100,
+      after: 50,
+      unit: 'ms',
+    },
   },
 ];
 
-const mockHealthEvaluation = {
-  overall: 'good' as const,
-  scores: {
-    performance: 90,
-    efficiency: 85,
-    freshness: 80,
+const mockHealthEvaluation: CacheHealthStatus = {
+  overall: 'healthy',
+  layers: {
+    'data-cache': {
+      status: 'healthy',
+      issues: [],
+      lastCheck: '2023-01-01T00:00:00Z',
+    },
+    'full-route-cache': {
+      status: 'healthy',
+      issues: [],
+      lastCheck: '2023-01-01T00:00:00Z',
+    },
+    'router-cache': {
+      status: 'healthy',
+      issues: [],
+      lastCheck: '2023-01-01T00:00:00Z',
+    },
+    'request-memoization': {
+      status: 'healthy',
+      issues: [],
+      lastCheck: '2023-01-01T00:00:00Z',
+    },
+    'cloudfront-cache': {
+      status: 'healthy',
+      issues: [],
+      lastCheck: '2023-01-01T00:00:00Z',
+    },
   },
-  issues: [],
+  alerts: [],
+  uptime: 99.9,
 };
 
 describe('CacheComparisonContainer', () => {
@@ -118,7 +309,7 @@ describe('CacheComparisonContainer', () => {
 
       // Assert
       expect(screen.getByTestId('presentational')).toBeInTheDocument();
-      expect(screen.getByTestId('comparison-count')).toHaveTextContent('2');
+      expect(screen.getByTestId('comparison-count')).toHaveTextContent('5');
       expect(screen.queryByTestId('error')).not.toBeInTheDocument();
     });
 

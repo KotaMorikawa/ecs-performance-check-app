@@ -63,6 +63,7 @@ export async function CacheComparisonContainer() {
     
     // 推奨事項生成
     const recommendations = generateRecommendations(overallMetrics, health);
+    const endTime = performance.now();
 
     return (
       <Suspense fallback={<div>Loading cache comparison...</div>}>
@@ -72,6 +73,7 @@ export async function CacheComparisonContainer() {
           overallMetrics={overallMetrics}
           health={health}
           recommendations={recommendations}
+          renderTime={endTime - startTime}
           error={null}
         />
       </Suspense>
@@ -87,6 +89,7 @@ export async function CacheComparisonContainer() {
           overallMetrics={null}
           health={null}
           recommendations={[]}
+          renderTime={50}
           error={err instanceof Error ? err.message : 'Unknown error'}
         />
       </Suspense>

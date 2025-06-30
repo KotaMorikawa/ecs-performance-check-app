@@ -26,6 +26,8 @@ export type RevalidationStrategy =
 
 // キャッシュ状態
 export type CacheStatus = 
+  | 'hit'           // キャッシュヒット
+  | 'miss'          // キャッシュミス
   | 'fresh'         // 新鮮なデータ
   | 'stale'         // 古いデータ
   | 'revalidating'  // リバリデート中

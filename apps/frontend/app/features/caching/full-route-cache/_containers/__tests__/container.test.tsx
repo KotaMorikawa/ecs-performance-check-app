@@ -14,7 +14,7 @@ import {
 vi.mock('../../../_shared/cache-api-client');
 vi.mock('../../../_shared/cache-metrics');
 vi.mock('../presentational', () => ({
-  FullRouteCachePresentational: ({ initialData, error, cacheInfo }: any) => (
+  FullRouteCachePresentational: ({ initialData, error, cacheInfo }: { initialData: unknown[]; error?: string | null; cacheInfo: { mode: string; cached: boolean } }) => (
     <div data-testid="presentational">
       {error && <div data-testid="error">{error}</div>}
       <div data-testid="data-count">{initialData.length}</div>
@@ -36,6 +36,9 @@ Object.defineProperty(global, 'performance', {
   writable: true,
 });
 
+// console.error のモック
+vi.spyOn(console, 'error').mockImplementation(() => {});
+
 // モックデータ
 const mockCacheResponse = {
   data: [
@@ -54,10 +57,10 @@ const mockCacheResponse = {
   ],
   metadata: {
     cached: true,
-    cacheStatus: 'fresh',
-    strategy: 'full-route-cache',
+    cacheStatus: 'fresh' as const,
+    strategy: 'full-route-cache' as const,
     timestamp: '2023-01-01T00:00:00Z',
-    source: 'cache',
+    source: 'cache' as const,
     ttl: 120,
     tags: ['full-route-cache'],
   },
@@ -69,7 +72,7 @@ const mockCacheResponse = {
 };
 
 const mockLayerMetrics = {
-  strategy: 'full-route-cache',
+  strategy: 'full-route-cache' as const,
   hits: 1,
   misses: 0,
   totalRequests: 1,
@@ -87,13 +90,11 @@ const mockOverallMetrics = {
 };
 
 const mockPerformanceMetrics = {
+  dataFetchTime: 20,
   renderTime: 25,
-  loadTime: 100,
-  coreWebVitals: {
-    lcp: 1200,
-    fid: 50,
-    cls: 0.1,
-  },
+  hydrationTime: 15,
+  timeToFirstByte: 80,
+  timeToInteractive: 100,
 };
 
 describe('FullRouteCacheContainer', () => {
@@ -252,19 +253,23 @@ describe('FullRouteCacheContainer', () => {
     it('should measure render time correctly', async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
+      mockPerformanceNow.mockReset();
       mockPerformanceNow.mockReturnValueOnce(100).mockReturnValueOnce(150);
 
       // Act
       await FullRouteCacheContainer({ mode: 'static' });
 
-      // Assert
+      // Assert - updateLayerMetricsの引数を確認
       expect(mockUpdateLayerMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
           strategy: 'full-route-cache',
         }),
         expect.objectContaining({
+          metadata: expect.objectContaining({
+            strategy: 'full-route-cache',
+          }),
           metrics: expect.objectContaining({
-            fetchTime: 50, // 150 - 100
+            fetchTime: 50, // 150 - 100 (performance.now()で計算される値)
           }),
         })
       );
@@ -272,8 +277,8 @@ describe('FullRouteCacheContainer', () => {
 
     it('should update performance metrics in initial metrics', async () => {
       // Arrange
-      const customRenderTime = 75;
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
+      mockPerformanceNow.mockReset();
       mockPerformanceNow.mockReturnValueOnce(200).mockReturnValueOnce(275);
 
       // Act
@@ -282,7 +287,7 @@ describe('FullRouteCacheContainer', () => {
       // Assert
       // updateLayerMetrics呼び出し時のmetricsを確認
       const updateLayerMetricsCall = mockUpdateLayerMetrics.mock.calls[0];
-      expect(updateLayerMetricsCall[1].metrics.fetchTime).toBe(customRenderTime);
+      expect(updateLayerMetricsCall[1].metrics.fetchTime).toBe(75); // 275 - 200 (performance.now()で計算される値)
     });
   });
 

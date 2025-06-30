@@ -170,7 +170,7 @@ export default function CachingPage() {
                     </div>
                   ))}
                 </div>
-                <Link href={strategy.href as string}>
+                <Link href={strategy.href as unknown as Parameters<typeof Link>[0]['href']}>
                   <Button 
                     className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
                     variant="outline"

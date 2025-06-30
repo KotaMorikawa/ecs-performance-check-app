@@ -3,8 +3,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { 
   calculateCacheMetrics, 
-  CacheApiError,
-  cacheTestApi,
   revalidationApi,
   cacheStatsApi,
   cloudfrontSimulationApi
@@ -68,26 +66,24 @@ describe('Cache API Client', () => {
     it('should handle revalidateTag API calls', async () => {
       // Arrange
       const mockResponse = {
-        id: 'revalidation-1',
-        type: 'tag' as const,
-        target: 'categories',
         success: true,
-        timestamp: new Date().toISOString(),
-        duration: 150,
-        triggeredBy: 'user',
-        strategy: 'on-demand',
+        message: 'Cache invalidated successfully',
+        revalidated: true,
       };
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      });
+      } as Response);
 
       // Act
       const result = await revalidationApi.revalidateTag('categories');
 
       // Assert
-      expect(result).toEqual(mockResponse);
+      expect(result.type).toBe('tag');
+      expect(result.target).toBe('categories');
+      expect(result.strategy).toBe('on-demand');
+      expect(result.triggeredBy).toBe('user');
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/revalidate'),
         expect.objectContaining({
@@ -101,26 +97,24 @@ describe('Cache API Client', () => {
     it('should handle revalidatePath API calls', async () => {
       // Arrange
       const mockResponse = {
-        id: 'revalidation-2',
-        type: 'path' as const,
-        target: '/features/caching',
         success: true,
-        timestamp: new Date().toISOString(),
-        duration: 200,
-        triggeredBy: 'user',
-        strategy: 'on-demand',
+        message: 'Cache invalidated successfully',
+        revalidated: true,
       };
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      });
+      } as Response);
 
       // Act
       const result = await revalidationApi.revalidatePath('/features/caching');
 
       // Assert
-      expect(result).toEqual(mockResponse);
+      expect(result.type).toBe('path');
+      expect(result.target).toBe('/features/caching');
+      expect(result.strategy).toBe('on-demand');
+      expect(result.triggeredBy).toBe('user');
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/revalidate'),
         expect.objectContaining({
@@ -133,59 +127,52 @@ describe('Cache API Client', () => {
   });
 
   describe('cacheStatsApi', () => {
-    it('should fetch cache statistics', async () => {
+    it('should fetch cache status', async () => {
       // Arrange
       const mockStats = {
         layers: {
-          'data-cache': { hits: 100, misses: 20 },
-          'full-route-cache': { hits: 80, misses: 10 },
+          'data-cache': { enabled: true, size: 1024 },
+          'full-route-cache': { enabled: true, size: 2048 },
+          'router-cache': { enabled: true, size: 512 },
+          'request-memoization': { enabled: true, size: 256 },
+          'cloudfront-cache': { enabled: false, size: 0 },
         },
-        overall: { hitRate: 85 },
+        timestamp: new Date().toISOString(),
       };
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockStats),
-      });
+      } as Response);
 
       // Act
-      const result = await cacheStatsApi.getStats();
+      const result = await cacheStatsApi.getCacheStatus();
 
       // Assert
       expect(result).toEqual(mockStats);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/cache-stats')
-      );
+      expect(global.fetch).toHaveBeenCalledWith('/api/cache-status');
     });
   });
 
   describe('cloudfrontSimulationApi', () => {
-    it('should simulate CloudFront cache behavior', async () => {
-      // Arrange
-      const mockSimulation = {
-        status: 'simulated',
-        hitRate: 95,
-        responseTime: 50,
-      };
-      
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockSimulation),
-      });
-
+    it('should get edge location', async () => {
       // Act
-      const result = await cloudfrontSimulationApi.simulate({ region: 'us-east-1' });
+      const result = await cloudfrontSimulationApi.getEdgeLocation();
 
       // Assert
-      expect(result).toEqual(mockSimulation);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/cloudfront-simulation'),
-        expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ region: 'us-east-1' }),
-        })
-      );
+      expect(result).toEqual({
+        location: 'Tokyo',
+        latency: 10,
+      });
+    });
+
+    it('should simulate hit rate', async () => {
+      // Act
+      const result = await cloudfrontSimulationApi.simulateHitRate('data-cache');
+
+      // Assert
+      expect(result.hitRate).toBe(85);
+      expect(result.recommendation).toBeDefined();
     });
   });
 

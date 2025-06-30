@@ -8,13 +8,16 @@ import { cacheTestApi } from '../../../_shared/cache-api-client';
 // モック設定
 vi.mock('../../../_shared/cache-api-client');
 vi.mock('../presentational', () => ({
-  OnDemandRevalidationPresentational: ({ initialData, error }: any) => (
+  OnDemandRevalidationPresentational: ({ initialData, error }: { initialData: unknown[]; error?: string | null }) => (
     <div data-testid="presentational">
       {error && <div data-testid="error">{error}</div>}
       <div data-testid="data-count">{initialData.length}</div>
     </div>
   ),
 }));
+
+// console.error のモック
+vi.spyOn(console, 'error').mockImplementation(() => {});
 
 const mockCacheTestApi = vi.mocked(cacheTestApi);
 
@@ -36,10 +39,10 @@ const mockCacheResponse = {
   ],
   metadata: {
     cached: true,
-    cacheStatus: 'fresh',
-    strategy: 'data-cache',
+    cacheStatus: 'fresh' as const,
+    strategy: 'data-cache' as const,
     timestamp: '2023-01-01T00:00:00Z',
-    source: 'cache',
+    source: 'cache' as const,
     ttl: 3600,
     tags: ['revalidation-demo', 'on-demand'],
   },
