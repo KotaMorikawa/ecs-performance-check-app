@@ -49,11 +49,15 @@ export function FullRouteCachePresentational({
 
   // ページリバリデート
   const handleRevalidatePage = async () => {
-    const result = await revalidationApi.revalidatePath('/features/caching/full-route-cache');
-    if (result.success) {
-      setLastRevalidated(new Date().toISOString());
-      // ページリロードで更新を確認
-      setTimeout(() => window.location.reload(), 1000);
+    try {
+      const result = await revalidationApi.revalidatePath('/features/caching/full-route-cache');
+      if (result.success) {
+        setLastRevalidated(new Date().toISOString());
+        // ページリロードで更新を確認
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error('Revalidation error:', error);
     }
   };
 

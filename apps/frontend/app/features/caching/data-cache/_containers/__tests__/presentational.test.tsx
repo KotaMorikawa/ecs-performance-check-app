@@ -1,7 +1,7 @@
 // DataCachePresentational Client Componentのテスト
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataCachePresentational } from '../presentational';
 import { cacheTestApi, revalidationApi } from '../../../_shared/cache-api-client';
@@ -9,40 +9,43 @@ import { cacheTestApi, revalidationApi } from '../../../_shared/cache-api-client
 // モック設定
 vi.mock('../../../_shared/cache-api-client');
 vi.mock('@/components/ui/card', () => ({
-  Card: ({ children, className }: any) => <div className={className}>{children}</div>,
-  CardContent: ({ children }: any) => <div>{children}</div>,
-  CardHeader: ({ children }: any) => <div>{children}</div>,
-  CardTitle: ({ children }: any) => <h3>{children}</h3>,
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className}>{children}</div>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
 }));
 vi.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, variant }: any) => (
+  Badge: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
     <span data-variant={variant}>{children}</span>
   ),
 }));
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled }: any) => (
+  Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
     <button onClick={onClick} disabled={disabled}>{children}</button>
   ),
 }));
 vi.mock('@/components/ui/tabs', () => ({
-  Tabs: ({ children }: any) => <div>{children}</div>,
-  TabsContent: ({ children, value }: any) => <div data-tab-content={value}>{children}</div>,
-  TabsList: ({ children }: any) => <div>{children}</div>,
-  TabsTrigger: ({ children, value }: any) => <button data-tab={value}>{children}</button>,
+  Tabs: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TabsContent: ({ children, value }: { children: React.ReactNode; value?: string }) => <div data-tab-content={value}>{children}</div>,
+  TabsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TabsTrigger: ({ children, value }: { children: React.ReactNode; value?: string }) => <button data-tab={value}>{children}</button>,
 }));
 vi.mock('@/components/ui/alert', () => ({
-  Alert: ({ children, variant }: any) => <div data-alert-variant={variant}>{children}</div>,
-  AlertDescription: ({ children }: any) => <div>{children}</div>,
+  Alert: ({ children, variant }: { children: React.ReactNode; variant?: string }) => <div data-alert-variant={variant}>{children}</div>,
+  AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock('@/components/ui/progress', () => ({
-  Progress: ({ value }: any) => <div data-progress={value} />,
+  Progress: ({ value }: { value?: number }) => <div data-progress={value} />,
 }));
 vi.mock('@/components/enhanced-performance-display', () => ({
-  EnhancedPerformanceDisplay: ({ title }: any) => <div data-testid="performance-display">{title}</div>,
+  EnhancedPerformanceDisplay: ({ title }: { title?: string }) => <div data-testid="performance-display">{title}</div>,
 }));
 vi.mock('@/components/code-display', () => ({
-  CodeDisplay: ({ title }: any) => <div data-testid="code-display">{title}</div>,
+  CodeDisplay: ({ title }: { title?: string }) => <div data-testid="code-display">{title}</div>,
 }));
+
+// console.error のモック
+vi.spyOn(console, 'error').mockImplementation(() => {});
 
 const mockCacheTestApi = vi.mocked(cacheTestApi);
 const mockRevalidationApi = vi.mocked(revalidationApi);
@@ -117,6 +120,8 @@ const mockRevalidationOperation = {
   success: true,
   timestamp: new Date().toISOString(),
   duration: 150,
+  strategy: 'on-demand' as const,
+  triggeredBy: 'user' as const,
 };
 
 describe('DataCachePresentational', () => {

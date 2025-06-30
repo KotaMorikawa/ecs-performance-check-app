@@ -5,49 +5,53 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OnDemandRevalidationPresentational } from '../presentational';
 import { revalidationApi } from '../../../_shared/cache-api-client';
+import type { CacheTestData } from '../../../_shared/types';
 
 // モック設定
 vi.mock('../../../_shared/cache-api-client');
 vi.mock('@/components/ui/card', () => ({
-  Card: ({ children }: any) => <div>{children}</div>,
-  CardContent: ({ children }: any) => <div>{children}</div>,
-  CardHeader: ({ children }: any) => <div>{children}</div>,
-  CardTitle: ({ children }: any) => <h3>{children}</h3>,
+  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
 }));
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled }: any) => (
+  Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
     <button onClick={onClick} disabled={disabled}>{children}</button>
   ),
 }));
 vi.mock('@/components/ui/input', () => ({
-  Input: ({ value, onChange, placeholder }: any) => (
+  Input: ({ value, onChange, placeholder }: { value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string }) => (
     <input value={value} onChange={onChange} placeholder={placeholder} />
   ),
 }));
 vi.mock('@/components/ui/label', () => ({
-  Label: ({ children }: any) => <label>{children}</label>,
+  Label: ({ children }: { children: React.ReactNode }) => <label>{children}</label>,
 }));
 vi.mock('@/components/ui/tabs', () => ({
-  Tabs: ({ children }: any) => <div>{children}</div>,
-  TabsContent: ({ children }: any) => <div>{children}</div>,
-  TabsList: ({ children }: any) => <div>{children}</div>,
-  TabsTrigger: ({ children }: any) => <button>{children}</button>,
+  Tabs: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TabsContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TabsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TabsTrigger: ({ children }: { children: React.ReactNode }) => <button>{children}</button>,
 }));
 vi.mock('@/components/ui/badge', () => ({
-  Badge: ({ children }: any) => <span>{children}</span>,
+  Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
 }));
 vi.mock('@/components/ui/alert', () => ({
-  Alert: ({ children }: any) => <div>{children}</div>,
-  AlertDescription: ({ children }: any) => <div>{children}</div>,
+  Alert: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock('@/components/code-display', () => ({
-  CodeDisplay: ({ title }: any) => <div data-testid="code-display">{title}</div>,
+  CodeDisplay: ({ title }: { title?: string }) => <div data-testid="code-display">{title}</div>,
 }));
+
+// console.error のモック
+vi.spyOn(console, 'error').mockImplementation(() => {});
 
 const mockRevalidationApi = vi.mocked(revalidationApi);
 
 // モックデータ
-const mockInitialData = [];
+const mockInitialData: CacheTestData[] = [];
 const mockInitialMetadata = {
   cached: true,
   cacheStatus: 'fresh' as const,
@@ -70,8 +74,8 @@ const mockRevalidationOperation = {
   success: true,
   timestamp: new Date().toISOString(),
   duration: 150,
-  triggeredBy: 'user',
-  strategy: 'on-demand',
+  triggeredBy: 'user' as const,
+  strategy: 'on-demand' as const,
 };
 
 describe('OnDemandRevalidationPresentational', () => {
@@ -101,8 +105,8 @@ describe('OnDemandRevalidationPresentational', () => {
 
       // Assert
       expect(screen.getByText('CACHED')).toBeInTheDocument();
-      expect(screen.getByText('revalidation-demo')).toBeInTheDocument();
-      expect(screen.getByText('on-demand')).toBeInTheDocument();
+      expect(screen.getAllByText('revalidation-demo')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('on-demand')[0]).toBeInTheDocument();
     });
   });
 
