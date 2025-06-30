@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,16 @@ export function ClientSidePresentational() {
     metrics: null,
     refreshCount: 0,
   });
+  const loadingRef = useRef(false);
 
   // クライアントサイド データフェッチ
   const fetchCategories = async (isRefresh = false) => {
+    // 既にロード中の場合は重複リクエストを防ぐ
+    if (loadingRef.current && !isRefresh) {
+      return;
+    }
+
+    loadingRef.current = true;
     setState(prev => ({ 
       ...prev, 
       loading: true, 
@@ -73,6 +80,7 @@ export function ClientSidePresentational() {
         loading: false,
         metrics,
       }));
+      loadingRef.current = false;
     } catch (error) {
       const endTime = performance.now();
       const duration = endTime - startTime;
@@ -90,6 +98,7 @@ export function ClientSidePresentational() {
           requestCount: 1,
         },
       }));
+      loadingRef.current = false;
     }
   };
 
@@ -101,13 +110,13 @@ export function ClientSidePresentational() {
   // 定期的な更新（SWRライクな動作）
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!state.loading) {
-        fetchCategories();
-      }
+      // loadingステートをチェックしないで、毎回実行する
+      // fetchCategories内でloadingチェックを処理
+      fetchCategories();
     }, 30000); // 30秒ごとに更新
 
     return () => clearInterval(interval);
-  }, [state.loading]);
+  }, []); // 依存配列は空にして一度だけ設定
 
   const handleRefresh = () => {
     fetchCategories(true);

@@ -51,7 +51,8 @@ vi.mock('../_shared/cache-api-client', async () => {
 });
 
 // グローバルfetchのモック
-global.fetch = vi.fn();
+const fetchMock = vi.fn();
+global.fetch = fetchMock as unknown as typeof fetch;
 
 describe('Cache API Client', () => {
   beforeEach(() => {
@@ -71,7 +72,7 @@ describe('Cache API Client', () => {
         revalidated: true,
       };
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
+      fetchMock.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       } as Response);
@@ -84,7 +85,7 @@ describe('Cache API Client', () => {
       expect(result.target).toBe('categories');
       expect(result.strategy).toBe('on-demand');
       expect(result.triggeredBy).toBe('user');
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         expect.stringContaining('/api/revalidate'),
         expect.objectContaining({
           method: 'POST',
@@ -102,7 +103,7 @@ describe('Cache API Client', () => {
         revalidated: true,
       };
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
+      fetchMock.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       } as Response);
@@ -115,7 +116,7 @@ describe('Cache API Client', () => {
       expect(result.target).toBe('/features/caching');
       expect(result.strategy).toBe('on-demand');
       expect(result.triggeredBy).toBe('user');
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         expect.stringContaining('/api/revalidate'),
         expect.objectContaining({
           method: 'POST',
@@ -140,7 +141,7 @@ describe('Cache API Client', () => {
         timestamp: new Date().toISOString(),
       };
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
+      fetchMock.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockStats),
       } as Response);
@@ -150,7 +151,7 @@ describe('Cache API Client', () => {
 
       // Assert
       expect(result).toEqual(mockStats);
-      expect(global.fetch).toHaveBeenCalledWith('/api/cache-status');
+      expect(fetchMock).toHaveBeenCalledWith('/api/cache-status');
     });
   });
 

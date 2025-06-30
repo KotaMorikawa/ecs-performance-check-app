@@ -85,7 +85,7 @@ export default function DataFetchingPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">Data Fetching Patterns</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -221,6 +221,6 @@ export default function DataFetchingPage() {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

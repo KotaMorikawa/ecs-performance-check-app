@@ -53,6 +53,13 @@ export interface DashboardStats {
   }>;
 }
 
+// 結合データ型（parallel fetch用）
+export interface CombinedData {
+  categories: Category[];
+  userProfile: UserProfile | null;
+  dashboardStats: DashboardStats;
+}
+
 // データフェッチメトリクス型
 export interface DataFetchMetrics {
   source: 'ssg' | 'ssr' | 'isr' | 'client-side' | 'parallel';

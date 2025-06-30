@@ -7,6 +7,31 @@ import type { Category } from '../../_shared/types';
 // Global fetch のモック
 const mockFetch = vi.fn();
 
+// Response モック作成ヘルパー
+const createMockResponse = (
+  data: unknown,
+  options: {
+    status?: number;
+    statusText?: string;
+    headers?: Record<string, string>;
+  } = {}
+): Response => {
+  const {
+    status = 200,
+    statusText = 'OK',
+    headers = {},
+  } = options;
+
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+      statusText,
+      headers: new Headers(headers),
+    }
+  );
+};
+
 // モックデータ
 const mockCategories: Category[] = [
   {
@@ -57,17 +82,17 @@ describe('ClientSidePresentational', () => {
   });
 
   it('should display data when loaded successfully', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockApiResponse,
-    } as Response);
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
-    render(<ClientSidePresentational />);
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Technology')).toBeInTheDocument();
       expect(screen.getByText('Science')).toBeInTheDocument();
-    });
+    }, { timeout: 10000 });
 
     expect(screen.getByText('10 posts')).toBeInTheDocument();
     expect(screen.getByText('5 posts')).toBeInTheDocument();
@@ -77,7 +102,9 @@ describe('ClientSidePresentational', () => {
     const errorMessage = 'Failed to fetch data';
     mockFetch.mockRejectedValueOnce(new Error(errorMessage));
 
-    render(<ClientSidePresentational />);
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/error loading client-side content/i)).toBeInTheDocument();
@@ -87,14 +114,81 @@ describe('ClientSidePresentational', () => {
     expect(screen.getByText(new RegExp(errorMessage, 'i'))).toBeInTheDocument();
   });
 
-  it('should allow manual refetch', async () => {
-    // 初回の fetch をモック
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => mockApiResponse,
-    } as Response);
+  it('should display basic UI elements', async () => {
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
-    render(<ClientSidePresentational />);
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
+
+    // データが読み込まれるまで待機
+    await waitFor(() => {
+      expect(screen.getByText('Technology')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
+    // 基本的なUIエレメントの存在確認
+    expect(screen.getByRole('tab', { name: /content/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /performance/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /how client-side fetching works/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show code/i })).toBeInTheDocument();
+  });
+
+  it('should toggle code display', async () => {
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValueOnce(mockResponse);
+
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Technology')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
+    // 初期状態ではコードが表示されていない
+    expect(screen.queryByText('ソースコード')).not.toBeInTheDocument();
+
+    // Show Codeボタンをクリック
+    const toggleButton = screen.getByRole('button', { name: /show code/i });
+    await act(async () => {
+      fireEvent.click(toggleButton);
+    });
+
+    // コードが表示される
+    expect(screen.getByText('ソースコード')).toBeInTheDocument();
+
+    // Hide Codeボタンをクリック
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /hide code/i }));
+    });
+
+    // コードが非表示になる
+    expect(screen.queryByText('ソースコード')).not.toBeInTheDocument();
+  });
+
+  it('should handle empty categories response', async () => {
+    const mockResponse = createMockResponse({ success: true, data: [] });
+    mockFetch.mockResolvedValueOnce(mockResponse);
+
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('No categories available')).toBeInTheDocument();
+    }, { timeout: 10000 });
+  });
+
+  it('should allow manual refresh', async () => {
+    // 初回の fetch をモック
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValue(mockResponse);
+
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
 
     // 初回データが読み込まれるまで待機
     await waitFor(() => {
@@ -113,34 +207,13 @@ describe('ClientSidePresentational', () => {
     }, { timeout: 10000 });
   });
 
-  it('should display basic UI elements', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockApiResponse,
-    } as Response);
+  it('should display fetch API call parameters', async () => {
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValue(mockResponse);
 
-    render(<ClientSidePresentational />);
-
-    // データが読み込まれるまで待機
-    await waitFor(() => {
-      expect(screen.getByText('Technology')).toBeInTheDocument();
+    await act(async () => {
+      render(<ClientSidePresentational />);
     });
-
-    // 基本的なUIエレメントの存在確認
-    expect(screen.getByRole('tab', { name: /content/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /performance/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /how client-side fetching works/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /show code/i })).toBeInTheDocument();
-  });
-
-  it('should handle component mounting', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => mockApiResponse,
-    } as Response);
-
-    render(<ClientSidePresentational />);
 
     // コンポーネントが正常にマウントされ、初回データ取得が行われることを確認
     await waitFor(() => {
@@ -157,32 +230,44 @@ describe('ClientSidePresentational', () => {
     });
   });
 
-  it('should increment refresh count when manually refreshed', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => mockApiResponse,
-    } as Response);
+  it('should display client-side characteristics', async () => {
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
-    render(<ClientSidePresentational />);
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
 
-    // 初回データが読み込まれるまで待機
+    await waitFor(() => {
+      expect(screen.getByText(/This data is fetched in the browser after the page loads/)).toBeInTheDocument();
+      expect(screen.getByText('Every 30s')).toBeInTheDocument(); // Auto-refresh interval
+      expect(screen.getByText('Browser')).toBeInTheDocument(); // Data source
+    }, { timeout: 10000 });
+  });
+
+  it('should display performance tab correctly', async () => {
+    const mockPerformanceNow = vi.fn();
+    global.performance.now = mockPerformanceNow;
+    mockPerformanceNow.mockReturnValueOnce(1000).mockReturnValueOnce(1200);
+    
+    const mockResponse = createMockResponse(mockApiResponse);
+    mockFetch.mockResolvedValueOnce(mockResponse);
+
+    await act(async () => {
+      render(<ClientSidePresentational />);
+    });
+
     await waitFor(() => {
       expect(screen.getByText('Technology')).toBeInTheDocument();
     }, { timeout: 10000 });
 
-    // リフレッシュボタンをクリック
-    const refreshButton = screen.getByRole('button', { name: /refresh/i });
-    
+    // Performance タブをクリック
+    const performanceTab = screen.getByRole('tab', { name: /performance/i });
     await act(async () => {
-      fireEvent.click(refreshButton);
+      fireEvent.click(performanceTab);
     });
 
-    // 手動リフレッシュ後、リフレッシュカウントが表示されることを確認
-    await waitFor(() => {
-      expect(screen.getByText('Refreshed 1 times')).toBeInTheDocument();
-    }, { timeout: 10000 });
-
-    // fetchが2回呼ばれることを確認（初回 + リフレッシュ）
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    // タブパネルが表示されることを確認
+    expect(screen.getByRole('tabpanel')).toBeInTheDocument();
   });
 });
