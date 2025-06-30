@@ -75,7 +75,7 @@ postsRoutes.get('/', async (c) => {
 postsRoutes.get('/:id', async (c) => {
   try {
     const id = parseInt(c.req.param('id'), 10);
-    
+
     if (isNaN(id)) {
       return c.json({ success: false, error: 'Invalid post ID' }, 400);
     }
@@ -128,7 +128,7 @@ postsRoutes.post('/', async (c) => {
         ...validatedData,
         authorId,
         tags: {
-          connect: tagIds.map(id => ({ id })),
+          connect: tagIds.map((id) => ({ id })),
         },
       },
       include: {
@@ -155,20 +155,26 @@ postsRoutes.post('/', async (c) => {
       console.warn('Revalidation failed:', revalidateError);
     }
 
-    return c.json({
-      success: true,
-      data: post,
-      message: 'Post created successfully',
-    }, 201);
+    return c.json(
+      {
+        success: true,
+        data: post,
+        message: 'Post created successfully',
+      },
+      201
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ 
-        success: false, 
-        error: 'Validation error', 
-        details: error.errors 
-      }, 400);
+      return c.json(
+        {
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        },
+        400
+      );
     }
-    
+
     console.error('Post creation error:', error);
     return c.json({ success: false, error: 'Failed to create post' }, 500);
   }
@@ -178,7 +184,7 @@ postsRoutes.post('/', async (c) => {
 postsRoutes.put('/:id', async (c) => {
   try {
     const id = parseInt(c.req.param('id'), 10);
-    
+
     if (isNaN(id)) {
       return c.json({ success: false, error: 'Invalid post ID' }, 400);
     }
@@ -193,11 +199,11 @@ postsRoutes.put('/:id', async (c) => {
     }
 
     const updateData: any = { ...validatedData };
-    
+
     if (tagIds !== undefined) {
       updateData.tags = {
         set: [],
-        connect: tagIds.map(id => ({ id })),
+        connect: tagIds.map((id) => ({ id })),
       };
     }
 
@@ -221,13 +227,16 @@ postsRoutes.put('/:id', async (c) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ 
-        success: false, 
-        error: 'Validation error', 
-        details: error.errors 
-      }, 400);
+      return c.json(
+        {
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        },
+        400
+      );
     }
-    
+
     console.error('Post update error:', error);
     return c.json({ success: false, error: 'Failed to update post' }, 500);
   }
@@ -237,7 +246,7 @@ postsRoutes.put('/:id', async (c) => {
 postsRoutes.delete('/:id', async (c) => {
   try {
     const id = parseInt(c.req.param('id'), 10);
-    
+
     if (isNaN(id)) {
       return c.json({ success: false, error: 'Invalid post ID' }, 400);
     }
