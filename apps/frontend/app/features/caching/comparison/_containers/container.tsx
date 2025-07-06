@@ -1,20 +1,29 @@
-import { Suspense } from 'react';
-import { CacheComparisonPresentational } from './presentational';
-import { cacheTestApi } from '../../_shared/cache-api-client';
-import { compareStrategies, generateRecommendations, evaluateCacheHealth } from '../../_shared/cache-metrics';
-import type { CacheStrategy, CacheLayerMetrics, CacheApiResponse, CacheTestData } from '../../_shared/types';
+import { Suspense } from "react";
+import { cacheTestApi } from "../../_shared/cache-api-client";
+import {
+  compareStrategies,
+  evaluateCacheHealth,
+  generateRecommendations,
+} from "../../_shared/cache-metrics";
+import type {
+  CacheApiResponse,
+  CacheLayerMetrics,
+  CacheStrategy,
+  CacheTestData,
+} from "../../_shared/types";
+import { CacheComparisonPresentational } from "./presentational";
 
 // Server Component（データ取得・統合レイヤー）
 export async function CacheComparisonContainer() {
   const startTime = performance.now();
-  
+
   try {
     // 各キャッシュ戦略のデータを並行取得
     const comparisonData = await cacheTestApi.getComparisonData();
-    
+
     // メトリクス計算
     const layerMetrics = {} as Record<CacheStrategy, CacheLayerMetrics>;
-    
+
     Object.entries(comparisonData).forEach(([strategy, response]) => {
       layerMetrics[strategy as CacheStrategy] = {
         strategy: strategy as CacheStrategy,
@@ -31,7 +40,7 @@ export async function CacheComparisonContainer() {
 
     // 比較結果生成
     const comparison = compareStrategies(layerMetrics);
-    
+
     // 全体メトリクス計算
     const overallMetrics = {
       layers: layerMetrics,
@@ -39,7 +48,10 @@ export async function CacheComparisonContainer() {
         totalHits: Object.values(layerMetrics).reduce((sum, layer) => sum + layer.hits, 0),
         totalMisses: Object.values(layerMetrics).reduce((sum, layer) => sum + layer.misses, 0),
         overallHitRate: 0,
-        totalCacheSize: Object.values(layerMetrics).reduce((sum, layer) => sum + layer.cacheSize, 0),
+        totalCacheSize: Object.values(layerMetrics).reduce(
+          (sum, layer) => sum + layer.cacheSize,
+          0
+        ),
         efficiencyScore: 85,
       },
       performance: {
@@ -60,14 +72,14 @@ export async function CacheComparisonContainer() {
 
     // ヘルス評価
     const health = evaluateCacheHealth(overallMetrics);
-    
+
     // 推奨事項生成
     const recommendations = generateRecommendations(overallMetrics, health);
     const endTime = performance.now();
 
     return (
       <Suspense fallback={<div>Loading cache comparison...</div>}>
-        <CacheComparisonPresentational 
+        <CacheComparisonPresentational
           comparisonData={comparisonData}
           comparisonResult={comparison}
           overallMetrics={overallMetrics}
@@ -79,18 +91,16 @@ export async function CacheComparisonContainer() {
       </Suspense>
     );
   } catch (err) {
-    console.error('Cache comparison error:', err);
-    
     return (
       <Suspense fallback={<div>Loading cache comparison...</div>}>
-        <CacheComparisonPresentational 
+        <CacheComparisonPresentational
           comparisonData={{} as Record<CacheStrategy, CacheApiResponse<CacheTestData[]>>}
           comparisonResult={null}
           overallMetrics={null}
           health={null}
           recommendations={[]}
           renderTime={50}
-          error={err instanceof Error ? err.message : 'Unknown error'}
+          error={err instanceof Error ? err.message : "Unknown error"}
         />
       </Suspense>
     );

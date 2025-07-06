@@ -1,28 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { 
-  Navigation, 
-  RefreshCw, 
-  Clock, 
-  Zap,
-  AlertCircle,
-  ArrowRight,
-  Link2
-} from 'lucide-react';
-import type { 
-  CacheLayerMetrics
-} from '../../_shared/types';
+import { AlertCircle, ArrowRight, Clock, Link2, Navigation, RefreshCw, Zap } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { CacheLayerMetrics } from "../../_shared/types";
 // Note: cacheTestApi, formatCacheSize, updateLayerMetrics are not used in this component
 // They would be used in a real implementation for data fetching and metrics calculation
 
@@ -33,9 +23,11 @@ export function RouterCachePresentational() {
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
   const [showCode, setShowCode] = useState(false);
-  const [navigationHistory, setNavigationHistory] = useState<{path: string; type: 'soft' | 'hard'; time: string}[]>([]);
+  const [navigationHistory, setNavigationHistory] = useState<
+    { path: string; type: "soft" | "hard"; time: string }[]
+  >([]);
   const [layerMetrics, setLayerMetrics] = useState<CacheLayerMetrics>({
-    strategy: 'router-cache',
+    strategy: "router-cache",
     hits: 0,
     misses: 0,
     totalRequests: 0,
@@ -47,42 +39,49 @@ export function RouterCachePresentational() {
   });
 
   // ナビゲーションのシミュレーション
-  const simulateNavigation = (path: string, type: 'soft' | 'hard') => {
+  const simulateNavigation = (path: string, type: "soft" | "hard") => {
     setIsNavigating(true);
     const startTime = performance.now();
-    
+
     // ナビゲーション履歴に追加
-    setNavigationHistory(prev => [{
-      path,
-      type,
-      time: new Date().toLocaleTimeString()
-    }, ...prev.slice(0, 9)]);
+    setNavigationHistory((prev) => [
+      {
+        path,
+        type,
+        time: new Date().toLocaleTimeString(),
+      },
+      ...prev.slice(0, 9),
+    ]);
 
     // Router Cacheのヒット/ミスをシミュレート
-    const isCacheHit = type === 'soft' && Math.random() > 0.2; // ソフトナビゲーションは80%ヒット
-    
-    setTimeout(() => {
-      const endTime = performance.now();
-      const responseTime = endTime - startTime;
-      
-      // メトリクス更新
-      setLayerMetrics(prev => ({
-        ...prev,
-        hits: prev.hits + (isCacheHit ? 1 : 0),
-        misses: prev.misses + (isCacheHit ? 0 : 1),
-        totalRequests: prev.totalRequests + 1,
-        hitRate: ((prev.hits + (isCacheHit ? 1 : 0)) / (prev.totalRequests + 1)) * 100,
-        avgResponseTime: (prev.avgResponseTime * prev.totalRequests + responseTime) / (prev.totalRequests + 1),
-      }));
-      
-      setIsNavigating(false);
-    }, isCacheHit ? 50 : 300);
+    const isCacheHit = type === "soft" && Math.random() > 0.2; // ソフトナビゲーションは80%ヒット
+
+    setTimeout(
+      () => {
+        const endTime = performance.now();
+        const responseTime = endTime - startTime;
+
+        // メトリクス更新
+        setLayerMetrics((prev) => ({
+          ...prev,
+          hits: prev.hits + (isCacheHit ? 1 : 0),
+          misses: prev.misses + (isCacheHit ? 0 : 1),
+          totalRequests: prev.totalRequests + 1,
+          hitRate: ((prev.hits + (isCacheHit ? 1 : 0)) / (prev.totalRequests + 1)) * 100,
+          avgResponseTime:
+            (prev.avgResponseTime * prev.totalRequests + responseTime) / (prev.totalRequests + 1),
+        }));
+
+        setIsNavigating(false);
+      },
+      isCacheHit ? 50 : 300
+    );
   };
 
   // プリフェッチのデモ
   const handlePrefetch = () => {
-    router.prefetch('/features/caching/data-cache');
-    router.prefetch('/features/caching/full-route-cache');
+    router.prefetch("/features/caching/data-cache");
+    router.prefetch("/features/caching/full-route-cache");
   };
 
   const routerCacheCode = `// Router Cache実装例
@@ -142,15 +141,12 @@ router.refresh(); // ページ全体を再取得
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handlePrefetch}
-          >
+          <Button variant="outline" onClick={handlePrefetch}>
             <Link2 className="h-4 w-4 mr-2" />
             Prefetch Pages
           </Button>
           <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-            {showCode ? 'Hide Code' : 'Show Code'}
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
@@ -161,10 +157,10 @@ router.refresh(); // ページ全体を再取得
           description="クライアントサイドルーティングキャッシュの実装例"
           files={[
             {
-              filename: 'router-cache.tsx',
-              language: 'typescript',
+              filename: "router-cache.tsx",
+              language: "typescript",
               content: routerCacheCode,
-              description: 'Router Cacheの様々な使用パターン',
+              description: "Router Cacheの様々な使用パターン",
             },
           ]}
         />
@@ -192,24 +188,22 @@ router.refresh(); // ページ全体を再取得
                 <Card className="border-primary/20">
                   <CardHeader>
                     <CardTitle className="text-base">Soft Navigation</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Router Cacheを使用した高速遷移
-                    </p>
+                    <p className="text-sm text-muted-foreground">Router Cacheを使用した高速遷移</p>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button 
+                    <Button
                       className="w-full"
                       variant="outline"
-                      onClick={() => simulateNavigation('/about', 'soft')}
+                      onClick={() => simulateNavigation("/about", "soft")}
                       disabled={isNavigating}
                     >
                       <ArrowRight className="h-4 w-4 mr-2" />
                       Navigate to About
                     </Button>
-                    <Button 
+                    <Button
                       className="w-full"
                       variant="outline"
-                      onClick={() => simulateNavigation('/products', 'soft')}
+                      onClick={() => simulateNavigation("/products", "soft")}
                       disabled={isNavigating}
                     >
                       <ArrowRight className="h-4 w-4 mr-2" />
@@ -226,19 +220,19 @@ router.refresh(); // ページ全体を再取得
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button 
+                    <Button
                       className="w-full"
                       variant="outline"
-                      onClick={() => simulateNavigation('/about', 'hard')}
+                      onClick={() => simulateNavigation("/about", "hard")}
                       disabled={isNavigating}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Hard Refresh About
                     </Button>
-                    <Button 
+                    <Button
                       className="w-full"
                       variant="outline"
-                      onClick={() => simulateNavigation('/products', 'hard')}
+                      onClick={() => simulateNavigation("/products", "hard")}
                       disabled={isNavigating}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
@@ -251,9 +245,7 @@ router.refresh(); // ページ全体を再取得
               {isNavigating && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    ナビゲーション中...
-                  </AlertDescription>
+                  <AlertDescription>ナビゲーション中...</AlertDescription>
                 </Alert>
               )}
             </CardContent>
@@ -269,7 +261,7 @@ router.refresh(); // ページ全体を再取得
                 以下のリンクはホバー時に自動的にプリフェッチされます：
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link 
+                <Link
                   href="/features/caching/data-cache"
                   className="flex items-center gap-2 text-primary hover:underline"
                   prefetch={true}
@@ -277,7 +269,7 @@ router.refresh(); // ページ全体を再取得
                   <Link2 className="h-4 w-4" />
                   Data Cache (Auto Prefetch)
                 </Link>
-                <Link 
+                <Link
                   href="/features/caching/full-route-cache"
                   className="flex items-center gap-2 text-primary hover:underline"
                   prefetch={true}
@@ -285,7 +277,7 @@ router.refresh(); // ページ全体を再取得
                   <Link2 className="h-4 w-4" />
                   Full Route Cache (Auto Prefetch)
                 </Link>
-                <Link 
+                <Link
                   href="/features/caching/on-demand-revalidation"
                   className="flex items-center gap-2 text-muted-foreground hover:underline"
                   prefetch={false}
@@ -369,34 +361,30 @@ router.refresh(); // ページ全体を再取得
             <CardContent>
               {navigationHistory.length > 0 ? (
                 <div className="space-y-2">
-                  {navigationHistory.map((nav, index) => (
+                  {navigationHistory.map((nav, _index) => (
                     <div
-                      key={index}
+                      key={`${nav.path}-${nav.time}`}
                       className="flex items-center justify-between p-3 rounded-lg border"
                     >
                       <div className="flex items-center gap-3">
-                        {nav.type === 'soft' ? (
+                        {nav.type === "soft" ? (
                           <Zap className="h-5 w-5 text-green-600" />
                         ) : (
                           <RefreshCw className="h-5 w-5 text-orange-600" />
                         )}
                         <div>
                           <p className="font-medium">{nav.path}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {nav.time}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{nav.time}</p>
                         </div>
                       </div>
-                      <Badge variant={nav.type === 'soft' ? 'success' : 'secondary'}>
-                        {nav.type === 'soft' ? 'Cached' : 'Fresh'}
+                      <Badge variant={nav.type === "soft" ? "success" : "secondary"}>
+                        {nav.type === "soft" ? "Cached" : "Fresh"}
                       </Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  No navigation history yet
-                </p>
+                <p className="text-center text-muted-foreground py-8">No navigation history yet</p>
               )}
             </CardContent>
           </Card>
@@ -425,7 +413,7 @@ router.refresh(); // ページ全体を再取得
                   2. Automatic Prefetching
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  {'<Link>'}コンポーネントが表示されると、Next.jsは自動的に
+                  {"<Link>"}コンポーネントが表示されると、Next.jsは自動的に
                   リンク先のページをプリフェッチし、Router Cacheに保存します。
                 </p>
               </div>
@@ -467,8 +455,7 @@ router.refresh(); // ページ全体を再取得
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Pro Tip:</strong> prefetch=falseを使用して、
-                  重要度の低いページの自動プリフェッチを無効にすることで、
-                  帯域幅を節約できます。
+                  重要度の低いページの自動プリフェッチを無効にすることで、 帯域幅を節約できます。
                 </AlertDescription>
               </Alert>
             </CardContent>

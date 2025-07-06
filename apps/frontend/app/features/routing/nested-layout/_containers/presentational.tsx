@@ -1,9 +1,9 @@
-import { SegmentFeatureInfo } from '@/components/features/segment-feature-info';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { Activity, Clock, Layers, Layout, ChevronRight } from 'lucide-react';
+import { Activity, ChevronRight, Clock, Layers, Layout } from "lucide-react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { SegmentFeatureInfo } from "@/components/features/segment-feature-info";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface LayoutLevel {
   name: string;
@@ -19,14 +19,12 @@ interface NestedLayoutPresentationalProps {
 
 export function NestedLayoutPresentational({
   renderTime,
-  layoutHierarchy
+  layoutHierarchy,
 }: NestedLayoutPresentationalProps) {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Nested Layout
-        </h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Nested Layout</h1>
         <p className="text-lg text-gray-600">
           複数のレイアウトを階層的に組み合わせるNext.js 15.3.4のネストされたレイアウト機能のデモ
         </p>
@@ -40,9 +38,7 @@ export function NestedLayoutPresentational({
               <Layers className="h-5 w-5" />
               レイアウト階層
             </CardTitle>
-            <CardDescription>
-              現在のページで使用されているレイアウトの階層構造
-            </CardDescription>
+            <CardDescription>現在のページで使用されているレイアウトの階層構造</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -51,7 +47,7 @@ export function NestedLayoutPresentational({
                   <div className="flex items-center flex-1">
                     <div className="flex items-center">
                       {Array.from({ length: layout.level - 1 }).map((_, i) => (
-                        <div key={i} className="w-6 flex justify-center">
+                        <div key={`${layout.path}-${i}`} className="w-6 flex justify-center">
                           <div className="w-px h-6 bg-gray-300"></div>
                         </div>
                       ))}
@@ -60,7 +56,9 @@ export function NestedLayoutPresentational({
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-gray-900">{layout.name}</span>
-                        <Badge variant="outline" className="text-xs">Level {layout.level}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Level {layout.level}
+                        </Badge>
                       </div>
                       <div className="text-sm text-gray-500 mt-1">{layout.description}</div>
                       <div className="text-xs text-gray-400 font-mono mt-1">{layout.path}</div>
@@ -84,9 +82,7 @@ export function NestedLayoutPresentational({
               <Layout className="h-5 w-5" />
               レイアウト機能のデモ
             </CardTitle>
-            <CardDescription>
-              ネストされたレイアウトで実現される機能
-            </CardDescription>
+            <CardDescription>ネストされたレイアウトで実現される機能</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -107,7 +103,7 @@ export function NestedLayoutPresentational({
                   </li>
                 </ul>
               </div>
-              
+
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-900">パフォーマンス最適化</h4>
                 <ul className="space-y-2 text-sm text-gray-600">
@@ -144,8 +140,11 @@ export function NestedLayoutPresentational({
           </CardHeader>
           <CardContent>
             <EnhancedPerformanceDisplay />
-            
-            <div data-testid="render-time" className="flex items-center gap-2 text-sm mt-6 pt-6 border-t">
+
+            <div
+              data-testid="render-time"
+              className="flex items-center gap-2 text-sm mt-6 pt-6 border-t"
+            >
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>レンダリング時間: {renderTime.toFixed(2)} ms</span>
             </div>
@@ -175,7 +174,7 @@ export function NestedLayoutContainer() {
   const [renderTime, setRenderTime] = useState<number>(0);
 
   // レイアウト階層データの管理...
-}`
+}`,
             },
             {
               filename: "_components/nested-layout.presentational.tsx",
@@ -183,7 +182,7 @@ export function NestedLayoutContainer() {
               description: "プレゼンテーションレイヤー（UI表示）",
               content: `import { SegmentFeatureInfo } from '@/components/features/segment-feature-info';
 import { Button } from '@/components/ui/button';
-// ... UI コンポーネント`
+// ... UI コンポーネント`,
             },
             {
               filename: "layout.tsx",
@@ -216,7 +215,7 @@ import { Button } from '@/components/ui/button';
       </main>
     </div>
   );
-}`
+}`,
             },
             {
               filename: "page.tsx",
@@ -226,8 +225,8 @@ import { Button } from '@/components/ui/button';
 
 export default function NestedLayoutPage() {
   return <NestedLayoutContainer />;
-}`
-            }
+}`,
+            },
           ]}
         />
       </section>

@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import type { DataFetchMetrics, UserProfile } from '../../_shared/types';
-import { formatDateTime, formatTime } from '@/utils/date-formatter';
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDateTime, formatTime } from "@/utils/date-formatter";
+import type { DataFetchMetrics, UserProfile } from "../../_shared/types";
 
 interface SsrPresentationalProps {
   userProfile: UserProfile | null;
@@ -17,11 +17,7 @@ interface SsrPresentationalProps {
   error: string | null;
 }
 
-export function SsrPresentational({ 
-  userProfile, 
-  metrics, 
-  error 
-}: SsrPresentationalProps) {
+export function SsrPresentational({ userProfile, metrics, error }: SsrPresentationalProps) {
   const [showCode, setShowCode] = useState(false);
 
   const ssrExampleCode = `// SSR Implementation (Server Component)
@@ -51,20 +47,15 @@ async function getCurrentProfile(options: FetchOptions = {}) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">SSR Data Fetching Demo</h1>
-          <p className="text-muted-foreground mt-2">
-            Server-Side Rendering with real-time data
-          </p>
+          <p className="text-muted-foreground mt-2">Server-Side Rendering with real-time data</p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowCode(!showCode)}
-        >
-          {showCode ? 'Hide Code' : 'Show Code'}
+        <Button variant="outline" onClick={() => setShowCode(!showCode)}>
+          {showCode ? "Hide Code" : "Show Code"}
         </Button>
       </div>
 
       {showCode && (
-        <CodeDisplay 
+        <CodeDisplay
           title="SSR Implementation"
           description="Server-Side Rendering の実装例"
           files={[
@@ -72,8 +63,8 @@ async function getCurrentProfile(options: FetchOptions = {}) {
               filename: "ssr-container.tsx",
               language: "typescript",
               content: ssrExampleCode,
-              description: "SSRを使用したServer Componentの実装"
-            }
+              description: "SSRを使用したServer Componentの実装",
+            },
           ]}
         />
       )}
@@ -96,28 +87,22 @@ async function getCurrentProfile(options: FetchOptions = {}) {
             <CardContent>
               {error ? (
                 <Alert variant="destructive">
-                  <AlertDescription>
-                    Error loading SSR content: {error}
-                  </AlertDescription>
+                  <AlertDescription>Error loading SSR content: {error}</AlertDescription>
                 </Alert>
               ) : userProfile ? (
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
-                      {userProfile.name?.charAt(0).toUpperCase() || 'U'}
+                      {userProfile.name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold">{userProfile.name || 'Anonymous User'}</h3>
+                      <h3 className="text-xl font-semibold">
+                        {userProfile.name || "Anonymous User"}
+                      </h3>
                       <p className="text-muted-foreground">{userProfile.email}</p>
-                      {userProfile.bio && (
-                        <p className="text-sm mt-2">{userProfile.bio}</p>
-                      )}
+                      {userProfile.bio && <p className="text-sm mt-2">{userProfile.bio}</p>}
                     </div>
-                    {userProfile.isVerified && (
-                      <Badge variant="default">
-                        Verified
-                      </Badge>
-                    )}
+                    {userProfile.isVerified && <Badge variant="default">Verified</Badge>}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
@@ -129,9 +114,7 @@ async function getCurrentProfile(options: FetchOptions = {}) {
                     </Card>
                     <Card>
                       <CardContent className="pt-4">
-                        <div className="text-2xl font-bold">
-                          {userProfile.viewsToday || 58}
-                        </div>
+                        <div className="text-2xl font-bold">{userProfile.viewsToday || 58}</div>
                         <p className="text-xs text-muted-foreground">Views Today</p>
                       </CardContent>
                     </Card>
@@ -155,8 +138,8 @@ async function getCurrentProfile(options: FetchOptions = {}) {
 
                   <Alert>
                     <AlertDescription>
-                      <strong>Real-time data:</strong> This information is fetched fresh on each request, 
-                      ensuring you always see the most current user profile data.
+                      <strong>Real-time data:</strong> This information is fetched fresh on each
+                      request, ensuring you always see the most current user profile data.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -171,7 +154,7 @@ async function getCurrentProfile(options: FetchOptions = {}) {
 
         <TabsContent value="performance">
           {metrics ? (
-            <EnhancedPerformanceDisplay 
+            <EnhancedPerformanceDisplay
               metrics={{
                 network: {
                   totalRequests: 1,
@@ -198,9 +181,7 @@ async function getCurrentProfile(options: FetchOptions = {}) {
             />
           ) : (
             <Alert>
-              <AlertDescription>
-                Performance metrics not available
-              </AlertDescription>
+              <AlertDescription>Performance metrics not available</AlertDescription>
             </Alert>
           )}
         </TabsContent>
@@ -214,11 +195,11 @@ async function getCurrentProfile(options: FetchOptions = {}) {
               <div>
                 <h4 className="font-semibold mb-2">1. Request Time Generation</h4>
                 <p className="text-sm text-muted-foreground">
-                  Pages are rendered on the server for each request. Data is fetched fresh 
-                  and HTML is generated with the latest information.
+                  Pages are rendered on the server for each request. Data is fetched fresh and HTML
+                  is generated with the latest information.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">2. Benefits</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
@@ -228,7 +209,7 @@ async function getCurrentProfile(options: FetchOptions = {}) {
                   <li>• Server-side authentication</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">3. Use Cases</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">

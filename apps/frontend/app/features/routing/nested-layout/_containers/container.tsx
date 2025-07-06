@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { NestedLayoutPresentational } from './presentational';
+import { useEffect, useState } from "react";
+import { NestedLayoutPresentational } from "./presentational";
 
 interface LayoutLevel {
   name: string;
@@ -21,41 +21,36 @@ export function NestedLayoutContainer() {
 
   const layoutHierarchy: LayoutLevel[] = [
     {
-      name: 'Root Layout',
-      path: 'app/layout.tsx',
+      name: "Root Layout",
+      path: "app/layout.tsx",
       level: 1,
-      description: 'HTML, Body, グローバルスタイルを提供'
+      description: "HTML, Body, グローバルスタイルを提供",
     },
     {
-      name: 'Features Layout',
-      path: 'app/features/layout.tsx',
+      name: "Features Layout",
+      path: "app/features/layout.tsx",
       level: 2,
-      description: '機能共通のナビゲーションやスタイル'
+      description: "機能共通のナビゲーションやスタイル",
     },
     {
-      name: 'Routing Layout',
-      path: 'app/features/routing/layout.tsx',
+      name: "Routing Layout",
+      path: "app/features/routing/layout.tsx",
       level: 3,
-      description: 'ルーティング機能専用のレイアウト'
+      description: "ルーティング機能専用のレイアウト",
     },
     {
-      name: 'Nested Layout',
-      path: 'app/features/routing/nested-layout/layout.tsx',
+      name: "Nested Layout",
+      path: "app/features/routing/nested-layout/layout.tsx",
       level: 4,
-      description: 'ネストされたページ専用のサイドバーとヘッダー'
+      description: "ネストされたページ専用のサイドバーとヘッダー",
     },
     {
-      name: 'Page Component',
-      path: 'app/features/routing/nested-layout/page.tsx',
+      name: "Page Component",
+      path: "app/features/routing/nested-layout/page.tsx",
       level: 5,
-      description: '実際のページコンテンツ'
-    }
+      description: "実際のページコンテンツ",
+    },
   ];
 
-  return (
-    <NestedLayoutPresentational
-      renderTime={renderTime}
-      layoutHierarchy={layoutHierarchy}
-    />
-  );
+  return <NestedLayoutPresentational renderTime={renderTime} layoutHierarchy={layoutHierarchy} />;
 }

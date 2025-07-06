@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { DynamicRoutingPresentational } from './presentational';
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { DynamicRoutingPresentational } from "./presentational";
 
 export interface DynamicData {
   id: string;
@@ -32,22 +32,22 @@ export function DynamicRoutingContainer() {
   useEffect(() => {
     const loadDynamicData = async () => {
       setIsLoading(true);
-      
+
       // 実際のAPIコールの代わりに、2秒の遅延をシミュレート
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const mockData: DynamicData = {
         id: params.id as string,
         title: `動的コンテンツ: ${params.id}`,
         content: `これは ID "${params.id}" に対応する動的に生成されたコンテンツです。実際のアプリケーションでは、この ID を使用してデータベースやAPIからデータを取得します。`,
         timestamp: new Date().toISOString(),
         metadata: {
-          type: 'dynamic-content',
-          category: Array.from(params.id as string)[0]?.toUpperCase() + '系',
-          tags: ['dynamic', 'routing', 'nextjs', 'demo']
-        }
+          type: "dynamic-content",
+          category: `${Array.from(params.id as string)[0]?.toUpperCase()}系`,
+          tags: ["dynamic", "routing", "nextjs", "demo"],
+        },
       };
-      
+
       setDynamicData(mockData);
       setIsLoading(false);
     };
@@ -60,7 +60,7 @@ export function DynamicRoutingContainer() {
   const handleRefreshData = () => {
     setDynamicData(null);
     setIsLoading(true);
-    
+
     // データを再読み込み
     setTimeout(() => {
       if (params.id) {
@@ -70,10 +70,10 @@ export function DynamicRoutingContainer() {
           content: `これは更新された ID "${params.id}" のコンテンツです。タイムスタンプ: ${new Date().toLocaleString()}`,
           timestamp: new Date().toISOString(),
           metadata: {
-            type: 'refreshed-content',
-            category: Array.from(params.id as string)[0]?.toUpperCase() + '系',
-            tags: ['dynamic', 'routing', 'nextjs', 'refreshed']
-          }
+            type: "refreshed-content",
+            category: `${Array.from(params.id as string)[0]?.toUpperCase()}系`,
+            tags: ["dynamic", "routing", "nextjs", "refreshed"],
+          },
         };
         setDynamicData(refreshedData);
         setIsLoading(false);

@@ -1,19 +1,19 @@
 // DataCacheContainer Server Componentのテスト
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { DataCacheContainer } from '../container';
-import { cacheTestApi } from '../../../_shared/cache-api-client';
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cacheTestApi } from "../../../_shared/cache-api-client";
 import {
-  updateLayerMetrics,
   calculateOverallMetrics,
   generatePerformanceMetrics,
-} from '../../../_shared/cache-metrics';
+  updateLayerMetrics,
+} from "../../../_shared/cache-metrics";
+import { DataCacheContainer } from "../container";
 
 // モック設定
-vi.mock('../../../_shared/cache-api-client');
-vi.mock('../../../_shared/cache-metrics');
-vi.mock('../presentational', () => ({
+vi.mock("../../../_shared/cache-api-client");
+vi.mock("../../../_shared/cache-metrics");
+vi.mock("../presentational", () => ({
   DataCachePresentational: ({ initialData, error }: { initialData: unknown[]; error?: string }) => (
     <div data-testid="presentational">
       {error && <div data-testid="error">{error}</div>}
@@ -23,7 +23,7 @@ vi.mock('../presentational', () => ({
 }));
 
 // console.error のモック
-vi.spyOn(console, 'error').mockImplementation(() => {});
+vi.spyOn(console, "error").mockImplementation(() => {});
 
 const mockCacheTestApi = vi.mocked(cacheTestApi);
 const mockUpdateLayerMetrics = vi.mocked(updateLayerMetrics);
@@ -35,25 +35,25 @@ const mockCacheResponse = {
   data: [
     {
       id: 1,
-      title: 'Test Category',
-      content: 'Test content',
-      category: 'test',
-      timestamp: '2023-01-01T00:00:00Z',
+      title: "Test Category",
+      content: "Test content",
+      category: "test",
+      timestamp: "2023-01-01T00:00:00Z",
       size: 1024,
       views: 100,
-      name: 'Test Item',
+      name: "Test Item",
       postCount: 5,
-      description: 'Test description',
+      description: "Test description",
     },
   ],
   metadata: {
     cached: true,
-    cacheStatus: 'fresh' as const,
-    strategy: 'data-cache' as const,
-    timestamp: '2023-01-01T00:00:00Z',
-    source: 'cache' as const,
+    cacheStatus: "fresh" as const,
+    strategy: "data-cache" as const,
+    timestamp: "2023-01-01T00:00:00Z",
+    source: "cache" as const,
     ttl: 3600,
-    tags: ['cache-test'],
+    tags: ["cache-test"],
   },
   metrics: {
     fetchTime: 50,
@@ -63,7 +63,7 @@ const mockCacheResponse = {
 };
 
 const mockLayerMetrics = {
-  strategy: 'data-cache' as const,
+  strategy: "data-cache" as const,
   hits: 1,
   misses: 0,
   totalRequests: 1,
@@ -88,18 +88,18 @@ const mockPerformanceMetrics = {
   timeToInteractive: 100,
 };
 
-describe('DataCacheContainer', () => {
+describe("DataCacheContainer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // デフォルトのモック動作を設定
     mockGeneratePerformanceMetrics.mockReturnValue(mockPerformanceMetrics);
     mockUpdateLayerMetrics.mockReturnValue(mockLayerMetrics);
     mockCalculateOverallMetrics.mockReturnValue(mockOverallMetrics);
   });
 
-  describe('正常なデータ取得', () => {
-    it('should render successfully with cached data', async () => {
+  describe("正常なデータ取得", () => {
+    it("should render successfully with cached data", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 
@@ -108,12 +108,12 @@ describe('DataCacheContainer', () => {
       render(Component);
 
       // Assert
-      expect(screen.getByTestId('presentational')).toBeInTheDocument();
-      expect(screen.getByTestId('data-count')).toHaveTextContent('1');
-      expect(screen.queryByTestId('error')).not.toBeInTheDocument();
+      expect(screen.getByTestId("presentational")).toBeInTheDocument();
+      expect(screen.getByTestId("data-count")).toHaveTextContent("1");
+      expect(screen.queryByTestId("error")).not.toBeInTheDocument();
     });
 
-    it('should call cacheTestApi.getTestData with correct parameters', async () => {
+    it("should call cacheTestApi.getTestData with correct parameters", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 
@@ -125,14 +125,14 @@ describe('DataCacheContainer', () => {
         {
           next: {
             revalidate: 60,
-            tags: ['cache-test'],
+            tags: ["cache-test"],
           },
         },
-        'data-cache'
+        "data-cache"
       );
     });
 
-    it('should update metrics correctly', async () => {
+    it("should update metrics correctly", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 
@@ -142,7 +142,7 @@ describe('DataCacheContainer', () => {
       // Assert
       expect(mockUpdateLayerMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
-          strategy: 'data-cache',
+          strategy: "data-cache",
           hits: 0,
           misses: 0,
         }),
@@ -150,12 +150,12 @@ describe('DataCacheContainer', () => {
       );
       expect(mockCalculateOverallMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
-          'data-cache': mockLayerMetrics,
+          "data-cache": mockLayerMetrics,
         })
       );
     });
 
-    it('should generate initial performance metrics', async () => {
+    it("should generate initial performance metrics", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 
@@ -167,10 +167,10 @@ describe('DataCacheContainer', () => {
     });
   });
 
-  describe('エラーハンドリング', () => {
-    it('should handle API errors gracefully', async () => {
+  describe("エラーハンドリング", () => {
+    it("should handle API errors gracefully", async () => {
       // Arrange
-      const errorMessage = 'Network error';
+      const errorMessage = "Network error";
       mockCacheTestApi.getTestData.mockRejectedValue(new Error(errorMessage));
 
       // Act
@@ -178,37 +178,37 @@ describe('DataCacheContainer', () => {
       render(Component);
 
       // Assert
-      expect(screen.getByTestId('error')).toHaveTextContent(errorMessage);
-      expect(screen.getByTestId('data-count')).toHaveTextContent('0');
+      expect(screen.getByTestId("error")).toHaveTextContent(errorMessage);
+      expect(screen.getByTestId("data-count")).toHaveTextContent("0");
     });
 
-    it('should handle unknown errors', async () => {
+    it("should handle unknown errors", async () => {
       // Arrange
-      mockCacheTestApi.getTestData.mockRejectedValue('Unknown error');
+      mockCacheTestApi.getTestData.mockRejectedValue("Unknown error");
 
       // Act
       const Component = await DataCacheContainer();
       render(Component);
 
       // Assert
-      expect(screen.getByTestId('error')).toHaveTextContent('Unknown error');
+      expect(screen.getByTestId("error")).toHaveTextContent("Unknown error");
     });
 
-    it('should still render Presentational component when error occurs', async () => {
+    it("should still render Presentational component when error occurs", async () => {
       // Arrange
-      mockCacheTestApi.getTestData.mockRejectedValue(new Error('API Error'));
+      mockCacheTestApi.getTestData.mockRejectedValue(new Error("API Error"));
 
       // Act
       const Component = await DataCacheContainer();
       render(Component);
 
       // Assert
-      expect(screen.getByTestId('presentational')).toBeInTheDocument();
+      expect(screen.getByTestId("presentational")).toBeInTheDocument();
     });
   });
 
-  describe('メトリクス初期化', () => {
-    it('should initialize metrics with correct structure', async () => {
+  describe("メトリクス初期化", () => {
+    it("should initialize metrics with correct structure", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 
@@ -218,7 +218,7 @@ describe('DataCacheContainer', () => {
       // Assert
       expect(mockUpdateLayerMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
-          strategy: 'data-cache',
+          strategy: "data-cache",
           hits: 0,
           misses: 0,
           totalRequests: 0,
@@ -230,7 +230,7 @@ describe('DataCacheContainer', () => {
       );
     });
 
-    it('should include all cache layer strategies in initial metrics', async () => {
+    it("should include all cache layer strategies in initial metrics", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 
@@ -239,16 +239,16 @@ describe('DataCacheContainer', () => {
 
       // Assert
       const callArgs = mockCalculateOverallMetrics.mock.calls[0][0];
-      expect(callArgs).toHaveProperty('data-cache');
-      expect(callArgs).toHaveProperty('full-route-cache');
-      expect(callArgs).toHaveProperty('router-cache');
-      expect(callArgs).toHaveProperty('request-memoization');
-      expect(callArgs).toHaveProperty('cloudfront-cache');
+      expect(callArgs).toHaveProperty("data-cache");
+      expect(callArgs).toHaveProperty("full-route-cache");
+      expect(callArgs).toHaveProperty("router-cache");
+      expect(callArgs).toHaveProperty("request-memoization");
+      expect(callArgs).toHaveProperty("cloudfront-cache");
     });
   });
 
-  describe('Suspense integration', () => {
-    it('should render with Suspense wrapper', async () => {
+  describe("Suspense integration", () => {
+    it("should render with Suspense wrapper", async () => {
       // Arrange
       mockCacheTestApi.getTestData.mockResolvedValue(mockCacheResponse);
 

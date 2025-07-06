@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useOptimistic, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { SegmentFeatureInfo } from '@/components/features/segment-feature-info';
-import { CodeDisplay } from '@/components/code-display';
-import { PostForm } from '../_components/post-form';
-import { PostList } from '../_components/post-list';
-import { ServerActionsErrorBoundary } from '../_components/error-boundary';
-import { Plus, List, Zap, Save } from 'lucide-react';
+import { List, Plus, Save, Zap } from "lucide-react";
+import { useCallback, useOptimistic, useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { SegmentFeatureInfo } from "@/components/features/segment-feature-info";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ServerActionsErrorBoundary } from "../_components/error-boundary";
+import { PostForm } from "../_components/post-form";
+import { PostList } from "../_components/post-list";
 
 interface Post {
   id: number;
@@ -35,9 +35,7 @@ interface ServerActionsPresentationalProps {
   posts: Post[];
 }
 
-export function ServerActionsPresentational({
-  posts,
-}: ServerActionsPresentationalProps) {
+export function ServerActionsPresentational({ posts }: ServerActionsPresentationalProps) {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   // 楽観的更新のためのuseOptimistic
@@ -45,12 +43,12 @@ export function ServerActionsPresentational({
     posts,
     (
       state: Post[],
-      newPost: Post | { type: 'delete'; id: number } | { type: 'update'; post: Post }
+      newPost: Post | { type: "delete"; id: number } | { type: "update"; post: Post }
     ) => {
-      if ('type' in newPost) {
-        if (newPost.type === 'delete') {
+      if ("type" in newPost) {
+        if (newPost.type === "delete") {
           return state.filter((post) => post.id !== newPost.id);
-        } else if (newPost.type === 'update') {
+        } else if (newPost.type === "update") {
           return state.map((post) => (post.id === newPost.post.id ? newPost.post : post));
         }
       }
@@ -68,7 +66,6 @@ export function ServerActionsPresentational({
     }
   );
 
-
   // 編集モードの切り替え
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
@@ -84,7 +81,7 @@ export function ServerActionsPresentational({
 
   // 楽観的更新ハンドラー
   const handleOptimisticCreate = (
-    newPost: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>
+    newPost: Omit<Post, "id" | "createdAt" | "updatedAt" | "views">
   ) => {
     addOptimisticPost({
       ...newPost,
@@ -93,11 +90,11 @@ export function ServerActionsPresentational({
   };
 
   const handleOptimisticUpdate = (updatedPost: Post) => {
-    addOptimisticPost({ type: 'update', post: updatedPost });
+    addOptimisticPost({ type: "update", post: updatedPost });
   };
 
   const handleOptimisticDelete = (postId: number) => {
-    addOptimisticPost({ type: 'delete', id: postId });
+    addOptimisticPost({ type: "delete", id: postId });
   };
 
   return (
@@ -129,11 +126,10 @@ export function ServerActionsPresentational({
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Plus className="h-5 w-5" />
-                      📝 投稿管理
+                      <Plus className="h-5 w-5" />📝 投稿管理
                     </CardTitle>
                     <CardDescription>
-                      {editingPost ? '投稿を編集中' : '新しい投稿を作成'}
+                      {editingPost ? "投稿を編集中" : "新しい投稿を作成"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -160,7 +156,7 @@ export function ServerActionsPresentational({
                     {/* フォームエリア */}
                     <ServerActionsErrorBoundary>
                       <PostForm
-                        mode={editingPost ? 'edit' : 'create'}
+                        mode={editingPost ? "edit" : "create"}
                         post={editingPost || undefined}
                         onOptimisticCreate={handleOptimisticCreate}
                         onOptimisticUpdate={handleOptimisticUpdate}
@@ -177,8 +173,7 @@ export function ServerActionsPresentational({
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <List className="h-5 w-5" />
-                        📋 投稿一覧
+                        <List className="h-5 w-5" />📋 投稿一覧
                       </div>
                       <Badge variant="secondary">{optimisticPosts.length} 件の投稿</Badge>
                     </CardTitle>
@@ -259,8 +254,8 @@ export function ServerActionsPresentational({
           description="Next.js 15.3.4のServer Actionsを使用したCRUD操作とProgressive Enhancement"
           files={[
             {
-              filename: '_actions/post-actions.ts',
-              language: 'typescript',
+              filename: "_actions/post-actions.ts",
+              language: "typescript",
               description: "Server Actions定義（'use server'）",
               content: `'use server';
 
@@ -308,9 +303,9 @@ export async function createPost(formData: FormData) {
 }`,
             },
             {
-              filename: '_components/post-form.tsx',
-              language: 'tsx',
-              description: 'Progressive Enhancement対応フォーム',
+              filename: "_components/post-form.tsx",
+              language: "tsx",
+              description: "Progressive Enhancement対応フォーム",
               content: `'use client';
 
 import { useFormStatus } from 'react-dom';
@@ -337,9 +332,9 @@ export function PostForm() {
 }`,
             },
             {
-              filename: '_containers/presentational.tsx',
-              language: 'tsx',
-              description: 'useOptimistic を使用した楽観的更新',
+              filename: "_containers/presentational.tsx",
+              language: "tsx",
+              description: "useOptimistic を使用した楽観的更新",
               content: `'use client';
 
 import { useState, useOptimistic } from 'react';
@@ -392,9 +387,9 @@ export function ServerActionsPresentational({ posts }) {
 }`,
             },
             {
-              filename: '_components/error-boundary.tsx',
-              language: 'tsx',
-              description: 'Server Actions用Error Boundary',
+              filename: "_components/error-boundary.tsx",
+              language: "tsx",
+              description: "Server Actions用Error Boundary",
               content: `'use client';
 
 import { Component } from 'react';
@@ -432,9 +427,9 @@ export class ServerActionsErrorBoundary extends Component {
 }`,
             },
             {
-              filename: 'page.tsx',
-              language: 'tsx',
-              description: 'メインページコンポーネント',
+              filename: "page.tsx",
+              language: "tsx",
+              description: "メインページコンポーネント",
               content: `import { ServerActionsContainer } from './_containers/container';
 
 export default function ServerActionsPage() {

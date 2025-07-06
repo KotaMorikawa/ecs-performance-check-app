@@ -1,14 +1,14 @@
-'use server';
+"use server";
 
-import { revalidateTag, revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from "next/cache";
 import {
+  type CreatePostState,
+  DeletePostSchema,
+  type DeletePostState,
   PostFormSchema,
   UpdatePostFormSchema,
-  DeletePostSchema,
-  type CreatePostState,
   type UpdatePostState,
-  type DeletePostState,
-} from '../_lib/validation';
+} from "../_lib/validation";
 
 // ===== useActionState対応のServer Actions =====
 
@@ -18,17 +18,17 @@ export async function createPostWithState(
   formData: FormData
 ): Promise<CreatePostState> {
   const rawFormData = {
-    title: formData.get('title') as string,
-    content: formData.get('content') as string,
-    slug: formData.get('slug') as string,
-    published: formData.get('published') === 'true',
+    title: formData.get("title") as string,
+    content: formData.get("content") as string,
+    slug: formData.get("slug") as string,
+    published: formData.get("published") === "true",
   };
 
   // バリデーション
   const validatedFields = PostFormSchema.safeParse(rawFormData);
   if (!validatedFields.success) {
     return {
-      error: 'バリデーションエラーがあります',
+      error: "バリデーションエラーがあります",
       fieldErrors: validatedFields.error.flatten().fieldErrors,
       success: false,
       timestamp: Date.now(),
@@ -37,33 +37,33 @@ export async function createPostWithState(
 
   try {
     // Hono バックエンドに投稿作成リクエストを送信
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.API_URL || "http://localhost:8000";
     const response = await fetch(`${apiUrl}/api/posts`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(validatedFields.data),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create post');
+      throw new Error("Failed to create post");
     }
 
     // Next.jsキャッシュを無効化
-    revalidateTag('getPosts');
+    revalidateTag("getPosts");
 
     // 成功時の状態を返却
     return {
       success: true,
-      message: '投稿を作成しました',
+      message: "投稿を作成しました",
       data: validatedFields.data,
       timestamp: Date.now(),
     };
   } catch (error) {
-    console.error('Create post error:', error);
+    console.error("Create post error:", error);
     return {
-      error: '投稿の作成に失敗しました。もう一度お試しください。',
+      error: "投稿の作成に失敗しました。もう一度お試しください。",
       success: false,
       timestamp: Date.now(),
     };
@@ -75,33 +75,33 @@ export async function updatePostWithState(
   _prevState: UpdatePostState,
   formData: FormData
 ): Promise<UpdatePostState> {
-  const id = formData.get('id') as string;
+  const id = formData.get("id") as string;
 
   if (!id) {
     return {
-      error: '投稿IDが必要です',
+      error: "投稿IDが必要です",
       success: false,
       timestamp: Date.now(),
     };
   }
 
   const rawFormData = {
-    title: formData.get('title') as string,
-    content: formData.get('content') as string,
-    slug: formData.get('slug') as string,
-    published: formData.get('published') === 'true',
+    title: formData.get("title") as string,
+    content: formData.get("content") as string,
+    slug: formData.get("slug") as string,
+    published: formData.get("published") === "true",
   };
 
   // 空の値を除外
   const filteredData = Object.fromEntries(
-    Object.entries(rawFormData).filter(([, value]) => value !== '' && value !== null)
+    Object.entries(rawFormData).filter(([, value]) => value !== "" && value !== null)
   );
 
   // バリデーション
   const validatedFields = UpdatePostFormSchema.safeParse(filteredData);
   if (!validatedFields.success) {
     return {
-      error: 'バリデーションエラーがあります',
+      error: "バリデーションエラーがあります",
       fieldErrors: validatedFields.error.flatten().fieldErrors,
       success: false,
       timestamp: Date.now(),
@@ -110,33 +110,33 @@ export async function updatePostWithState(
 
   try {
     // Hono バックエンドに投稿更新リクエストを送信
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.API_URL || "http://localhost:8000";
     const response = await fetch(`${apiUrl}/api/posts/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(validatedFields.data),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update post');
+      throw new Error("Failed to update post");
     }
 
     // Next.jsキャッシュを無効化
-    revalidateTag('getPosts');
+    revalidateTag("getPosts");
 
     // 成功時の状態を返却
     return {
       success: true,
-      message: '投稿を更新しました',
+      message: "投稿を更新しました",
       data: { ...validatedFields.data, id },
       timestamp: Date.now(),
     };
   } catch (error) {
-    console.error('Update post error:', error);
+    console.error("Update post error:", error);
     return {
-      error: '投稿の更新に失敗しました。もう一度お試しください。',
+      error: "投稿の更新に失敗しました。もう一度お試しください。",
       success: false,
       timestamp: Date.now(),
     };
@@ -148,11 +148,11 @@ export async function deletePostWithState(
   _prevState: DeletePostState,
   formData: FormData
 ): Promise<DeletePostState> {
-  const id = formData.get('id') as string;
+  const id = formData.get("id") as string;
 
   if (!id) {
     return {
-      error: '投稿IDが必要です',
+      error: "投稿IDが必要です",
       success: false,
       timestamp: Date.now(),
     };
@@ -162,7 +162,7 @@ export async function deletePostWithState(
   const validatedFields = DeletePostSchema.safeParse({ id });
   if (!validatedFields.success) {
     return {
-      error: 'バリデーションエラーがあります',
+      error: "バリデーションエラーがあります",
       fieldErrors: validatedFields.error.flatten().fieldErrors,
       success: false,
       timestamp: Date.now(),
@@ -171,11 +171,11 @@ export async function deletePostWithState(
 
   try {
     // Hono バックエンドに投稿削除リクエストを送信
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.API_URL || "http://localhost:8000";
     console.log(`[Delete Post] Sending delete request to: ${apiUrl}/api/posts/${id}`);
 
     const response = await fetch(`${apiUrl}/api/posts/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
 
     console.log(`[Delete Post] Response status: ${response.status}`);
@@ -187,22 +187,22 @@ export async function deletePostWithState(
     }
 
     // Next.jsキャッシュを無効化
-    console.log('[Delete Post] Invalidating cache...');
-    revalidateTag('getPosts');
-    revalidatePath('/features/server-actions/basic');
-    console.log('[Delete Post] Cache invalidated successfully');
+    console.log("[Delete Post] Invalidating cache...");
+    revalidateTag("getPosts");
+    revalidatePath("/features/server-actions/basic");
+    console.log("[Delete Post] Cache invalidated successfully");
 
     // 成功時の状態を返却
     return {
       success: true,
-      message: '投稿を削除しました',
+      message: "投稿を削除しました",
       data: validatedFields.data,
       timestamp: Date.now(),
     };
   } catch (error) {
-    console.error('Delete post error:', error);
+    console.error("Delete post error:", error);
     return {
-      error: '投稿の削除に失敗しました。もう一度お試しください。',
+      error: "投稿の削除に失敗しました。もう一度お試しください。",
       success: false,
       timestamp: Date.now(),
     };

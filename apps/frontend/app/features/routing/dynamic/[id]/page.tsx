@@ -1,4 +1,4 @@
-import { DynamicRoutingContainer } from '../_containers/container';
+import { DynamicRoutingContainer } from "../_containers/container";
 
 export default function DynamicRoutingPage() {
   return <DynamicRoutingContainer />;

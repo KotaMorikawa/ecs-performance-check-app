@@ -1,38 +1,32 @@
 // キャッシュ機能の共通型定義
 
 // キャッシュ戦略の種類
-export type CacheStrategy = 
-  | 'data-cache'           // Next.js Data Cache (fetch API)
-  | 'full-route-cache'     // Next.js Full Route Cache (pages)
-  | 'router-cache'         // Next.js Router Cache (client navigation)
-  | 'request-memoization'  // Request Memoization (same request)
-  | 'cloudfront-cache';    // CloudFront Edge Cache
+export type CacheStrategy =
+  | "data-cache" // Next.js Data Cache (fetch API)
+  | "full-route-cache" // Next.js Full Route Cache (pages)
+  | "router-cache" // Next.js Router Cache (client navigation)
+  | "request-memoization" // Request Memoization (same request)
+  | "cloudfront-cache"; // CloudFront Edge Cache
 
 // キャッシュ操作の種類
-export type CacheOperation = 
-  | 'read'
-  | 'write'
-  | 'hit'
-  | 'miss'
-  | 'revalidate'
-  | 'invalidate';
+export type CacheOperation = "read" | "write" | "hit" | "miss" | "revalidate" | "invalidate";
 
 // リバリデート戦略
-export type RevalidationStrategy = 
-  | 'time-based'    // 時間ベース（revalidate: 60）
-  | 'on-demand'     // オンデマンド（revalidatePath/Tag）
-  | 'manual'        // 手動リバリデート
-  | 'webhook';      // バックエンドからの通知
+export type RevalidationStrategy =
+  | "time-based" // 時間ベース（revalidate: 60）
+  | "on-demand" // オンデマンド（revalidatePath/Tag）
+  | "manual" // 手動リバリデート
+  | "webhook"; // バックエンドからの通知
 
 // キャッシュ状態
-export type CacheStatus = 
-  | 'hit'           // キャッシュヒット
-  | 'miss'          // キャッシュミス
-  | 'fresh'         // 新鮮なデータ
-  | 'stale'         // 古いデータ
-  | 'revalidating'  // リバリデート中
-  | 'error'         // エラー状態
-  | 'empty';        // キャッシュなし
+export type CacheStatus =
+  | "hit" // キャッシュヒット
+  | "miss" // キャッシュミス
+  | "fresh" // 新鮮なデータ
+  | "stale" // 古いデータ
+  | "revalidating" // リバリデート中
+  | "error" // エラー状態
+  | "empty"; // キャッシュなし
 
 // キャッシュレイヤー詳細メトリクス
 export interface CacheLayerMetrics {
@@ -75,10 +69,10 @@ export interface CacheMetrics {
 
 // リバリデート操作の詳細
 export interface RevalidationOperation {
-  type: 'path' | 'tag' | 'full';
+  type: "path" | "tag" | "full";
   target: string; // パス、タグ名、または'all'
   strategy: RevalidationStrategy;
-  triggeredBy: 'user' | 'backend' | 'timer' | 'webhook';
+  triggeredBy: "user" | "backend" | "timer" | "webhook";
   timestamp: string;
   duration?: number;
   success: boolean;
@@ -96,7 +90,7 @@ export interface CacheOptions {
 
 // キャッシュ対応フェッチオプション
 export interface CacheFetchOptions {
-  cache?: RequestCache | 'no-store' | 'force-cache';
+  cache?: RequestCache | "no-store" | "force-cache";
   next?: {
     revalidate?: number | false;
     tags?: string[];
@@ -142,12 +136,15 @@ export interface CacheTestData {
 // キャッシュ比較結果
 export interface CacheComparisonResult {
   strategies: CacheStrategy[];
-  metrics: Record<CacheStrategy, {
-    performance: number; // 0-100 score
-    efficiency: number;  // 0-100 score
-    reliability: number; // 0-100 score
-    complexity: number;  // 0-100 score (lower is better)
-  }>;
+  metrics: Record<
+    CacheStrategy,
+    {
+      performance: number; // 0-100 score
+      efficiency: number; // 0-100 score
+      reliability: number; // 0-100 score
+      complexity: number; // 0-100 score (lower is better)
+    }
+  >;
   recommendations: {
     bestFor: string;
     worstFor: string;
@@ -173,8 +170,8 @@ export interface CloudFrontCacheMetrics {
     total: number; // MB
   };
   latency: {
-    edge: number;    // ms from edge
-    origin: number;  // ms from origin
+    edge: number; // ms from edge
+    origin: number; // ms from origin
   };
   geolocation: {
     region: string;
@@ -185,13 +182,13 @@ export interface CloudFrontCacheMetrics {
 
 // パフォーマンス改善提案
 export interface PerformanceRecommendation {
-  type: 'cache-strategy' | 'revalidation' | 'optimization' | 'monitoring';
-  priority: 'high' | 'medium' | 'low';
+  type: "cache-strategy" | "revalidation" | "optimization" | "monitoring";
+  priority: "high" | "medium" | "low";
   title: string;
   description: string;
   expectedImprovement: string; // e.g., "20% faster load time"
   implementation: {
-    complexity: 'easy' | 'medium' | 'hard';
+    complexity: "easy" | "medium" | "hard";
     timeRequired: string;
     steps: string[];
   };
@@ -206,8 +203,8 @@ export interface PerformanceRecommendation {
 export interface CacheInvalidationEvent {
   id: string;
   timestamp: string;
-  type: 'manual' | 'automatic' | 'webhook' | 'schedule';
-  scope: 'path' | 'tag' | 'all';
+  type: "manual" | "automatic" | "webhook" | "schedule";
+  scope: "path" | "tag" | "all";
   target: string;
   reason: string;
   triggeredBy: string;
@@ -219,14 +216,17 @@ export interface CacheInvalidationEvent {
 
 // キャッシュヘルス状態
 export interface CacheHealthStatus {
-  overall: 'healthy' | 'warning' | 'critical';
-  layers: Record<CacheStrategy, {
-    status: 'healthy' | 'warning' | 'critical';
-    issues: string[];
-    lastCheck: string;
-  }>;
+  overall: "healthy" | "warning" | "critical";
+  layers: Record<
+    CacheStrategy,
+    {
+      status: "healthy" | "warning" | "critical";
+      issues: string[];
+      lastCheck: string;
+    }
+  >;
   alerts: {
-    level: 'info' | 'warning' | 'error';
+    level: "info" | "warning" | "error";
     message: string;
     timestamp: string;
     acknowledged: boolean;

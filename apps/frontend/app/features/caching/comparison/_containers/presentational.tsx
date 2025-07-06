@@ -1,36 +1,36 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { CodeDisplay } from '@/components/code-display';
-import { 
-  Layers, 
-  Trophy,
-  TrendingUp,
-  Zap,
-  Shield,
-  Clock,
-  Globe,
+import {
+  AlertTriangle,
   BarChart3,
   CheckCircle,
-  AlertTriangle,
+  Clock,
+  Globe,
+  Layers,
+  Lightbulb,
+  Shield,
+  TrendingUp,
+  Trophy,
   XCircle,
-  Lightbulb
-} from 'lucide-react';
-import type { 
-  CacheStrategy,
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type {
   CacheApiResponse,
-  CacheTestData,
   CacheComparisonResult,
-  CacheMetrics,
   CacheHealthStatus,
-  PerformanceRecommendation
-} from '../../_shared/types';
+  CacheMetrics,
+  CacheStrategy,
+  CacheTestData,
+  PerformanceRecommendation,
+} from "../../_shared/types";
 
 interface CacheComparisonPresentationalProps {
   comparisonData: Record<CacheStrategy, CacheApiResponse<CacheTestData[]>>;
@@ -42,31 +42,31 @@ interface CacheComparisonPresentationalProps {
   error: string | null;
 }
 
-export function CacheComparisonPresentational({ 
+export function CacheComparisonPresentational({
   comparisonData,
   comparisonResult,
   overallMetrics,
   health,
   recommendations,
-  error 
+  error,
 }: CacheComparisonPresentationalProps) {
   const [showCode, setShowCode] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState<CacheStrategy | null>(null);
 
   const strategyIcons: Record<CacheStrategy, React.ComponentType<{ className?: string }>> = {
-    'data-cache': Shield,
-    'full-route-cache': Globe,
-    'router-cache': Zap,
-    'request-memoization': Clock,
-    'cloudfront-cache': TrendingUp,
+    "data-cache": Shield,
+    "full-route-cache": Globe,
+    "router-cache": Zap,
+    "request-memoization": Clock,
+    "cloudfront-cache": TrendingUp,
   };
 
   const strategyColors: Record<CacheStrategy, string> = {
-    'data-cache': 'text-blue-600',
-    'full-route-cache': 'text-green-600',
-    'router-cache': 'text-purple-600',
-    'request-memoization': 'text-orange-600',
-    'cloudfront-cache': 'text-indigo-600',
+    "data-cache": "text-blue-600",
+    "full-route-cache": "text-green-600",
+    "router-cache": "text-purple-600",
+    "request-memoization": "text-orange-600",
+    "cloudfront-cache": "text-indigo-600",
   };
 
   const comparisonCode = `// キャッシュ戦略の比較と選択
@@ -148,13 +148,13 @@ function selectCacheStrategy(requirements: Requirements) {
   return ['data-cache', 'full-route-cache', 'router-cache'];
 }`;
 
-  const getHealthIcon = (status: 'healthy' | 'warning' | 'critical') => {
+  const getHealthIcon = (status: "healthy" | "warning" | "critical") => {
     switch (status) {
-      case 'healthy':
+      case "healthy":
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'warning':
+      case "warning":
         return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'critical':
+      case "critical":
         return <XCircle className="h-5 w-5 text-red-600" />;
     }
   };
@@ -170,7 +170,7 @@ function selectCacheStrategy(requirements: Requirements) {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-            {showCode ? 'Hide Code' : 'Show Code'}
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
@@ -181,10 +181,10 @@ function selectCacheStrategy(requirements: Requirements) {
           description="キャッシュ戦略の比較と選択指針"
           files={[
             {
-              filename: 'cache-comparison.ts',
-              language: 'typescript',
+              filename: "cache-comparison.ts",
+              language: "typescript",
               content: comparisonCode,
-              description: '各キャッシュ戦略の実装と選択基準',
+              description: "各キャッシュ戦略の実装と選択基準",
             },
           ]}
         />
@@ -218,7 +218,9 @@ function selectCacheStrategy(requirements: Requirements) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-lg">
-                        {comparisonResult.winner.strategy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {comparisonResult.winner.strategy
+                          .replace("-", " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {comparisonResult.winner.reason}
@@ -237,25 +239,27 @@ function selectCacheStrategy(requirements: Requirements) {
               {Object.entries(comparisonData).map(([strategy, data]) => {
                 const StrategyIcon = strategyIcons[strategy as CacheStrategy] || Layers;
                 const metrics = comparisonResult?.metrics[strategy as CacheStrategy];
-                
+
                 return (
-                  <Card 
+                  <Card
                     key={strategy}
                     className={`cursor-pointer transition-all ${
-                      selectedStrategy === strategy ? 'ring-2 ring-primary' : 'hover:shadow-md'
+                      selectedStrategy === strategy ? "ring-2 ring-primary" : "hover:shadow-md"
                     }`}
                     onClick={() => setSelectedStrategy(strategy as CacheStrategy)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <StrategyIcon className={`h-5 w-5 ${strategyColors[strategy as CacheStrategy]}`} />
+                          <StrategyIcon
+                            className={`h-5 w-5 ${strategyColors[strategy as CacheStrategy]}`}
+                          />
                           <CardTitle className="text-base">
-                            {strategy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            {strategy.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                           </CardTitle>
                         </div>
-                        <Badge variant={data.metadata.cached ? 'default' : 'secondary'}>
-                          {data.metadata.cached ? 'HIT' : 'MISS'}
+                        <Badge variant={data.metadata.cached ? "default" : "secondary"}>
+                          {data.metadata.cached ? "HIT" : "MISS"}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -279,7 +283,7 @@ function selectCacheStrategy(requirements: Requirements) {
                             </div>
                           </div>
                         )}
-                        
+
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <p className="text-muted-foreground">Response</p>
@@ -354,13 +358,19 @@ function selectCacheStrategy(requirements: Requirements) {
                         <div key={strategy} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="font-medium">
-                              {strategy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {strategy.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                             </span>
                             <span className="text-sm text-muted-foreground">
-                              Overall: {(metrics.performance + metrics.efficiency + metrics.reliability - metrics.complexity / 2).toFixed(0)}
+                              Overall:{" "}
+                              {(
+                                metrics.performance +
+                                metrics.efficiency +
+                                metrics.reliability -
+                                metrics.complexity / 2
+                              ).toFixed(0)}
                             </span>
                           </div>
-                          
+
                           <div className="grid grid-cols-4 gap-4">
                             <div>
                               <p className="text-xs text-muted-foreground">Performance</p>
@@ -435,10 +445,15 @@ function selectCacheStrategy(requirements: Requirements) {
                         {getHealthIcon(health.overall)}
                         Cache Health Status
                       </span>
-                      <Badge variant={
-                        health.overall === 'healthy' ? 'default' : 
-                        health.overall === 'warning' ? 'secondary' : 'destructive'
-                      }>
+                      <Badge
+                        variant={
+                          health.overall === "healthy"
+                            ? "default"
+                            : health.overall === "warning"
+                              ? "secondary"
+                              : "destructive"
+                        }
+                      >
                         {health.overall.toUpperCase()}
                       </Badge>
                     </CardTitle>
@@ -450,15 +465,20 @@ function selectCacheStrategy(requirements: Requirements) {
                         <h4 className="font-semibold mb-3">Layer Status</h4>
                         <div className="space-y-2">
                           {Object.entries(health.layers).map(([strategy, status]) => (
-                            <div key={strategy} className="flex items-center justify-between p-2 border rounded">
+                            <div
+                              key={strategy}
+                              className="flex items-center justify-between p-2 border rounded"
+                            >
                               <div className="flex items-center gap-2">
                                 {getHealthIcon(status.status)}
                                 <span className="text-sm">
-                                  {strategy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                  {strategy
+                                    .replace("-", " ")
+                                    .replace(/\b\w/g, (l) => l.toUpperCase())}
                                 </span>
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {status.issues.length > 0 ? `${status.issues.length} issues` : 'OK'}
+                                {status.issues.length > 0 ? `${status.issues.length} issues` : "OK"}
                               </div>
                             </div>
                           ))}
@@ -470,8 +490,11 @@ function selectCacheStrategy(requirements: Requirements) {
                         <h4 className="font-semibold mb-3">Active Alerts</h4>
                         {health.alerts.length > 0 ? (
                           <div className="space-y-2">
-                            {health.alerts.map((alert, index) => (
-                              <Alert key={index} variant={alert.level === 'error' ? 'destructive' : 'default'}>
+                            {health.alerts.map((alert, _index) => (
+                              <Alert
+                                key={`${alert.level}-${alert.message}`}
+                                variant={alert.level === "error" ? "destructive" : "default"}
+                              >
                                 <AlertDescription className="text-sm">
                                   {alert.message}
                                 </AlertDescription>
@@ -492,18 +515,23 @@ function selectCacheStrategy(requirements: Requirements) {
           <TabsContent value="recommendations">
             <div className="space-y-4">
               {recommendations.length > 0 ? (
-                recommendations.map((rec, index) => (
-                  <Card key={index}>
+                recommendations.map((rec, _index) => (
+                  <Card key={rec.title}>
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
                         <span className="flex items-center gap-2">
                           <Lightbulb className="h-5 w-5" />
                           {rec.title}
                         </span>
-                        <Badge variant={
-                          rec.priority === 'high' ? 'destructive' :
-                          rec.priority === 'medium' ? 'outline' : 'secondary'
-                        }>
+                        <Badge
+                          variant={
+                            rec.priority === "high"
+                              ? "destructive"
+                              : rec.priority === "medium"
+                                ? "outline"
+                                : "secondary"
+                          }
+                        >
                           {rec.priority}
                         </Badge>
                       </CardTitle>
@@ -511,7 +539,7 @@ function selectCacheStrategy(requirements: Requirements) {
                     <CardContent>
                       <div className="space-y-4">
                         <p className="text-sm text-muted-foreground">{rec.description}</p>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <h5 className="font-medium mb-2">Expected Improvement</h5>
@@ -525,12 +553,14 @@ function selectCacheStrategy(requirements: Requirements) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div>
                           <h5 className="font-medium mb-2">Implementation Steps</h5>
                           <ol className="text-sm text-muted-foreground space-y-1">
                             {rec.implementation.steps.map((step, stepIndex) => (
-                              <li key={stepIndex}>{stepIndex + 1}. {step}</li>
+                              <li key={`${stepIndex}-${step}`}>
+                                {stepIndex + 1}. {step}
+                              </li>
                             ))}
                           </ol>
                         </div>
@@ -555,8 +585,8 @@ function selectCacheStrategy(requirements: Requirements) {
           <TabsContent value="details">
             <div className="space-y-4">
               {/* 戦略詳細 */}
-              {comparisonResult?.recommendations.map((rec, index) => (
-                <Card key={index}>
+              {comparisonResult?.recommendations.map((rec) => (
+                <Card key={rec.bestFor}>
                   <CardHeader>
                     <CardTitle>{rec.bestFor}</CardTitle>
                   </CardHeader>
@@ -565,8 +595,8 @@ function selectCacheStrategy(requirements: Requirements) {
                       <div>
                         <h5 className="font-medium mb-2 text-green-600">Pros</h5>
                         <ul className="text-sm space-y-1">
-                          {rec.pros.map((pro, proIndex) => (
-                            <li key={proIndex} className="flex items-start gap-2">
+                          {rec.pros.map((pro) => (
+                            <li key={pro.slice(0, 20)} className="flex items-start gap-2">
                               <CheckCircle className="h-3 w-3 mt-1 text-green-600 flex-shrink-0" />
                               {pro}
                             </li>
@@ -576,8 +606,8 @@ function selectCacheStrategy(requirements: Requirements) {
                       <div>
                         <h5 className="font-medium mb-2 text-red-600">Cons</h5>
                         <ul className="text-sm space-y-1">
-                          {rec.cons.map((con, conIndex) => (
-                            <li key={conIndex} className="flex items-start gap-2">
+                          {rec.cons.map((con) => (
+                            <li key={con.slice(0, 20)} className="flex items-start gap-2">
                               <XCircle className="h-3 w-3 mt-1 text-red-600 flex-shrink-0" />
                               {con}
                             </li>

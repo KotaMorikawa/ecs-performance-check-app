@@ -1,31 +1,31 @@
-import { Hono } from 'hono';
-import { z } from 'zod';
-import { prisma } from '../lib/database.js';
-import { getTestPrismaClient } from '../lib/test-database.js';
+import { Hono } from "hono";
+import { z } from "zod";
+import { prisma } from "../lib/database.js";
+import { getTestPrismaClient } from "../lib/test-database.js";
 
 // 環境に応じてPrismaクライアントを選択
 function getPrismaClient() {
-  return process.env.NODE_ENV === 'test' ? getTestPrismaClient() : prisma;
+  return process.env.NODE_ENV === "test" ? getTestPrismaClient() : prisma;
 }
 
 export const postsRoutes = new Hono();
 
 // バリデーションスキーマ
 const createPostSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  content: z.string().min(1, 'Content is required'),
-  slug: z.string().min(1, 'Slug is required'),
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+  slug: z.string().min(1, "Slug is required"),
   published: z.boolean().optional().default(false),
   authorId: z.number().optional(),
   tagIds: z.array(z.number()).optional().default([]),
 });
 
 // GET /api/posts - 投稿一覧取得
-postsRoutes.get('/', async (c) => {
+postsRoutes.get("/", async (c) => {
   try {
-    const page = parseInt(c.req.query('page') || '1', 10);
-    const limit = parseInt(c.req.query('limit') || '10', 10);
-    const publishedOnly = c.req.query('published') === 'true';
+    const page = parseInt(c.req.query("page") || "1", 10);
+    const limit = parseInt(c.req.query("limit") || "10", 10);
+    const publishedOnly = c.req.query("published") === "true";
     const skip = (page - 1) * limit;
 
     // フィルター条件
@@ -38,7 +38,7 @@ postsRoutes.get('/', async (c) => {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           author: {
             select: { id: true, name: true, email: true },
@@ -66,18 +66,18 @@ postsRoutes.get('/', async (c) => {
       },
     });
   } catch (error) {
-    console.error('Posts fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch posts' }, 500);
+    console.error("Posts fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch posts" }, 500);
   }
 });
 
 // GET /api/posts/:id - 投稿詳細取得
-postsRoutes.get('/:id', async (c) => {
+postsRoutes.get("/:id", async (c) => {
   try {
-    const id = parseInt(c.req.param('id'), 10);
+    const id = parseInt(c.req.param("id"), 10);
 
-    if (isNaN(id)) {
-      return c.json({ success: false, error: 'Invalid post ID' }, 400);
+    if (Number.isNaN(id)) {
+      return c.json({ success: false, error: "Invalid post ID" }, 400);
     }
 
     const dbClient = getPrismaClient();
@@ -94,7 +94,7 @@ postsRoutes.get('/:id', async (c) => {
     });
 
     if (!post) {
-      return c.json({ success: false, error: 'Post not found' }, 404);
+      return c.json({ success: false, error: "Post not found" }, 404);
     }
 
     // ビュー数を増加
@@ -108,13 +108,13 @@ postsRoutes.get('/:id', async (c) => {
       data: { ...post, views: post.views + 1 },
     });
   } catch (error) {
-    console.error('Post fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch post' }, 500);
+    console.error("Post fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch post" }, 500);
   }
 });
 
 // POST /api/posts - 投稿作成
-postsRoutes.post('/', async (c) => {
+postsRoutes.post("/", async (c) => {
   try {
     const body = await c.req.json();
     const { tagIds, ...validatedData } = createPostSchema.parse(body);
@@ -144,22 +144,22 @@ postsRoutes.post('/', async (c) => {
     // Next.jsキャッシュを無効化（リバリデート通知）
     try {
       await fetch(`${process.env.NEXTJS_URL}/api/revalidate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          path: '/api/posts',
+          path: "/api/posts",
           secret: process.env.REVALIDATE_SECRET,
         }),
       });
     } catch (revalidateError) {
-      console.warn('Revalidation failed:', revalidateError);
+      console.warn("Revalidation failed:", revalidateError);
     }
 
     return c.json(
       {
         success: true,
         data: post,
-        message: 'Post created successfully',
+        message: "Post created successfully",
       },
       201
     );
@@ -168,25 +168,25 @@ postsRoutes.post('/', async (c) => {
       return c.json(
         {
           success: false,
-          error: 'Validation error',
+          error: "Validation error",
           details: error.errors,
         },
         400
       );
     }
 
-    console.error('Post creation error:', error);
-    return c.json({ success: false, error: 'Failed to create post' }, 500);
+    console.error("Post creation error:", error);
+    return c.json({ success: false, error: "Failed to create post" }, 500);
   }
 });
 
 // PUT /api/posts/:id - 投稿更新
-postsRoutes.put('/:id', async (c) => {
+postsRoutes.put("/:id", async (c) => {
   try {
-    const id = parseInt(c.req.param('id'), 10);
+    const id = parseInt(c.req.param("id"), 10);
 
-    if (isNaN(id)) {
-      return c.json({ success: false, error: 'Invalid post ID' }, 400);
+    if (Number.isNaN(id)) {
+      return c.json({ success: false, error: "Invalid post ID" }, 400);
     }
 
     const body = await c.req.json();
@@ -195,10 +195,11 @@ postsRoutes.put('/:id', async (c) => {
     const dbClient = getPrismaClient();
     const existingPost = await dbClient.post.findUnique({ where: { id } });
     if (!existingPost) {
-      return c.json({ success: false, error: 'Post not found' }, 404);
+      return c.json({ success: false, error: "Post not found" }, 404);
     }
 
-    const updateData: any = { ...validatedData };
+    // Prisma update用のデータ
+    const updateData = { ...validatedData } as Record<string, unknown>;
 
     if (tagIds !== undefined) {
       updateData.tags = {
@@ -223,38 +224,38 @@ postsRoutes.put('/:id', async (c) => {
     return c.json({
       success: true,
       data: post,
-      message: 'Post updated successfully',
+      message: "Post updated successfully",
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json(
         {
           success: false,
-          error: 'Validation error',
+          error: "Validation error",
           details: error.errors,
         },
         400
       );
     }
 
-    console.error('Post update error:', error);
-    return c.json({ success: false, error: 'Failed to update post' }, 500);
+    console.error("Post update error:", error);
+    return c.json({ success: false, error: "Failed to update post" }, 500);
   }
 });
 
 // DELETE /api/posts/:id - 投稿削除
-postsRoutes.delete('/:id', async (c) => {
+postsRoutes.delete("/:id", async (c) => {
   try {
-    const id = parseInt(c.req.param('id'), 10);
+    const id = parseInt(c.req.param("id"), 10);
 
-    if (isNaN(id)) {
-      return c.json({ success: false, error: 'Invalid post ID' }, 400);
+    if (Number.isNaN(id)) {
+      return c.json({ success: false, error: "Invalid post ID" }, 400);
     }
 
     const dbClient = getPrismaClient();
     const existingPost = await dbClient.post.findUnique({ where: { id } });
     if (!existingPost) {
-      return c.json({ success: false, error: 'Post not found' }, 404);
+      return c.json({ success: false, error: "Post not found" }, 404);
     }
 
     await dbClient.post.delete({ where: { id } });
@@ -262,23 +263,23 @@ postsRoutes.delete('/:id', async (c) => {
     // Next.jsキャッシュを無効化（リバリデート通知）
     try {
       await fetch(`${process.env.NEXTJS_URL}/api/revalidate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tag: 'getPosts',
+          tag: "getPosts",
           secret: process.env.REVALIDATE_SECRET,
         }),
       });
     } catch (revalidateError) {
-      console.warn('Revalidation failed:', revalidateError);
+      console.warn("Revalidation failed:", revalidateError);
     }
 
     return c.json({
       success: true,
-      message: 'Post deleted successfully',
+      message: "Post deleted successfully",
     });
   } catch (error) {
-    console.error('Post deletion error:', error);
-    return c.json({ success: false, error: 'Failed to delete post' }, 500);
+    console.error("Post deletion error:", error);
+    return c.json({ success: false, error: "Failed to delete post" }, 500);
   }
 });

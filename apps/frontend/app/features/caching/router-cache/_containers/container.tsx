@@ -1,17 +1,14 @@
-import { Suspense } from 'react';
-import { RouterCachePresentational } from './presentational';
-import {
-  CacheMetrics,
-  CacheLayerMetrics,
-} from '../../_shared/types';
+import { Suspense } from "react";
+import type { CacheLayerMetrics, CacheMetrics } from "../../_shared/types";
+import { RouterCachePresentational } from "./presentational";
 
 // Server Component（データ取得・統合レイヤー）
 export async function RouterCacheContainer() {
   // 初期メトリクスの生成
   const initialMetrics: CacheMetrics = {
     layers: {
-      'data-cache': {
-        strategy: 'data-cache',
+      "data-cache": {
+        strategy: "data-cache",
         hits: 0,
         misses: 0,
         totalRequests: 0,
@@ -19,10 +16,42 @@ export async function RouterCacheContainer() {
         avgResponseTime: 0,
         cacheSize: 0,
       } as CacheLayerMetrics,
-      'full-route-cache': { strategy: 'full-route-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'router-cache': { strategy: 'router-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'request-memoization': { strategy: 'request-memoization', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'cloudfront-cache': { strategy: 'cloudfront-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
+      "full-route-cache": {
+        strategy: "full-route-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "router-cache": {
+        strategy: "router-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "request-memoization": {
+        strategy: "request-memoization",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "cloudfront-cache": {
+        strategy: "cloudfront-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
     },
     overall: {
       totalHits: 0,
@@ -52,7 +81,7 @@ export async function RouterCacheContainer() {
     // メトリクスのタイムスタンプを更新
     initialMetrics.timestamp = new Date().toISOString();
   } catch (err) {
-    console.error('Router cache fetch error:', err);
+    console.error("Router cache fetch error:", err);
   }
 
   return (

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { LoadingErrorPresentational } from './presentational';
+import { useEffect, useState } from "react";
+import { LoadingErrorPresentational } from "./presentational";
 
-type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+type LoadingState = "idle" | "loading" | "success" | "error";
 
 export function LoadingErrorContainer() {
   const [renderTime, setRenderTime] = useState<number>(0);
-  const [loadingState, setLoadingState] = useState<LoadingState>('idle');
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [loadingState, setLoadingState] = useState<LoadingState>("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
     const startTime = performance.now();
@@ -17,31 +17,31 @@ export function LoadingErrorContainer() {
   }, []);
 
   const simulateDataLoading = async () => {
-    setLoadingState('loading');
-    setErrorMessage('');
-    
+    setLoadingState("loading");
+    setErrorMessage("");
+
     try {
       // 2秒の読み込みシミュレーション
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setLoadingState('success');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setLoadingState("success");
     } catch {
-      setLoadingState('error');
-      setErrorMessage('データの読み込みに失敗しました');
+      setLoadingState("error");
+      setErrorMessage("データの読み込みに失敗しました");
     }
   };
 
   const simulateError = () => {
-    setLoadingState('error');
-    setErrorMessage('意図的に発生させたエラーです。このエラーはデモ用のものです。');
+    setLoadingState("error");
+    setErrorMessage("意図的に発生させたエラーです。このエラーはデモ用のものです。");
   };
 
   const resetState = () => {
-    setLoadingState('idle');
-    setErrorMessage('');
+    setLoadingState("idle");
+    setErrorMessage("");
   };
 
   const throwError = () => {
-    throw new Error('このエラーはエラーバウンダリのテスト用です');
+    throw new Error("このエラーはエラーバウンダリのテスト用です");
   };
 
   return (

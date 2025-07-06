@@ -1,15 +1,15 @@
 // データフェッチング機能共通のAPIクライアント
 
-import {
+import type {
   Category,
-  UserProfile,
   DashboardStats,
-  FetchOptions,
   DataFetchMetrics,
+  FetchOptions,
   PaginatedResponse,
-} from './types';
+  UserProfile,
+} from "./types";
 
-const API_BASE_URL = process.env.API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.API_URL || "http://localhost:8000";
 
 class DataFetchError extends Error {
   constructor(
@@ -18,23 +18,23 @@ class DataFetchError extends Error {
     public code?: string
   ) {
     super(message);
-    this.name = 'DataFetchError';
+    this.name = "DataFetchError";
   }
 }
 
 // 汎用フェッチ関数（メトリクス付き）
 async function fetchWithMetrics<T>(
   url: string,
-  options: FetchOptions = {},
-  source: DataFetchMetrics['source']
+  options: FetchOptions,
+  source: DataFetchMetrics["source"]
 ): Promise<{ data: T; metrics: DataFetchMetrics }> {
   const fetchStartTime = performance.now();
 
   try {
     const response = await fetch(url, {
-      method: options.method || 'GET',
+      method: options.method || "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(options.headers || {}),
       },
       cache: options.cache,
@@ -45,7 +45,7 @@ async function fetchWithMetrics<T>(
       throw new DataFetchError(
         `API request failed: ${response.statusText}`,
         response.status,
-        'FETCH_ERROR'
+        "FETCH_ERROR"
       );
     }
 
@@ -60,7 +60,7 @@ async function fetchWithMetrics<T>(
       duration: fetchEndTime - fetchStartTime,
       timestamp: new Date().toISOString(),
       dataSize,
-      cached: response.headers.get('x-nextjs-cache') === 'HIT',
+      cached: response.headers.get("x-nextjs-cache") === "HIT",
     };
 
     return { data, metrics };
@@ -70,9 +70,9 @@ async function fetchWithMetrics<T>(
     }
 
     throw new DataFetchError(
-      `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Network error: ${error instanceof Error ? error.message : "Unknown error"}`,
       undefined,
-      'NETWORK_ERROR'
+      "NETWORK_ERROR"
     );
   }
 }
@@ -82,7 +82,7 @@ export const categoriesApi = {
   // 全カテゴリ取得
   async getAll(
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'ssg'
+    source: DataFetchMetrics["source"] = "ssg"
   ): Promise<{ data: Category[]; metrics: DataFetchMetrics }> {
     const result = await fetchWithMetrics<{
       success: boolean;
@@ -106,7 +106,7 @@ export const categoriesApi = {
   async getById(
     id: number,
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'ssr'
+    source: DataFetchMetrics["source"] = "ssr"
   ): Promise<{ data: Category; metrics: DataFetchMetrics }> {
     const result = await fetchWithMetrics<{
       success: boolean;
@@ -125,7 +125,7 @@ export const categoriesApi = {
     page = 1,
     limit = 10,
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'ssr'
+    source: DataFetchMetrics["source"] = "ssr"
   ): Promise<{ data: PaginatedResponse<Category>; metrics: DataFetchMetrics }> {
     return fetchWithMetrics<PaginatedResponse<Category>>(
       `${API_BASE_URL}/api/categories/${slug}/posts?page=${page}&limit=${limit}`,
@@ -141,7 +141,7 @@ export const userProfileApi = {
   async getProfile(
     userId: number,
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'ssr'
+    source: DataFetchMetrics["source"] = "ssr"
   ): Promise<{ data: UserProfile; metrics: DataFetchMetrics }> {
     const result = await fetchWithMetrics<{
       success: boolean;
@@ -157,7 +157,7 @@ export const userProfileApi = {
   // 現在のユーザープロフィール取得
   async getCurrentProfile(
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'ssr'
+    source: DataFetchMetrics["source"] = "ssr"
   ): Promise<{ data: UserProfile; metrics: DataFetchMetrics }> {
     const result = await fetchWithMetrics<{
       success: boolean;
@@ -176,7 +176,7 @@ export const dashboardStatsApi = {
   // 統計データ取得
   async getStats(
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'ssr'
+    source: DataFetchMetrics["source"] = "ssr"
   ): Promise<{ data: DashboardStats; metrics: DataFetchMetrics }> {
     const result = await fetchWithMetrics<{
       success: boolean;
@@ -192,7 +192,7 @@ export const dashboardStatsApi = {
   // リアルタイム統計取得
   async getRealTimeStats(
     options: FetchOptions = {},
-    source: DataFetchMetrics['source'] = 'client-side'
+    source: DataFetchMetrics["source"] = "client-side"
   ): Promise<{ data: DashboardStats; metrics: DataFetchMetrics }> {
     const result = await fetchWithMetrics<{
       success: boolean;
@@ -201,7 +201,7 @@ export const dashboardStatsApi = {
       `${API_BASE_URL}/api/dashboard-stats/realtime`,
       {
         ...options,
-        cache: 'no-store', // リアルタイムなのでキャッシュしない
+        cache: "no-store", // リアルタイムなのでキャッシュしない
       },
       source
     );
@@ -226,9 +226,9 @@ export async function fetchParallel(): Promise<{
 
   try {
     const [categoriesResult, userProfileResult, dashboardStatsResult] = await Promise.all([
-      categoriesApi.getAll({}, 'parallel'),
-      userProfileApi.getCurrentProfile({}, 'parallel'),
-      dashboardStatsApi.getStats({}, 'parallel'),
+      categoriesApi.getAll({}, "parallel"),
+      userProfileApi.getCurrentProfile({}, "parallel"),
+      dashboardStatsApi.getStats({}, "parallel"),
     ]);
 
     const endTime = performance.now();
@@ -241,7 +241,7 @@ export async function fetchParallel(): Promise<{
         dashboardStats: dashboardStatsResult.data,
       },
       metrics: {
-        source: 'parallel',
+        source: "parallel",
         duration,
         timestamp: new Date().toISOString(),
         dataSize:
@@ -254,9 +254,9 @@ export async function fetchParallel(): Promise<{
     };
   } catch (error) {
     throw new DataFetchError(
-      `Parallel fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Parallel fetch failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       undefined,
-      'PARALLEL_FETCH_ERROR'
+      "PARALLEL_FETCH_ERROR"
     );
   }
 }

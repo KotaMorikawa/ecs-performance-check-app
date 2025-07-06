@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Edit, Calendar, Eye, User } from 'lucide-react';
-import { DeleteButton } from './delete-button';
+import { Calendar, Edit, Eye, User } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeleteButton } from "./delete-button";
+
 // date-fns removed to prevent hydration issues
 
 interface Post {
@@ -35,7 +36,12 @@ interface PostListProps {
   emptyMessage?: string;
 }
 
-export function PostList({ posts, onEdit, onOptimisticDelete, emptyMessage = '投稿がありません' }: PostListProps) {
+export function PostList({
+  posts,
+  onEdit,
+  onOptimisticDelete,
+  emptyMessage = "投稿がありません",
+}: PostListProps) {
   if (posts.length === 0) {
     return (
       <Alert>
@@ -75,7 +81,7 @@ export function PostList({ posts, onEdit, onOptimisticDelete, emptyMessage = '�
                   {post.author && (
                     <span className="flex items-center gap-1">
                       <User className="h-4 w-4" />
-                      {post.author.name || 'Anonymous'}
+                      {post.author.name || "Anonymous"}
                     </span>
                   )}
                 </CardDescription>
@@ -93,10 +99,10 @@ export function PostList({ posts, onEdit, onOptimisticDelete, emptyMessage = '�
                     編集
                   </Button>
                 )}
-                <DeleteButton 
-                  postId={post.id} 
-                  postTitle={post.title} 
-                  variant="outline" 
+                <DeleteButton
+                  postId={post.id}
+                  postTitle={post.title}
+                  variant="outline"
                   size="sm"
                   onOptimisticDelete={onOptimisticDelete}
                 />
@@ -123,7 +129,7 @@ export function PostList({ posts, onEdit, onOptimisticDelete, emptyMessage = '�
 
               <div className="flex items-center justify-between pt-2 border-t">
                 <span className="text-sm text-muted-foreground">
-                  スラッグ:{' '}
+                  スラッグ:{" "}
                   <code className="bg-muted px-1 py-0.5 rounded text-xs">/{post.slug}</code>
                 </span>
                 {post.updatedAt !== post.createdAt && (

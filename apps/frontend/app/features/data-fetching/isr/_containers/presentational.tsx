@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import type { Category, DataFetchMetrics } from '../../_shared/types';
-import { formatDateTime } from '@/utils/date-formatter';
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDateTime } from "@/utils/date-formatter";
+import type { Category, DataFetchMetrics } from "../../_shared/types";
 
 interface IsrPresentationalProps {
   categories: Category[];
@@ -54,12 +54,12 @@ async function revalidateCategories() {
 
   const handleRevalidate = async () => {
     try {
-      const response = await fetch('/api/revalidate', {
-        method: 'POST',
+      const response = await fetch("/api/revalidate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ tag: 'categories' }),
+        body: JSON.stringify({ tag: "categories" }),
       });
 
       if (response.ok) {
@@ -67,7 +67,7 @@ async function revalidateCategories() {
         window.location.reload();
       }
     } catch (error) {
-      console.error('Revalidation failed:', error);
+      console.error("Revalidation failed:", error);
     }
   };
 
@@ -85,7 +85,7 @@ async function revalidateCategories() {
             Force Revalidate
           </Button>
           <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-            {showCode ? 'Hide Code' : 'Show Code'}
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
@@ -96,10 +96,10 @@ async function revalidateCategories() {
           description="Incremental Static Regeneration の実装例"
           files={[
             {
-              filename: 'container.tsx',
-              language: 'typescript',
+              filename: "container.tsx",
+              language: "typescript",
               content: isrExampleCode,
-              description: 'ISRを使用したServer Componentの実装',
+              description: "ISRを使用したServer Componentの実装",
             },
           ]}
         />
@@ -163,9 +163,9 @@ async function revalidateCategories() {
                       <div>
                         <span className="text-muted-foreground">Page Generated:</span>
                         <span className="ml-2 font-mono">
-                          {metrics && metrics.timestamp
-                            ? new Date(metrics.timestamp).toISOString().split('T')[0]
-                            : 'Build time'}
+                          {metrics?.timestamp
+                            ? new Date(metrics.timestamp).toISOString().split("T")[0]
+                            : "Build time"}
                         </span>
                       </div>
                       <div>
@@ -175,7 +175,7 @@ async function revalidateCategories() {
                       <div>
                         <span className="text-muted-foreground">Cache Status:</span>
                         <Badge variant="outline" className="ml-2">
-                          {metrics?.cached ? 'Cached' : 'Fresh'}
+                          {metrics?.cached ? "Cached" : "Fresh"}
                         </Badge>
                       </div>
                       <div>

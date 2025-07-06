@@ -1,9 +1,9 @@
-import Link from 'next/link';
-import type { Route } from 'next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ExternalLink, CheckCircle, Clock, Github } from 'lucide-react';
+import { CheckCircle, Clock, ExternalLink, Github } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SubFeature {
   name: string;
@@ -14,64 +14,64 @@ interface Feature {
   title: string;
   description: string;
   path: string;
-  status: 'implemented';
+  status: "implemented";
   subFeatures?: SubFeature[];
 }
 
 export default function Home() {
   const implementedFeatures: Feature[] = [
     {
-      title: 'ルーティング機能',
-      description: 'App Routerによるファイルベースルーティング',
-      path: '/features/routing/basic',
-      status: 'implemented',
+      title: "ルーティング機能",
+      description: "App Routerによるファイルベースルーティング",
+      path: "/features/routing/basic",
+      status: "implemented",
       subFeatures: [
-        { name: '基本ルーティング', path: '/features/routing/basic' },
-        { name: 'ダイナミックルート', path: '/features/routing/dynamic/1' },
-        { name: 'ネストレイアウト', path: '/features/routing/nested-layout' },
-        { name: 'ローディング・エラー', path: '/features/routing/loading-error' },
-        { name: 'ルートグループ', path: '/features/routing/(route-groups)/public' },
-        { name: 'パラレル・インターセプト', path: '/features/routing/parallel-intercept' }
-      ]
+        { name: "基本ルーティング", path: "/features/routing/basic" },
+        { name: "ダイナミックルート", path: "/features/routing/dynamic/1" },
+        { name: "ネストレイアウト", path: "/features/routing/nested-layout" },
+        { name: "ローディング・エラー", path: "/features/routing/loading-error" },
+        { name: "ルートグループ", path: "/features/routing/(route-groups)/public" },
+        { name: "パラレル・インターセプト", path: "/features/routing/parallel-intercept" },
+      ],
     },
     {
-      title: 'Server Actions',
-      description: 'フォーム処理とサーバーサイドアクション',
-      path: '/features/server-actions/basic',
-      status: 'implemented'
+      title: "Server Actions",
+      description: "フォーム処理とサーバーサイドアクション",
+      path: "/features/server-actions/basic",
+      status: "implemented",
     },
     {
-      title: 'データフェッチング',
-      description: 'SSG/SSR/ISR/クライアントサイド/パラレルフェッチング',
-      path: '/features/data-fetching',
-      status: 'implemented',
+      title: "データフェッチング",
+      description: "SSG/SSR/ISR/クライアントサイド/パラレルフェッチング",
+      path: "/features/data-fetching",
+      status: "implemented",
       subFeatures: [
-        { name: 'SSG (Static Site Generation)', path: '/features/data-fetching/ssg' },
-        { name: 'SSR (Server-Side Rendering)', path: '/features/data-fetching/ssr' },
-        { name: 'ISR (Incremental Static Regeneration)', path: '/features/data-fetching/isr' },
-        { name: 'クライアントサイド', path: '/features/data-fetching/client-side' },
-        { name: 'パラレルフェッチング', path: '/features/data-fetching/parallel' }
-      ]
-    }
+        { name: "SSG (Static Site Generation)", path: "/features/data-fetching/ssg" },
+        { name: "SSR (Server-Side Rendering)", path: "/features/data-fetching/ssr" },
+        { name: "ISR (Incremental Static Regeneration)", path: "/features/data-fetching/isr" },
+        { name: "クライアントサイド", path: "/features/data-fetching/client-side" },
+        { name: "パラレルフェッチング", path: "/features/data-fetching/parallel" },
+      ],
+    },
   ];
 
   const plannedFeatures = [
-    { name: 'キャッシュ戦略', description: '多層キャッシュシステムの構築' },
-    { name: 'ストリーミング', description: 'Suspenseによるストリーミングレンダリング' },
-    { name: 'Middleware', description: 'リクエスト処理とルートガード' },
-    { name: '画像最適化', description: 'Next.js Image コンポーネント活用' },
-    { name: 'メタデータ', description: 'SEO対応とOpen Graphタグ' }
+    { name: "キャッシュ戦略", description: "多層キャッシュシステムの構築" },
+    { name: "ストリーミング", description: "Suspenseによるストリーミングレンダリング" },
+    { name: "Middleware", description: "リクエスト処理とルートガード" },
+    { name: "画像最適化", description: "Next.js Image コンポーネント活用" },
+    { name: "メタデータ", description: "SEO対応とOpen Graphタグ" },
   ];
 
   const techStack = [
-    { name: 'Next.js 15.3.4', type: 'framework' },
-    { name: 'React 18', type: 'library' },
-    { name: 'TypeScript', type: 'language' },
-    { name: 'Tailwind CSS', type: 'styling' },
-    { name: 'shadcn/ui', type: 'components' },
-    { name: 'Hono', type: 'backend' },
-    { name: 'PostgreSQL', type: 'database' },
-    { name: 'AWS ECS', type: 'infrastructure' }
+    { name: "Next.js 15.3.4", type: "framework" },
+    { name: "React 18", type: "library" },
+    { name: "TypeScript", type: "language" },
+    { name: "Tailwind CSS", type: "styling" },
+    { name: "shadcn/ui", type: "components" },
+    { name: "Hono", type: "backend" },
+    { name: "PostgreSQL", type: "database" },
+    { name: "AWS ECS", type: "infrastructure" },
   ];
 
   return (
@@ -83,7 +83,8 @@ export default function Home() {
             ECS Performance Check App
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-6">
-            Next.js 15.3.4の主要機能をAWS ECS環境で動作させ、パフォーマンスメトリクスを可視化するデモアプリケーション
+            Next.js 15.3.4の主要機能をAWS
+            ECS環境で動作させ、パフォーマンスメトリクスを可視化するデモアプリケーション
           </p>
           <Button asChild size="lg" className="mr-4">
             <a href="https://github.com" target="_blank" rel="noopener noreferrer">
@@ -104,8 +105,8 @@ export default function Home() {
               <CardDescription>現在利用可能な機能デモ</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {implementedFeatures.map((feature, index) => (
-                <Card key={index} className="border-l-4 border-l-green-500">
+              {implementedFeatures.map((feature) => (
+                <Card key={feature.title} className="border-l-4 border-l-green-500">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center justify-between">
                       {feature.title}
@@ -126,9 +127,9 @@ export default function Home() {
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">サブ機能:</p>
                         <div className="grid grid-cols-1 gap-2">
-                          {feature.subFeatures.map((subFeature, subIndex) => (
+                          {feature.subFeatures.map((subFeature) => (
                             <Button
-                              key={subIndex}
+                              key={subFeature.name}
                               asChild
                               variant="ghost"
                               size="sm"
@@ -160,8 +161,11 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {plannedFeatures.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
+                {plannedFeatures.map((feature) => (
+                  <div
+                    key={feature.name}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800"
+                  >
                     <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
                       <div className="font-medium">{feature.name}</div>
@@ -211,8 +215,8 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {techStack.map((tech, index) => (
-                <Badge key={index} variant="outline" className="text-sm">
+              {techStack.map((tech) => (
+                <Badge key={tech.name} variant="outline" className="text-sm">
                   {tech.name}
                 </Badge>
               ))}

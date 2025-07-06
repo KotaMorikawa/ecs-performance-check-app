@@ -1,19 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import type {
-  Category,
-  UserProfile,
-  DashboardStats,
-  DataFetchMetrics,
-} from '../../_shared/types';
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Category, DashboardStats, DataFetchMetrics, UserProfile } from "../../_shared/types";
 
 interface CombinedData {
   categories: Category[];
@@ -90,7 +85,7 @@ export async function ParallelContainer() {
           </p>
         </div>
         <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-          {showCode ? 'Hide Code' : 'Show Code'}
+          {showCode ? "Hide Code" : "Show Code"}
         </Button>
       </div>
 
@@ -103,8 +98,8 @@ export async function ParallelContainer() {
               filename: "parallel-fetch.tsx",
               language: "typescript",
               content: parallelExampleCode,
-              description: "複数のAPIを並行で呼び出す実装"
-            }
+              description: "複数のAPIを並行で呼び出す実装",
+            },
           ]}
         />
       )}
@@ -181,11 +176,11 @@ export async function ParallelContainer() {
                   {combinedData.userProfile ? (
                     <div className="flex items-start gap-4">
                       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
-                        {combinedData.userProfile.name?.charAt(0).toUpperCase() || 'U'}
+                        {combinedData.userProfile.name?.charAt(0).toUpperCase() || "U"}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold">
-                          {combinedData.userProfile.name || 'Anonymous User'}
+                          {combinedData.userProfile.name || "Anonymous User"}
                         </h3>
                         <p className="text-muted-foreground">{combinedData.userProfile.email}</p>
                         {combinedData.userProfile.bio && (
@@ -193,9 +188,7 @@ export async function ParallelContainer() {
                         )}
                         <div className="flex gap-2 mt-2">
                           {combinedData.userProfile.isVerified && (
-                            <Badge variant="default">
-                              Verified
-                            </Badge>
+                            <Badge variant="default">Verified</Badge>
                           )}
                           <Badge variant="outline">
                             {combinedData.userProfile.postsCount} posts
@@ -251,7 +244,7 @@ export async function ParallelContainer() {
                   sequential fetching.
                   {metrics && (
                     <span className="block mt-1">
-                      Total time: {metrics.duration.toFixed(2)}ms for {metrics.requestCount}{' '}
+                      Total time: {metrics.duration.toFixed(2)}ms for {metrics.requestCount}{" "}
                       requests
                     </span>
                   )}

@@ -1,17 +1,20 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // 投稿フォームのバリデーションスキーマ
 export const PostFormSchema = z.object({
-  title: z.string()
-    .min(1, 'タイトルは必須です')
-    .max(200, 'タイトルは200文字以下で入力してください'),
-  content: z.string()
-    .min(1, 'コンテンツは必須です')
-    .max(10000, 'コンテンツは10000文字以下で入力してください'),
-  slug: z.string()
-    .min(1, 'スラッグは必須です')
-    .max(100, 'スラッグは100文字以下で入力してください')
-    .regex(/^[a-z0-9-]+$/, 'スラッグは英小文字、数字、ハイフンのみ使用可能です'),
+  title: z
+    .string()
+    .min(1, "タイトルは必須です")
+    .max(200, "タイトルは200文字以下で入力してください"),
+  content: z
+    .string()
+    .min(1, "コンテンツは必須です")
+    .max(10000, "コンテンツは10000文字以下で入力してください"),
+  slug: z
+    .string()
+    .min(1, "スラッグは必須です")
+    .max(100, "スラッグは100文字以下で入力してください")
+    .regex(/^[a-z0-9-]+$/, "スラッグは英小文字、数字、ハイフンのみ使用可能です"),
   published: z.boolean().optional().default(false),
 });
 
@@ -20,7 +23,7 @@ export const UpdatePostFormSchema = PostFormSchema.partial();
 
 // 投稿削除用のスキーマ
 export const DeletePostSchema = z.object({
-  id: z.string().min(1, '投稿IDは必須です'),
+  id: z.string().min(1, "投稿IDは必須です"),
 });
 
 // フォームの状態管理用の型定義
@@ -47,7 +50,10 @@ export type ActionResult<TFieldErrors = FormFieldErrors> = {
 };
 
 // useActionState用の状態型
-export type ActionState<T = Record<string, unknown>, TFieldErrors = FormFieldErrors> = ActionResult<TFieldErrors> & {
+export type ActionState<
+  T = Record<string, unknown>,
+  TFieldErrors = FormFieldErrors,
+> = ActionResult<TFieldErrors> & {
   data?: T;
   timestamp?: number;
 };
@@ -63,9 +69,9 @@ export type DeletePostState = ActionState<DeletePostData, DeleteFieldErrors>;
 
 // フォームの初期値
 export const DEFAULT_POST_FORM: PostFormData = {
-  title: '',
-  content: '',
-  slug: '',
+  title: "",
+  content: "",
+  slug: "",
   published: false,
 };
 
@@ -85,38 +91,37 @@ export const INITIAL_DELETE_STATE: DeletePostState = {
 // スラッグ生成ユーティリティ（日本語対応版）
 export function generateSlug(title: string): string {
   const timestamp = Date.now();
-  
+
   // 基本的なクリーニング
   const cleaned = title
     .toLowerCase()
-    .normalize('NFD') // Unicode正規化
-    .replace(/[\u0300-\u036f]/g, '') // ダイアクリティカルマーク削除
-    .replace(/[^a-z0-9\s-]/g, '') // 英数字、スペース、ハイフン以外を削除
-    .replace(/\s+/g, '-') // スペースをハイフンに変換
-    .replace(/-+/g, '-') // 連続するハイフンを単一に
-    .replace(/^-|-$/g, '') // 先頭と末尾のハイフンを削除
+    .normalize("NFD") // Unicode正規化
+    .replace(/[\u0300-\u036f]/g, "") // ダイアクリティカルマーク削除
+    .replace(/[^a-z0-9\s-]/g, "") // 英数字、スペース、ハイフン以外を削除
+    .replace(/\s+/g, "-") // スペースをハイフンに変換
+    .replace(/-+/g, "-") // 連続するハイフンを単一に
+    .replace(/^-|-$/g, "") // 先頭と末尾のハイフンを削除
     .substring(0, 50); // 長さ制限
-  
+
   // 日本語などで空文字になった場合はタイムスタンプベースのスラッグを生成
   if (!cleaned) {
     return `post-${timestamp}`;
   }
-  
+
   return cleaned;
 }
 
 // フォームバリデーション（クライアント側）
 export function validatePostForm(data: Partial<PostFormData>): ActionResult {
   const result = PostFormSchema.safeParse(data);
-  
+
   if (!result.success) {
     return {
-      error: 'バリデーションエラーがあります',
+      error: "バリデーションエラーがあります",
       fieldErrors: result.error.flatten().fieldErrors,
       success: false,
     };
   }
-  
+
   return { success: true };
 }
-

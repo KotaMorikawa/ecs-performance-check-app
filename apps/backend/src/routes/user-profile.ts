@@ -1,27 +1,27 @@
-import { Hono } from 'hono';
-import { z } from 'zod';
-import { prisma } from '../lib/database.js';
-import { getTestPrismaClient } from '../lib/test-database.js';
+import { Hono } from "hono";
+import { z } from "zod";
+import { prisma } from "../lib/database.js";
+import { getTestPrismaClient } from "../lib/test-database.js";
 
 // 環境に応じてPrismaクライアントを選択
 function getPrismaClient() {
-  return process.env.NODE_ENV === 'test' ? getTestPrismaClient() : prisma;
+  return process.env.NODE_ENV === "test" ? getTestPrismaClient() : prisma;
 }
 
 export const userProfileRoutes = new Hono();
 
 // バリデーションスキーマ
 const updateProfileSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
+  name: z.string().min(1, "Name is required").optional(),
   bio: z.string().optional(),
-  avatar: z.string().url('Invalid avatar URL').optional(),
+  avatar: z.string().url("Invalid avatar URL").optional(),
 });
 
 // GET /api/user-profile/current - 現在のユーザープロフィール取得
-userProfileRoutes.get('/current', async (c) => {
+userProfileRoutes.get("/current", async (c) => {
   try {
     const dbClient = getPrismaClient();
-    
+
     // 実際のアプリでは認証トークンからユーザーIDを取得
     // デモでは固定のユーザーID（1）を使用
     const userId = 1;
@@ -36,7 +36,7 @@ userProfileRoutes.get('/current', async (c) => {
     });
 
     if (!user) {
-      return c.json({ success: false, error: 'User not found' }, 404);
+      return c.json({ success: false, error: "User not found" }, 404);
     }
 
     const userProfile = {
@@ -63,18 +63,18 @@ userProfileRoutes.get('/current', async (c) => {
       data: userProfile,
     });
   } catch (error) {
-    console.error('Current user profile fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch user profile' }, 500);
+    console.error("Current user profile fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch user profile" }, 500);
   }
 });
 
 // GET /api/user-profile/:id - 指定ユーザープロフィール取得
-userProfileRoutes.get('/:id', async (c) => {
+userProfileRoutes.get("/:id", async (c) => {
   try {
-    const id = parseInt(c.req.param('id'), 10);
-    
-    if (isNaN(id)) {
-      return c.json({ success: false, error: 'Invalid user ID' }, 400);
+    const id = parseInt(c.req.param("id"), 10);
+
+    if (Number.isNaN(id)) {
+      return c.json({ success: false, error: "Invalid user ID" }, 400);
     }
 
     const dbClient = getPrismaClient();
@@ -87,7 +87,7 @@ userProfileRoutes.get('/:id', async (c) => {
         posts: {
           where: { published: true },
           take: 5,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
           select: {
             id: true,
             title: true,
@@ -100,7 +100,7 @@ userProfileRoutes.get('/:id', async (c) => {
     });
 
     if (!user) {
-      return c.json({ success: false, error: 'User not found' }, 404);
+      return c.json({ success: false, error: "User not found" }, 404);
     }
 
     const userProfile = {
@@ -114,7 +114,7 @@ userProfileRoutes.get('/:id', async (c) => {
       lastActiveAt: user.lastActiveAt?.toISOString() || user.createdAt.toISOString(),
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
-      recentPosts: user.posts.map(post => ({
+      recentPosts: user.posts.map((post) => ({
         id: post.id,
         title: post.title,
         slug: post.slug,
@@ -128,29 +128,29 @@ userProfileRoutes.get('/:id', async (c) => {
       data: userProfile,
     });
   } catch (error) {
-    console.error('User profile fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch user profile' }, 500);
+    console.error("User profile fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch user profile" }, 500);
   }
 });
 
 // PUT /api/user-profile/:id - ユーザープロフィール更新
-userProfileRoutes.put('/:id', async (c) => {
+userProfileRoutes.put("/:id", async (c) => {
   try {
-    const id = parseInt(c.req.param('id'), 10);
-    
-    if (isNaN(id)) {
-      return c.json({ success: false, error: 'Invalid user ID' }, 400);
+    const id = parseInt(c.req.param("id"), 10);
+
+    if (Number.isNaN(id)) {
+      return c.json({ success: false, error: "Invalid user ID" }, 400);
     }
 
     const body = await c.req.json();
     const validatedData = updateProfileSchema.parse(body);
 
     const dbClient = getPrismaClient();
-    
+
     // ユーザーが存在するかチェック
     const existingUser = await dbClient.user.findUnique({ where: { id } });
     if (!existingUser) {
-      return c.json({ success: false, error: 'User not found' }, 404);
+      return c.json({ success: false, error: "User not found" }, 404);
     }
 
     // プロフィールを更新
@@ -183,65 +183,68 @@ userProfileRoutes.put('/:id', async (c) => {
     // Next.jsキャッシュを無効化
     try {
       await fetch(`${process.env.NEXTJS_URL}/api/revalidate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tag: 'user-profile',
+          tag: "user-profile",
           secret: process.env.REVALIDATE_SECRET,
         }),
       });
     } catch (revalidateError) {
-      console.warn('Revalidation failed:', revalidateError);
+      console.warn("Revalidation failed:", revalidateError);
     }
 
     return c.json({
       success: true,
       data: userProfile,
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ 
-        success: false, 
-        error: 'Validation error', 
-        details: error.errors 
-      }, 400);
+      return c.json(
+        {
+          success: false,
+          error: "Validation error",
+          details: error.errors,
+        },
+        400
+      );
     }
-    
-    console.error('Profile update error:', error);
-    return c.json({ success: false, error: 'Failed to update profile' }, 500);
+
+    console.error("Profile update error:", error);
+    return c.json({ success: false, error: "Failed to update profile" }, 500);
   }
 });
 
 // GET /api/user-profile/:id/posts - ユーザーの投稿一覧
-userProfileRoutes.get('/:id/posts', async (c) => {
+userProfileRoutes.get("/:id/posts", async (c) => {
   try {
-    const id = parseInt(c.req.param('id'), 10);
-    const page = parseInt(c.req.query('page') || '1', 10);
-    const limit = parseInt(c.req.query('limit') || '10', 10);
+    const id = parseInt(c.req.param("id"), 10);
+    const page = parseInt(c.req.query("page") || "1", 10);
+    const limit = parseInt(c.req.query("limit") || "10", 10);
     const skip = (page - 1) * limit;
-    
-    if (isNaN(id)) {
-      return c.json({ success: false, error: 'Invalid user ID' }, 400);
+
+    if (Number.isNaN(id)) {
+      return c.json({ success: false, error: "Invalid user ID" }, 400);
     }
 
     const dbClient = getPrismaClient();
-    
+
     // ユーザーが存在するかチェック
     const user = await dbClient.user.findUnique({ where: { id } });
     if (!user) {
-      return c.json({ success: false, error: 'User not found' }, 404);
+      return c.json({ success: false, error: "User not found" }, 404);
     }
 
     const [posts, total] = await Promise.all([
       dbClient.post.findMany({
-        where: { 
+        where: {
           authorId: id,
           published: true,
         },
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           categories: {
             select: { id: true, name: true, slug: true },
@@ -249,7 +252,7 @@ userProfileRoutes.get('/:id/posts', async (c) => {
         },
       }),
       dbClient.post.count({
-        where: { 
+        where: {
           authorId: id,
           published: true,
         },
@@ -276,7 +279,7 @@ userProfileRoutes.get('/:id/posts', async (c) => {
       },
     });
   } catch (error) {
-    console.error('User posts fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch user posts' }, 500);
+    console.error("User posts fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch user posts" }, 500);
   }
 });

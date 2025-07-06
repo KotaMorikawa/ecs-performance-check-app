@@ -1,19 +1,20 @@
-import { Hono } from 'hono';
-import { prisma } from '../lib/database.js';
-import { getTestPrismaClient } from '../lib/test-database.js';
+import type { PrismaClient } from "@prisma/client";
+import { Hono } from "hono";
+import { prisma } from "../lib/database.js";
+import { getTestPrismaClient } from "../lib/test-database.js";
 
 // 環境に応じてPrismaクライアントを選択
 function getPrismaClient() {
-  return process.env.NODE_ENV === 'test' ? getTestPrismaClient() : prisma;
+  return process.env.NODE_ENV === "test" ? getTestPrismaClient() : prisma;
 }
 
 export const dashboardStatsRoutes = new Hono();
 
 // GET /api/dashboard-stats - 基本統計取得
-dashboardStatsRoutes.get('/', async (c) => {
+dashboardStatsRoutes.get("/", async (c) => {
   try {
     const dbClient = getPrismaClient();
-    
+
     // 基本統計を並列取得
     const [
       totalPosts,
@@ -26,19 +27,19 @@ dashboardStatsRoutes.get('/', async (c) => {
     ] = await Promise.all([
       // 総投稿数
       dbClient.post.count({ where: { published: true } }),
-      
+
       // 総ユーザー数
       dbClient.user.count(),
-      
+
       // 総カテゴリ数
       dbClient.category.count(),
-      
+
       // 総ビュー数
       dbClient.post.aggregate({
         where: { published: true },
         _sum: { views: true },
       }),
-      
+
       // 過去7日の投稿数
       dbClient.post.count({
         where: {
@@ -48,7 +49,7 @@ dashboardStatsRoutes.get('/', async (c) => {
           },
         },
       }),
-      
+
       // 人気カテゴリ（投稿数順）
       dbClient.category.findMany({
         take: 5,
@@ -59,11 +60,11 @@ dashboardStatsRoutes.get('/', async (c) => {
         },
         orderBy: {
           posts: {
-            _count: 'desc',
+            _count: "desc",
           },
         },
       }),
-      
+
       // ユーザー成長データ（過去6ヶ月）
       getUserGrowthData(dbClient),
     ]);
@@ -74,7 +75,7 @@ dashboardStatsRoutes.get('/', async (c) => {
       totalCategories,
       totalViews: totalViews._sum.views || 0,
       recentPosts,
-      popularCategories: popularCategories.map(cat => ({
+      popularCategories: popularCategories.map((cat) => ({
         name: cat.name,
         count: cat._count.posts,
       })),
@@ -87,23 +88,18 @@ dashboardStatsRoutes.get('/', async (c) => {
       data: dashboardStats,
     });
   } catch (error) {
-    console.error('Dashboard stats fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch dashboard stats' }, 500);
+    console.error("Dashboard stats fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch dashboard stats" }, 500);
   }
 });
 
 // GET /api/dashboard-stats/realtime - リアルタイム統計取得
-dashboardStatsRoutes.get('/realtime', async (c) => {
+dashboardStatsRoutes.get("/realtime", async (c) => {
   try {
     const dbClient = getPrismaClient();
-    
+
     // リアルタイムデータ（キャッシュしない）
-    const [
-      onlineUsers,
-      todayPosts,
-      todayViews,
-      recentActivity,
-    ] = await Promise.all([
+    const [onlineUsers, todayPosts, todayViews, recentActivity] = await Promise.all([
       // アクティブユーザー数（過去1時間以内）
       dbClient.user.count({
         where: {
@@ -112,7 +108,7 @@ dashboardStatsRoutes.get('/realtime', async (c) => {
           },
         },
       }),
-      
+
       // 今日の投稿数
       dbClient.post.count({
         where: {
@@ -122,7 +118,7 @@ dashboardStatsRoutes.get('/realtime', async (c) => {
           },
         },
       }),
-      
+
       // 今日のビュー数
       dbClient.post.aggregate({
         where: {
@@ -133,7 +129,7 @@ dashboardStatsRoutes.get('/realtime', async (c) => {
         },
         _sum: { views: true },
       }),
-      
+
       // 最近のアクティビティ
       getRecentActivity(dbClient),
     ]);
@@ -151,27 +147,23 @@ dashboardStatsRoutes.get('/realtime', async (c) => {
       data: realtimeStats,
     });
   } catch (error) {
-    console.error('Realtime stats fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch realtime stats' }, 500);
+    console.error("Realtime stats fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch realtime stats" }, 500);
   }
 });
 
 // GET /api/dashboard-stats/performance - パフォーマンス統計
-dashboardStatsRoutes.get('/performance', async (c) => {
+dashboardStatsRoutes.get("/performance", async (c) => {
   try {
     const dbClient = getPrismaClient();
-    
+
     // パフォーマンス関連統計
-    const [
-      popularPosts,
-      topAuthors,
-      categoryDistribution,
-    ] = await Promise.all([
+    const [popularPosts, topAuthors, categoryDistribution] = await Promise.all([
       // 人気投稿（ビュー数順）
       dbClient.post.findMany({
         where: { published: true },
         take: 10,
-        orderBy: { views: 'desc' },
+        orderBy: { views: "desc" },
         select: {
           id: true,
           title: true,
@@ -183,7 +175,7 @@ dashboardStatsRoutes.get('/performance', async (c) => {
           },
         },
       }),
-      
+
       // トップ著者（投稿数順）
       dbClient.user.findMany({
         take: 5,
@@ -194,11 +186,11 @@ dashboardStatsRoutes.get('/performance', async (c) => {
         },
         orderBy: {
           posts: {
-            _count: 'desc',
+            _count: "desc",
           },
         },
       }),
-      
+
       // カテゴリ分布
       dbClient.category.findMany({
         include: {
@@ -206,25 +198,25 @@ dashboardStatsRoutes.get('/performance', async (c) => {
             select: { posts: true },
           },
         },
-        orderBy: { name: 'asc' },
+        orderBy: { name: "asc" },
       }),
     ]);
 
     const performanceStats = {
-      popularPosts: popularPosts.map(post => ({
+      popularPosts: popularPosts.map((post) => ({
         id: post.id,
         title: post.title,
         slug: post.slug,
         views: post.views,
-        author: post.author?.name || 'Unknown',
+        author: post.author?.name || "Unknown",
         createdAt: post.createdAt.toISOString(),
       })),
-      topAuthors: topAuthors.map(author => ({
+      topAuthors: topAuthors.map((author) => ({
         id: author.id,
         name: author.name,
         postCount: author._count.posts,
       })),
-      categoryDistribution: categoryDistribution.map(cat => ({
+      categoryDistribution: categoryDistribution.map((cat) => ({
         name: cat.name,
         slug: cat.slug,
         postCount: cat._count.posts,
@@ -237,20 +229,20 @@ dashboardStatsRoutes.get('/performance', async (c) => {
       data: performanceStats,
     });
   } catch (error) {
-    console.error('Performance stats fetch error:', error);
-    return c.json({ success: false, error: 'Failed to fetch performance stats' }, 500);
+    console.error("Performance stats fetch error:", error);
+    return c.json({ success: false, error: "Failed to fetch performance stats" }, 500);
   }
 });
 
 // ヘルパー関数：ユーザー成長データ取得
-async function getUserGrowthData(dbClient: any) {
+async function getUserGrowthData(dbClient: PrismaClient) {
   const months = [];
   const now = new Date();
-  
+
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const nextDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-    
+
     const count = await dbClient.user.count({
       where: {
         createdAt: {
@@ -259,24 +251,24 @@ async function getUserGrowthData(dbClient: any) {
         },
       },
     });
-    
+
     months.push({
       period: date.toISOString().slice(0, 7), // YYYY-MM形式
       count,
     });
   }
-  
+
   return months;
 }
 
 // ヘルパー関数：最近のアクティビティ取得
-async function getRecentActivity(dbClient: any) {
+async function getRecentActivity(dbClient: PrismaClient) {
   const [recentPosts, recentUsers] = await Promise.all([
     // 最新投稿
     dbClient.post.findMany({
       where: { published: true },
       take: 5,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         title: true,
@@ -287,11 +279,11 @@ async function getRecentActivity(dbClient: any) {
         },
       },
     }),
-    
+
     // 新規ユーザー
     dbClient.user.findMany({
       take: 5,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         name: true,
@@ -301,17 +293,17 @@ async function getRecentActivity(dbClient: any) {
   ]);
 
   return {
-    recentPosts: recentPosts.map((post: any) => ({
-      type: 'post',
+    recentPosts: recentPosts.map((post) => ({
+      type: "post",
       id: post.id,
       title: post.title,
-      author: post.author?.name || 'Unknown',
+      author: post.author?.name || "Unknown",
       createdAt: post.createdAt.toISOString(),
     })),
-    recentUsers: recentUsers.map((user: any) => ({
-      type: 'user',
+    recentUsers: recentUsers.map((user) => ({
+      type: "user",
       id: user.id,
-      name: user.name || 'Unknown',
+      name: user.name || "Unknown",
       createdAt: user.createdAt.toISOString(),
     })),
   };
