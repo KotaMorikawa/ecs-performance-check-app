@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import SsgIndexPage, { metadata } from '../page';
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import "@testing-library/jest-dom";
+import SsgIndexPage, { metadata } from "../page";
 
 // Global fetch のモック
 const mockFetch = vi.fn();
@@ -10,23 +10,23 @@ const mockFetch = vi.fn();
 const mockCategories = [
   {
     id: 1,
-    name: 'Technology',
-    slug: 'technology',
+    name: "Technology",
+    slug: "technology",
   },
   {
     id: 2,
-    name: 'Science',
-    slug: 'science',
+    name: "Science",
+    slug: "science",
   },
 ];
 
-describe('SsgIndexPage', () => {
+describe("SsgIndexPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = mockFetch;
   });
 
-  it('should render page with categories', async () => {
+  it("should render page with categories", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: mockCategories }),
@@ -34,29 +34,31 @@ describe('SsgIndexPage', () => {
 
     render(await SsgIndexPage());
 
-    expect(screen.getByText('SSG Data Fetching Demo')).toBeInTheDocument();
+    expect(screen.getByText("SSG Data Fetching Demo")).toBeInTheDocument();
     expect(screen.getByText(/Static Site Generation/)).toBeInTheDocument();
-    expect(screen.getByText('Available Categories:')).toBeInTheDocument();
-    expect(screen.getByText('Technology')).toBeInTheDocument();
-    expect(screen.getByText('Science')).toBeInTheDocument();
-    expect(screen.getByText('(technology)')).toBeInTheDocument();
-    expect(screen.getByText('(science)')).toBeInTheDocument();
+    expect(screen.getByText("Available Categories:")).toBeInTheDocument();
+    expect(screen.getByText("Technology")).toBeInTheDocument();
+    expect(screen.getByText("Science")).toBeInTheDocument();
+    expect(screen.getByText("(technology)")).toBeInTheDocument();
+    expect(screen.getByText("(science)")).toBeInTheDocument();
   });
 
-  it('should handle fetch error gracefully', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    mockFetch.mockRejectedValueOnce(new Error('Fetch failed'));
+  it("should handle fetch error gracefully", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockFetch.mockRejectedValueOnce(new Error("Fetch failed"));
 
     render(await SsgIndexPage());
 
-    expect(screen.getByText('SSG Data Fetching Demo')).toBeInTheDocument();
-    expect(screen.getByText('No categories available. Make sure the backend is running.')).toBeInTheDocument();
-    expect(consoleSpy).toHaveBeenCalledWith('Error fetching categories:', expect.any(Error));
+    expect(screen.getByText("SSG Data Fetching Demo")).toBeInTheDocument();
+    expect(
+      screen.getByText("No categories available. Make sure the backend is running.")
+    ).toBeInTheDocument();
+    expect(consoleSpy).toHaveBeenCalledWith("Error fetching categories:", expect.any(Error));
 
     consoleSpy.mockRestore();
   });
 
-  it('should handle empty categories response', async () => {
+  it("should handle empty categories response", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: [] }),
@@ -64,11 +66,13 @@ describe('SsgIndexPage', () => {
 
     render(await SsgIndexPage());
 
-    expect(screen.getByText('No categories available. Make sure the backend is running.')).toBeInTheDocument();
+    expect(
+      screen.getByText("No categories available. Make sure the backend is running.")
+    ).toBeInTheDocument();
   });
 
-  it('should handle API response failure', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it("should handle API response failure", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
@@ -76,12 +80,14 @@ describe('SsgIndexPage', () => {
 
     render(await SsgIndexPage());
 
-    expect(screen.getByText('No categories available. Make sure the backend is running.')).toBeInTheDocument();
+    expect(
+      screen.getByText("No categories available. Make sure the backend is running.")
+    ).toBeInTheDocument();
 
     consoleSpy.mockRestore();
   });
 
-  it('should call API with correct parameters', async () => {
+  it("should call API with correct parameters", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: mockCategories }),
@@ -89,20 +95,22 @@ describe('SsgIndexPage', () => {
 
     await SsgIndexPage();
 
-    expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/categories', {
-      method: 'GET',
+    expect(mockFetch).toHaveBeenCalledWith("http://localhost:8000/api/categories", {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
   });
 
-  it('should have correct metadata', () => {
-    expect(metadata.title).toBe('SSG Data Fetching Demo');
-    expect(metadata.description).toBe('Static Site Generation demonstration with generateStaticParams');
+  it("should have correct metadata", () => {
+    expect(metadata.title).toBe("SSG Data Fetching Demo");
+    expect(metadata.description).toBe(
+      "Static Site Generation demonstration with generateStaticParams"
+    );
   });
 
-  it('should render category links with correct hrefs', async () => {
+  it("should render category links with correct hrefs", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: mockCategories }),
@@ -110,10 +118,10 @@ describe('SsgIndexPage', () => {
 
     render(await SsgIndexPage());
 
-    const technologyLink = screen.getByRole('link', { name: /Technology/ });
-    const scienceLink = screen.getByRole('link', { name: /Science/ });
+    const technologyLink = screen.getByRole("link", { name: /Technology/ });
+    const scienceLink = screen.getByRole("link", { name: /Science/ });
 
-    expect(technologyLink).toHaveAttribute('href', '/features/data-fetching/ssg/technology');
-    expect(scienceLink).toHaveAttribute('href', '/features/data-fetching/ssg/science');
+    expect(technologyLink).toHaveAttribute("href", "/features/data-fetching/ssg/technology");
+    expect(scienceLink).toHaveAttribute("href", "/features/data-fetching/ssg/science");
   });
 });

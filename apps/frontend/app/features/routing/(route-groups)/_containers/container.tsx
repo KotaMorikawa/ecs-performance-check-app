@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { PublicPresentational } from './presentational';
+import { useEffect, useState } from "react";
+import { PublicPresentational } from "./presentational";
 
 export function PublicContainer() {
   const [renderTime, setRenderTime] = useState<number>(0);

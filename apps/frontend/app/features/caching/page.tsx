@@ -1,98 +1,98 @@
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Database, 
-  FileText, 
-  Navigation, 
-  RefreshCw, 
-  Zap,
-  Globe,
+import {
   ArrowRight,
+  Database,
+  FileText,
+  Globe,
   Layers,
+  Navigation,
+  RefreshCw,
+  Shield,
   Timer,
-  Shield
-} from 'lucide-react';
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const cacheStrategies = [
   {
-    id: 'data-cache',
-    title: 'Data Cache',
-    description: 'Next.js fetch APIのキャッシュ機能。サーバーサイドでのデータ取得を最適化',
+    id: "data-cache",
+    title: "Data Cache",
+    description: "Next.js fetch APIのキャッシュ機能。サーバーサイドでのデータ取得を最適化",
     icon: Database,
-    href: '/features/caching/data-cache',
-    badge: 'Core',
-    features: ['自動キャッシュ', 'タグベース無効化', 'リクエスト重複排除'],
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
+    href: "/features/caching/data-cache",
+    badge: "Core",
+    features: ["自動キャッシュ", "タグベース無効化", "リクエスト重複排除"],
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
   },
   {
-    id: 'full-route-cache',
-    title: 'Full Route Cache',
-    description: '完全なページレンダリング結果をキャッシュ。静的サイトのパフォーマンスを実現',
+    id: "full-route-cache",
+    title: "Full Route Cache",
+    description: "完全なページレンダリング結果をキャッシュ。静的サイトのパフォーマンスを実現",
     icon: FileText,
-    href: '/features/caching/full-route-cache',
-    badge: 'Page Level',
-    features: ['HTML全体キャッシュ', 'ISR対応', 'ビルド時生成'],
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
+    href: "/features/caching/full-route-cache",
+    badge: "Page Level",
+    features: ["HTML全体キャッシュ", "ISR対応", "ビルド時生成"],
+    color: "text-green-600",
+    bgColor: "bg-green-50",
   },
   {
-    id: 'router-cache',
-    title: 'Router Cache',
-    description: 'クライアントサイドナビゲーションのキャッシュ。シームレスな画面遷移を実現',
+    id: "router-cache",
+    title: "Router Cache",
+    description: "クライアントサイドナビゲーションのキャッシュ。シームレスな画面遷移を実現",
     icon: Navigation,
-    href: '/features/caching/router-cache',
-    badge: 'Client Side',
-    features: ['プリフェッチ', 'ソフトナビゲーション', 'インスタント遷移'],
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
+    href: "/features/caching/router-cache",
+    badge: "Client Side",
+    features: ["プリフェッチ", "ソフトナビゲーション", "インスタント遷移"],
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
   },
   {
-    id: 'on-demand-revalidation',
-    title: 'On-demand Revalidation',
-    description: '必要に応じてキャッシュを無効化。リアルタイム性とパフォーマンスの両立',
+    id: "on-demand-revalidation",
+    title: "On-demand Revalidation",
+    description: "必要に応じてキャッシュを無効化。リアルタイム性とパフォーマンスの両立",
     icon: RefreshCw,
-    href: '/features/caching/on-demand-revalidation',
-    badge: 'Dynamic',
-    features: ['パス/タグ指定', 'Webhook連携', 'バックエンド通知'],
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
+    href: "/features/caching/on-demand-revalidation",
+    badge: "Dynamic",
+    features: ["パス/タグ指定", "Webhook連携", "バックエンド通知"],
+    color: "text-orange-600",
+    bgColor: "bg-orange-50",
   },
   {
-    id: 'comparison',
-    title: 'Cache Strategy Comparison',
-    description: '各キャッシュ戦略のパフォーマンス比較とCloudFrontシミュレーション',
+    id: "comparison",
+    title: "Cache Strategy Comparison",
+    description: "各キャッシュ戦略のパフォーマンス比較とCloudFrontシミュレーション",
     icon: Layers,
-    href: '/features/caching/comparison',
-    badge: 'Analysis',
-    features: ['性能比較', 'CloudFront統合', '最適化提案'],
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
+    href: "/features/caching/comparison",
+    badge: "Analysis",
+    features: ["性能比較", "CloudFront統合", "最適化提案"],
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
   },
 ];
 
 const keyFeatures = [
   {
     icon: Zap,
-    title: '4層キャッシュシステム',
-    description: 'Data Cache、Full Route Cache、Router Cache、Request Memoizationの多層構造',
+    title: "4層キャッシュシステム",
+    description: "Data Cache、Full Route Cache、Router Cache、Request Memoizationの多層構造",
   },
   {
     icon: Globe,
-    title: 'CloudFront統合',
-    description: 'エッジキャッシュによるグローバル配信の最適化とCDN効率の可視化',
+    title: "CloudFront統合",
+    description: "エッジキャッシュによるグローバル配信の最適化とCDN効率の可視化",
   },
   {
     icon: Timer,
-    title: 'リアルタイムメトリクス',
-    description: 'キャッシュヒット率、レスポンス時間、効率スコアの即時計測',
+    title: "リアルタイムメトリクス",
+    description: "キャッシュヒット率、レスポンス時間、効率スコアの即時計測",
   },
   {
     icon: Shield,
-    title: 'インテリジェント無効化',
-    description: 'タグベース、パスベース、時間ベースの柔軟なキャッシュ管理',
+    title: "インテリジェント無効化",
+    description: "タグベース、パスベース、時間ベースの柔軟なキャッシュ管理",
   },
 ];
 
@@ -131,15 +131,13 @@ export default function CachingPage() {
       <div className="space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">キャッシュ戦略デモ</h2>
-          <p className="text-muted-foreground">
-            各キャッシュレイヤーの動作を実際に体験できます
-          </p>
+          <p className="text-muted-foreground">各キャッシュレイヤーの動作を実際に体験できます</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {cacheStrategies.map((strategy) => (
-            <Card 
-              key={strategy.id} 
+            <Card
+              key={strategy.id}
               className="group hover:shadow-lg transition-all duration-200 overflow-hidden"
             >
               <div className={`h-1 ${strategy.bgColor}`} />
@@ -157,21 +155,19 @@ export default function CachingPage() {
                     </div>
                   </div>
                 </div>
-                <CardDescription className="mt-3">
-                  {strategy.description}
-                </CardDescription>
+                <CardDescription className="mt-3">{strategy.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  {strategy.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
+                  {strategy.features.map((feature) => (
+                    <div key={feature} className="flex items-center gap-2 text-sm">
                       <div className={`w-1.5 h-1.5 rounded-full ${strategy.bgColor}`} />
                       <span className="text-muted-foreground">{feature}</span>
                     </div>
                   ))}
                 </div>
-                <Link href={strategy.href as unknown as Parameters<typeof Link>[0]['href']}>
-                  <Button 
+                <Link href={strategy.href as unknown as Parameters<typeof Link>[0]["href"]}>
+                  <Button
                     className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
                     variant="outline"
                   >
@@ -214,7 +210,7 @@ export default function CachingPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-6 p-4 bg-background rounded-lg">
             <p className="text-sm">
               <strong>💡 ヒント:</strong> 各デモページでは実際のキャッシュ動作を確認でき、

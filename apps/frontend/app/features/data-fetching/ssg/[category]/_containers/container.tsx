@@ -1,7 +1,7 @@
-import { Suspense } from 'react';
-import { SsgPresentational } from './presentational';
-import { categoriesApi } from '../../../_shared/api-client';
-import type { Category, DataFetchMetrics } from '../../../_shared/types';
+import { Suspense } from "react";
+import { categoriesApi } from "../../../_shared/api-client";
+import type { Category, DataFetchMetrics } from "../../../_shared/types";
+import { SsgPresentational } from "./presentational";
 
 interface SsgContainerProps {
   category: string;
@@ -16,24 +16,27 @@ export async function SsgContainer({ category }: SsgContainerProps) {
 
   try {
     // SSG用のキャッシュ設定でカテゴリ一覧を取得
-    const result = await categoriesApi.getAll({
-      next: {
-        tags: ['categories'],
-        // SSGではビルド時に生成されるため、revalidateは設定しない
+    const result = await categoriesApi.getAll(
+      {
+        next: {
+          tags: ["categories"],
+          // SSGではビルド時に生成されるため、revalidateは設定しない
+        },
       },
-    }, 'ssg');
+      "ssg"
+    );
 
     categories = result.data;
-    selectedCategory = categories.find(cat => cat.slug === category) || null;
+    selectedCategory = categories.find((cat) => cat.slug === category) || null;
     metrics = result.metrics;
   } catch (err) {
-    console.error('SSG fetch error:', err);
-    error = err instanceof Error ? err.message : 'Unknown error';
+    console.error("SSG fetch error:", err);
+    error = err instanceof Error ? err.message : "Unknown error";
   }
 
   return (
     <Suspense fallback={<div>Loading SSG demo...</div>}>
-      <SsgPresentational 
+      <SsgPresentational
         categories={categories}
         selectedCategory={selectedCategory}
         currentSlug={category}

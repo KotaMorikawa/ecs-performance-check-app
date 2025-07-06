@@ -1,15 +1,17 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 // Prismaクライアントのシングルトンインスタンス
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
-});
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ["query", "info", "warn", "error"],
+  });
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
@@ -17,10 +19,10 @@ if (process.env.NODE_ENV !== 'production') {
 export async function testDatabaseConnection(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    console.log('✅ Database connected successfully');
+    console.log("✅ Database connected successfully");
     return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error("❌ Database connection failed:", error);
     return false;
   }
 }
@@ -28,5 +30,5 @@ export async function testDatabaseConnection(): Promise<boolean> {
 // グレースフルシャットダウン
 export async function closeDatabaseConnection(): Promise<void> {
   await prisma.$disconnect();
-  console.log('📝 Database connection closed');
+  console.log("📝 Database connection closed");
 }

@@ -1,31 +1,31 @@
-import { Suspense } from 'react';
-import { FullRouteCachePresentational } from './presentational';
-import { cacheTestApi } from '../../_shared/cache-api-client';
+import { Suspense } from "react";
+import { cacheTestApi } from "../../_shared/cache-api-client";
 import {
-  CacheMetrics,
-  CacheLayerMetrics,
-  CacheTestData,
-} from '../../_shared/types';
-import {
-  updateLayerMetrics,
   calculateOverallMetrics,
   generatePerformanceMetrics,
-} from '../../_shared/cache-metrics';
+  updateLayerMetrics,
+} from "../../_shared/cache-metrics";
+import type {
+  CacheApiResponse,
+  CacheLayerMetrics,
+  CacheMetrics,
+  CacheTestData,
+} from "../../_shared/types";
+import { FullRouteCachePresentational } from "./presentational";
 
 interface FullRouteCacheContainerProps {
-  mode?: 'static' | 'isr' | 'dynamic';
+  mode?: "static" | "isr" | "dynamic";
 }
 
 // Server Component（データ取得・統合レイヤー）
-export async function FullRouteCacheContainer({ 
-  mode = 'static' 
+export async function FullRouteCacheContainer({
+  mode = "static",
 }: FullRouteCacheContainerProps = {}) {
   // 初期メトリクスの生成
   const initialMetrics: CacheMetrics = {
     layers: {
-      'data-cache': { strategy: 'data-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'full-route-cache': {
-        strategy: 'full-route-cache',
+      "data-cache": {
+        strategy: "data-cache",
         hits: 0,
         misses: 0,
         totalRequests: 0,
@@ -33,9 +33,42 @@ export async function FullRouteCacheContainer({
         avgResponseTime: 0,
         cacheSize: 0,
       } as CacheLayerMetrics,
-      'router-cache': { strategy: 'router-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'request-memoization': { strategy: 'request-memoization', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'cloudfront-cache': { strategy: 'cloudfront-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
+      "full-route-cache": {
+        strategy: "full-route-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "router-cache": {
+        strategy: "router-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "request-memoization": {
+        strategy: "request-memoization",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "cloudfront-cache": {
+        strategy: "cloudfront-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
     },
     overall: {
       totalHits: 0,
@@ -65,40 +98,49 @@ export async function FullRouteCacheContainer({
     const startTime = performance.now();
 
     // モード別のキャッシュ戦略
-    let response;
-    
+    let response: CacheApiResponse<CacheTestData[]>;
+
     switch (mode) {
-      case 'static':
+      case "static":
         // 静的生成（ビルド時キャッシュ、revalidateなし）
-        response = await cacheTestApi.getTestData({
-          cache: 'force-cache',
-        }, 'full-route-cache');
+        response = await cacheTestApi.getTestData(
+          {
+            cache: "force-cache",
+          },
+          "full-route-cache"
+        );
         cacheInfo.cached = true;
         break;
-        
-      case 'isr':
+
+      case "isr":
         // ISR（120秒でリバリデート）
-        response = await cacheTestApi.getTestData({
-          next: {
-            revalidate: 120,
-            tags: ['full-route-cache', 'isr'],
+        response = await cacheTestApi.getTestData(
+          {
+            next: {
+              revalidate: 120,
+              tags: ["full-route-cache", "isr"],
+            },
           },
-        }, 'full-route-cache');
+          "full-route-cache"
+        );
         break;
-        
-      case 'dynamic':
+
+      case "dynamic":
         // 動的生成（キャッシュなし）
-        response = await cacheTestApi.getTestData({
-          cache: 'no-store',
-        }, 'full-route-cache');
+        response = await cacheTestApi.getTestData(
+          {
+            cache: "no-store",
+          },
+          "full-route-cache"
+        );
         break;
-        
+
       default:
-        response = await cacheTestApi.getTestData({}, 'full-route-cache');
+        response = await cacheTestApi.getTestData({}, "full-route-cache");
     }
 
     testData = response.data;
-    
+
     const endTime = performance.now();
     const renderTime = endTime - startTime;
 
@@ -107,7 +149,7 @@ export async function FullRouteCacheContainer({
       ...response,
       metadata: {
         ...response.metadata,
-        cached: mode === 'static' || response.metadata.cached,
+        cached: mode === "static" || response.metadata.cached,
       },
       metrics: {
         ...response.metrics,
@@ -116,11 +158,11 @@ export async function FullRouteCacheContainer({
     };
 
     const updatedFullRouteCacheMetrics = updateLayerMetrics(
-      initialMetrics.layers['full-route-cache'],
+      initialMetrics.layers["full-route-cache"],
       simulatedResponse
     );
-    
-    initialMetrics.layers['full-route-cache'] = updatedFullRouteCacheMetrics;
+
+    initialMetrics.layers["full-route-cache"] = updatedFullRouteCacheMetrics;
     initialMetrics.overall = calculateOverallMetrics(initialMetrics.layers);
     initialMetrics.performance.renderTime = renderTime;
     initialMetrics.timestamp = new Date().toISOString();
@@ -130,15 +172,14 @@ export async function FullRouteCacheContainer({
       mode,
       cached: simulatedResponse.metadata.cached,
     };
-
   } catch (err) {
-    console.error('Full route cache fetch error:', err);
-    error = err instanceof Error ? err.message : 'Unknown error';
+    console.error("Full route cache fetch error:", err);
+    error = err instanceof Error ? err.message : "Unknown error";
   }
 
   return (
     <Suspense fallback={<div>Loading full route cache demo...</div>}>
-      <FullRouteCachePresentational 
+      <FullRouteCachePresentational
         initialData={testData}
         initialMetrics={initialMetrics}
         cacheInfo={cacheInfo}

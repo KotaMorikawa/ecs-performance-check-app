@@ -1,12 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { ParallelInterceptPresentational } from './presentational';
+import { useEffect, useState } from "react";
+import { ParallelInterceptPresentational } from "./presentational";
 
 export function ParallelInterceptContainer() {
   const [renderTime, setRenderTime] = useState<number>(0);
   const [showModal, setShowModal] = useState(false);
-  const [parallelContent, setParallelContent] = useState<'analytics' | 'team' | 'settings'>('analytics');
+  const [parallelContent, setParallelContent] = useState<"analytics" | "team" | "settings">(
+    "analytics"
+  );
 
   useEffect(() => {
     const startTime = performance.now();

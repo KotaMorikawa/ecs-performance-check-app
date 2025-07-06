@@ -1,28 +1,27 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useTransition } from 'react';
-import { useActionState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Save, Plus } from 'lucide-react';
-import { createPostWithState, updatePostWithState } from '../_actions/post-actions';
+import { Loader2, Plus, Save } from "lucide-react";
+import { useActionState, useEffect, useState, useTransition } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { createPostWithState, updatePostWithState } from "../_actions/post-actions";
 import {
   generateSlug,
-  type PostFormData,
   INITIAL_CREATE_STATE,
   INITIAL_UPDATE_STATE,
-} from '../_lib/validation';
+  type PostFormData,
+} from "../_lib/validation";
 
 interface PostFormProps {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   post?: Post;
-  onOptimisticCreate?: (post: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => void;
+  onOptimisticCreate?: (post: Omit<Post, "id" | "createdAt" | "updatedAt" | "views">) => void;
   onOptimisticUpdate?: (post: Post) => void;
   onEditComplete?: () => void;
 }
@@ -48,30 +47,44 @@ interface Post {
 }
 
 // フォーム送信ボタンコンポーネント（useActionStateのisPendingを使用）
-function SubmitButton({ mode, isPending, isPendingTransition }: { mode: 'create' | 'edit'; isPending: boolean; isPendingTransition?: boolean }) {
+function SubmitButton({
+  mode,
+  isPending,
+  isPendingTransition,
+}: {
+  mode: "create" | "edit";
+  isPending: boolean;
+  isPendingTransition?: boolean;
+}) {
   const isSubmitting = isPending || isPendingTransition;
   return (
     <Button type="submit" disabled={isSubmitting} className="w-full">
       {isSubmitting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {mode === 'create' ? '作成中...' : '更新中...'}
+          {mode === "create" ? "作成中..." : "更新中..."}
         </>
       ) : (
         <>
-          {mode === 'create' ? (
+          {mode === "create" ? (
             <Plus className="mr-2 h-4 w-4" />
           ) : (
             <Save className="mr-2 h-4 w-4" />
           )}
-          {mode === 'create' ? '投稿を作成' : '投稿を更新'}
+          {mode === "create" ? "投稿を作成" : "投稿を更新"}
         </>
       )}
     </Button>
   );
 }
 
-export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, onEditComplete }: PostFormProps) {
+export function PostForm({
+  mode,
+  post,
+  onOptimisticCreate,
+  onOptimisticUpdate,
+  onEditComplete,
+}: PostFormProps) {
   const { toast } = useToast();
   const [isPendingTransition, startTransition] = useTransition();
 
@@ -86,14 +99,14 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
   );
 
   // 現在のmode に応じて適切な状態とアクションを選択
-  const currentState = mode === 'create' ? createState : updateState;
-  const currentAction = mode === 'create' ? createAction : updateAction;
-  const isPending = mode === 'create' ? isCreatePending : isUpdatePending;
+  const currentState = mode === "create" ? createState : updateState;
+  const currentAction = mode === "create" ? createAction : updateAction;
+  const isPending = mode === "create" ? isCreatePending : isUpdatePending;
 
   const [formData, setFormData] = useState<PostFormData>({
-    title: post?.title || '',
-    content: post?.content || '',
-    slug: post?.slug || '',
+    title: post?.title || "",
+    content: post?.content || "",
+    slug: post?.slug || "",
     published: post?.published || false,
   });
 
@@ -112,9 +125,9 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
     } else {
       // 新規作成モードの場合は空のフォームにリセット
       setFormData({
-        title: '',
-        content: '',
-        slug: '',
+        title: "",
+        content: "",
+        slug: "",
         published: false,
       });
       setAutoGenerateSlug(true); // 新規作成モードでは自動生成を有効
@@ -135,28 +148,28 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
 
     if (currentState.success && currentState.message) {
       toast({
-        title: '成功',
+        title: "成功",
         description: currentState.message,
       });
 
       // 作成モードの場合、フォームをリセット
-      if (mode === 'create') {
+      if (mode === "create") {
         setFormData({
-          title: '',
-          content: '',
-          slug: '',
+          title: "",
+          content: "",
+          slug: "",
           published: false,
         });
         setAutoGenerateSlug(true);
-      } else if (mode === 'edit') {
+      } else if (mode === "edit") {
         // 編集モードの場合、編集完了をコールバック
         onEditComplete?.();
       }
     } else if (currentState.error) {
       toast({
-        title: 'エラー',
+        title: "エラー",
         description: currentState.error,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   }, [currentState, mode, toast, onEditComplete]);
@@ -166,8 +179,8 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     // スラッグが手動で変更された場合、自動生成を停止
-    if (field === 'slug' && typeof value === 'string') {
-      setAutoGenerateSlug(value === '');
+    if (field === "slug" && typeof value === "string") {
+      setAutoGenerateSlug(value === "");
     }
   };
 
@@ -178,7 +191,7 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
   // 楽観的更新を実行するフォーム送信ハンドラー
   const handleSubmit = () => {
     // 楽観的更新用のデータを作成
-    if (mode === 'create' && onOptimisticCreate) {
+    if (mode === "create" && onOptimisticCreate) {
       startTransition(() => {
         onOptimisticCreate({
           title: formData.title,
@@ -189,7 +202,7 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
           tags: [],
         });
       });
-    } else if (mode === 'edit' && post && onOptimisticUpdate) {
+    } else if (mode === "edit" && post && onOptimisticUpdate) {
       startTransition(() => {
         onOptimisticUpdate({
           ...post,
@@ -211,7 +224,7 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          {mode === 'create' ? (
+          {mode === "create" ? (
             <>
               <Plus className="h-5 w-5" />
               新しい投稿を作成
@@ -224,9 +237,9 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
           )}
         </CardTitle>
         <CardDescription>
-          {mode === 'create'
-            ? 'JavaScript無効環境でも動作するServer Actionsフォーム'
-            : '投稿内容を更新します'}
+          {mode === "create"
+            ? "JavaScript無効環境でも動作するServer Actionsフォーム"
+            : "投稿内容を更新します"}
         </CardDescription>
       </CardHeader>
 
@@ -238,14 +251,13 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
         )}
 
         <form
-          role="form"
           action={currentAction}
           onSubmit={handleSubmit}
           noValidate // クライアント側のHTML5バリデーションを無効化
           className="space-y-6"
         >
           {/* 編集モードの場合はpost IDを送信 */}
-          {mode === 'edit' && post && <input type="hidden" name="id" value={post.id} />}
+          {mode === "edit" && post && <input type="hidden" name="id" value={post.id} />}
           {/* タイトル */}
           <div className="space-y-2">
             <Label htmlFor="title">
@@ -257,9 +269,9 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
               type="text"
               required
               value={formData.title}
-              onChange={(e) => updateFormField('title', e.target.value)}
-              aria-describedby={errors.title ? 'title-error' : undefined}
-              className={errors.title ? 'border-red-500' : ''}
+              onChange={(e) => updateFormField("title", e.target.value)}
+              aria-describedby={errors.title ? "title-error" : undefined}
+              className={errors.title ? "border-red-500" : ""}
               placeholder="投稿のタイトルを入力してください"
             />
             {errors.title && (
@@ -279,9 +291,9 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
               name="content"
               required
               value={formData.content}
-              onChange={(e) => updateFormField('content', e.target.value)}
-              aria-describedby={errors.content ? 'content-error' : undefined}
-              className={errors.content ? 'border-red-500' : ''}
+              onChange={(e) => updateFormField("content", e.target.value)}
+              aria-describedby={errors.content ? "content-error" : undefined}
+              className={errors.content ? "border-red-500" : ""}
               placeholder="投稿の内容を入力してください"
               rows={6}
             />
@@ -303,9 +315,9 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
               type="text"
               required
               value={formData.slug}
-              onChange={(e) => updateFormField('slug', e.target.value)}
-              aria-describedby={errors.slug ? 'slug-error' : 'slug-help'}
-              className={errors.slug ? 'border-red-500' : ''}
+              onChange={(e) => updateFormField("slug", e.target.value)}
+              aria-describedby={errors.slug ? "slug-error" : "slug-help"}
+              className={errors.slug ? "border-red-500" : ""}
               placeholder="url-friendly-slug"
             />
             {errors.slug ? (
@@ -325,14 +337,18 @@ export function PostForm({ mode, post, onOptimisticCreate, onOptimisticUpdate, o
               id="published"
               name="published"
               checked={formData.published}
-              onCheckedChange={(checked) => updateFormField('published', !!checked)}
+              onCheckedChange={(checked) => updateFormField("published", !!checked)}
               value="true"
             />
             <Label htmlFor="published">公開する</Label>
           </div>
 
           {/* 送信ボタン */}
-          <SubmitButton mode={mode} isPending={isPending} isPendingTransition={isPendingTransition} />
+          <SubmitButton
+            mode={mode}
+            isPending={isPending}
+            isPendingTransition={isPendingTransition}
+          />
         </form>
 
         {/* Progressive Enhancement の説明 */}

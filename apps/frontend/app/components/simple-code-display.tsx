@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 interface SimpleCodeDisplayProps {
   code: string;
@@ -6,7 +6,7 @@ interface SimpleCodeDisplayProps {
   title?: string;
 }
 
-export function SimpleCodeDisplay({ code, language = 'tsx', title }: SimpleCodeDisplayProps) {
+export function SimpleCodeDisplay({ code, language = "tsx", title }: SimpleCodeDisplayProps) {
   return (
     <div className="border rounded-lg overflow-hidden">
       {title && (

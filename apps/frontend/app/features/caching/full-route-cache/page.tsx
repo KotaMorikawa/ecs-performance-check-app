@@ -1,4 +1,4 @@
-import { FullRouteCacheContainer } from './_containers/container';
+import { FullRouteCacheContainer } from "./_containers/container";
 
 // ISR設定: 60秒ごとにリジェネレート
 export const revalidate = 60;

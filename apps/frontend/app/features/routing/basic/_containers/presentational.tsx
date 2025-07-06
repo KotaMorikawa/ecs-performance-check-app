@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { SegmentFeatureInfo } from '@/components/features/segment-feature-info';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { Activity, Clock } from 'lucide-react';
+import { Activity, Clock } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { SegmentFeatureInfo } from "@/components/features/segment-feature-info";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface BasicRoutingPresentationalProps {
   serverData: {
@@ -27,9 +27,7 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
   return (
     <div className="min-h-screen bg-white p-8">
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Basic App Router
-        </h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Basic App Router</h1>
         <p className="text-lg text-gray-600">
           Next.js 15.3.4 の App Router を使用した基本的なルーティング機能のデモ
         </p>
@@ -43,14 +41,15 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
               <Activity className="h-5 w-5" />
               パフォーマンスメトリクス
             </CardTitle>
-            <CardDescription>
-              リアルタイムのCore Web Vitals測定結果
-            </CardDescription>
+            <CardDescription>リアルタイムのCore Web Vitals測定結果</CardDescription>
           </CardHeader>
           <CardContent>
             <EnhancedPerformanceDisplay />
-            
-            <div data-testid="render-time" className="flex items-center gap-2 text-sm mt-6 pt-6 border-t">
+
+            <div
+              data-testid="render-time"
+              className="flex items-center gap-2 text-sm mt-6 pt-6 border-t"
+            >
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>クライアントレンダリング時間: {clientRenderTime.toFixed(2)} ms</span>
               <span className="ml-4">サーバータイムスタンプ: {serverData.timestamp}</span>
@@ -64,9 +63,7 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
         <Card>
           <CardHeader>
             <CardTitle>他のルーティング機能</CardTitle>
-            <CardDescription>
-              Next.js 15.3.4の様々なルーティング機能を確認できます
-            </CardDescription>
+            <CardDescription>Next.js 15.3.4の様々なルーティング機能を確認できます</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -74,20 +71,24 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
                 <Link href="/features/routing/dynamic/demo-123">
                   <div className="text-left">
                     <div className="font-semibold">動的ルーティング</div>
-                    <div className="text-sm text-muted-foreground">URLパラメータに基づく動的ページ生成</div>
+                    <div className="text-sm text-muted-foreground">
+                      URLパラメータに基づく動的ページ生成
+                    </div>
                   </div>
                 </Link>
               </Button>
-              
+
               <Button asChild variant="outline" className="h-auto p-4 justify-start">
                 <Link href="/features/routing/nested-layout">
                   <div className="text-left">
                     <div className="font-semibold">ネストされたレイアウト</div>
-                    <div className="text-sm text-muted-foreground">階層的なレイアウト組み合わせ</div>
+                    <div className="text-sm text-muted-foreground">
+                      階層的なレイアウト組み合わせ
+                    </div>
                   </div>
                 </Link>
               </Button>
-              
+
               <Button asChild variant="outline" className="h-auto p-4 justify-start">
                 <Link href="/features/routing/loading-error">
                   <div className="text-left">
@@ -96,7 +97,7 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
                   </div>
                 </Link>
               </Button>
-              
+
               <Button asChild variant="outline" className="h-auto p-4 justify-start">
                 <Link href="/features/routing/public" as="/features/routing/public">
                   <div className="text-left">
@@ -105,7 +106,7 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
                   </div>
                 </Link>
               </Button>
-              
+
               <Button asChild variant="outline" className="h-auto p-4 justify-start">
                 <Link href="/features/routing/parallel-intercept">
                   <div className="text-left">
@@ -114,12 +115,14 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
                   </div>
                 </Link>
               </Button>
-              
+
               <Button asChild variant="outline" className="h-auto p-4 justify-start">
                 <Link href="/features/routing/basic">
                   <div className="text-left">
                     <div className="font-semibold">基本ルーティング</div>
-                    <div className="text-sm text-muted-foreground">現在のページ（Basic App Router）</div>
+                    <div className="text-sm text-muted-foreground">
+                      現在のページ（Basic App Router）
+                    </div>
                   </div>
                 </Link>
               </Button>
@@ -145,7 +148,7 @@ export function BasicRoutingPresentational({ serverData }: BasicRoutingPresentat
 
 export default function BasicRoutingPage() {
   return <BasicRoutingContainer />;
-}`
+}`,
             },
             {
               filename: "_containers/basic-routing.container.tsx",
@@ -166,7 +169,7 @@ export function BasicRoutingContainer() {
   }, []);
 
   return <BasicRoutingPresentational renderTime={renderTime} />;
-}`
+}`,
             },
             {
               filename: "_components/basic-routing.presentational.tsx",
@@ -175,7 +178,7 @@ export function BasicRoutingContainer() {
               content: `import Link from 'next/link';
 import { SegmentFeatureInfo } from '@/components/features/segment-feature-info';
 import { Button } from '@/components/ui/button';
-// ... UI コンポーネント`
+// ... UI コンポーネント`,
             },
             {
               filename: "layout.tsx",
@@ -200,8 +203,8 @@ export default function RootLayout({
       </body>
     </html>
   );
-}`
-            }
+}`,
+            },
           ]}
         />
       </section>

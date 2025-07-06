@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { usePerformanceMetrics, formatMetrics } from '@/hooks/use-performance-metrics';
-import { useWebVitals } from '@/hooks/use-web-vitals';
-import { WebVitalsDisplay } from './web-vitals-display';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Activity, 
-  Network, 
-  Database, 
-  Clock, 
-  RefreshCw, 
-  TrendingUp, 
-  Zap,
-  HardDrive,
+import {
+  Activity,
+  Clock,
+  Database,
   Globe,
-  Timer
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  HardDrive,
+  Network,
+  RefreshCw,
+  Timer,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { formatMetrics, usePerformanceMetrics } from "@/hooks/use-performance-metrics";
+import { useWebVitals } from "@/hooks/use-web-vitals";
+import { cn } from "@/lib/utils";
+import { WebVitalsDisplay } from "./web-vitals-display";
 
 interface PerformanceMetrics {
   network: {
@@ -54,39 +54,41 @@ interface MetricCardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
-  trend?: 'up' | 'down' | 'stable';
-  status?: 'good' | 'warning' | 'error';
+  trend?: "up" | "down" | "stable";
+  status?: "good" | "warning" | "error";
   description?: string;
 }
 
-function MetricCard({ title, value, icon, trend, status = 'good', description }: MetricCardProps) {
+function MetricCard({ title, value, icon, trend, status = "good", description }: MetricCardProps) {
   const statusColors = {
-    good: 'border-green-200 bg-green-50',
-    warning: 'border-yellow-200 bg-yellow-50',
-    error: 'border-red-200 bg-red-50'
+    good: "border-green-200 bg-green-50",
+    warning: "border-yellow-200 bg-yellow-50",
+    error: "border-red-200 bg-red-50",
   };
 
   return (
-    <Card className={cn('transition-all hover:shadow-md', statusColors[status])}>
+    <Card className={cn("transition-all hover:shadow-md", statusColors[status])}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white rounded-lg shadow-sm">
-              {icon}
-            </div>
+            <div className="p-2 bg-white rounded-lg shadow-sm">{icon}</div>
             <div>
               <p className="text-sm font-medium text-gray-600">{title}</p>
               <p className="text-2xl font-bold text-gray-900">{value}</p>
-              {description && (
-                <p className="text-xs text-gray-500 mt-1">{description}</p>
-              )}
+              {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
             </div>
           </div>
           {trend && (
-            <TrendingUp className={cn(
-              'h-4 w-4',
-              trend === 'up' ? 'text-green-500' : trend === 'down' ? 'text-red-500' : 'text-gray-400'
-            )} />
+            <TrendingUp
+              className={cn(
+                "h-4 w-4",
+                trend === "up"
+                  ? "text-green-500"
+                  : trend === "down"
+                    ? "text-red-500"
+                    : "text-gray-400"
+              )}
+            />
           )}
         </div>
       </CardContent>
@@ -94,13 +96,13 @@ function MetricCard({ title, value, icon, trend, status = 'good', description }:
   );
 }
 
-export function EnhancedPerformanceDisplay({ 
-  metrics: externalMetrics, 
-  title = "Performance Metrics" 
+export function EnhancedPerformanceDisplay({
+  metrics: externalMetrics,
+  title = "Performance Metrics",
 }: EnhancedPerformanceDisplayProps = {}) {
   const { metrics: hookMetrics, isCollecting, refreshMetrics } = usePerformanceMetrics();
   useWebVitals();
-  
+
   // 外部から渡されたmetricsを優先、なければhookからのmetricsを使用
   const metrics = externalMetrics || hookMetrics;
 
@@ -116,15 +118,15 @@ export function EnhancedPerformanceDisplay({
   }
 
   const getCacheStatus = (efficiency: number) => {
-    if (efficiency >= 80) return 'good';
-    if (efficiency >= 60) return 'warning';
-    return 'error';
+    if (efficiency >= 80) return "good";
+    if (efficiency >= 60) return "warning";
+    return "error";
   };
 
   const getNetworkStatus = (avgResponseTime: number) => {
-    if (avgResponseTime < 200) return 'good';
-    if (avgResponseTime < 500) return 'warning';
-    return 'error';
+    if (avgResponseTime < 200) return "good";
+    if (avgResponseTime < 500) return "warning";
+    return "error";
   };
 
   return (
@@ -133,11 +135,11 @@ export function EnhancedPerformanceDisplay({
       <div className="border-b pb-4">
         <h2 className="text-xl font-bold text-gray-900">{title}</h2>
         <p className="text-sm text-gray-600 mt-1">
-          最終更新: {new Date(metrics.lastUpdated).toLocaleString('ja-JP')}
+          最終更新: {new Date(metrics.lastUpdated).toLocaleString("ja-JP")}
         </p>
       </div>
 
-      {/* Core Web Vitals */} 
+      {/* Core Web Vitals */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Core Web Vitals</h3>
@@ -148,7 +150,7 @@ export function EnhancedPerformanceDisplay({
             variant="outline"
             className="flex items-center gap-2"
           >
-            <RefreshCw className={cn('h-4 w-4', isCollecting && 'animate-spin')} />
+            <RefreshCw className={cn("h-4 w-4", isCollecting && "animate-spin")} />
             更新
           </Button>
         </div>
@@ -235,9 +237,7 @@ export function EnhancedPerformanceDisplay({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Next.js キャッシュ</CardTitle>
-              <CardDescription>
-                Next.js内部キャッシュシステムの効率性
-              </CardDescription>
+              <CardDescription>Next.js内部キャッシュシステムの効率性</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -247,10 +247,7 @@ export function EnhancedPerformanceDisplay({
                     {formatMetrics.percentage(metrics.cache.cacheEfficiency)}
                   </span>
                 </div>
-                <Progress 
-                  value={metrics.cache.cacheEfficiency} 
-                  className="h-2"
-                />
+                <Progress value={metrics.cache.cacheEfficiency} className="h-2" />
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">ヒット:</span>
@@ -272,9 +269,7 @@ export function EnhancedPerformanceDisplay({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">ブラウザキャッシュ</CardTitle>
-              <CardDescription>
-                ブラウザキャッシュの利用状況
-              </CardDescription>
+              <CardDescription>ブラウザキャッシュの利用状況</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -284,10 +279,7 @@ export function EnhancedPerformanceDisplay({
                     {formatMetrics.percentage(metrics.network.cacheHitRate)}
                   </span>
                 </div>
-                <Progress 
-                  value={metrics.network.cacheHitRate} 
-                  className="h-2"
-                />
+                <Progress value={metrics.network.cacheHitRate} className="h-2" />
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">ヒット:</span>
@@ -314,7 +306,7 @@ export function EnhancedPerformanceDisplay({
           <div className="flex items-center justify-between text-sm text-gray-500">
             <span>最終更新: {new Date(metrics.lastUpdated).toLocaleString()}</span>
             <Badge variant="outline" className="text-xs">
-              {isCollecting ? '測定中...' : 'リアルタイム'}
+              {isCollecting ? "測定中..." : "リアルタイム"}
             </Badge>
           </div>
         </CardContent>

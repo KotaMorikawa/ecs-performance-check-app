@@ -1,8 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { Users, Globe, Activity, Clock } from 'lucide-react';
+import { Activity, Clock, Globe, Users } from "lucide-react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PublicPresentationalProps {
   renderTime: number;
@@ -25,8 +25,11 @@ export function PublicPresentational({ renderTime }: PublicPresentationalProps) 
           </div>
         </div>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          ルートグループ <code className="bg-gray-100 px-2 py-1 rounded text-sm">(route-groups)</code> 内の
-          パブリックエリア。URLパスは <code className="bg-gray-100 px-2 py-1 rounded text-sm">/features/routing/public</code> になります。
+          ルートグループ{" "}
+          <code className="bg-gray-100 px-2 py-1 rounded text-sm">(route-groups)</code> 内の
+          パブリックエリア。URLパスは{" "}
+          <code className="bg-gray-100 px-2 py-1 rounded text-sm">/features/routing/public</code>{" "}
+          になります。
         </p>
       </header>
 
@@ -37,9 +40,7 @@ export function PublicPresentational({ renderTime }: PublicPresentationalProps) 
             <Globe className="h-5 w-5" />
             ルート情報
           </CardTitle>
-          <CardDescription>
-            Route Groupsによるファイル構成とURL構造の関係
-          </CardDescription>
+          <CardDescription>Route Groupsによるファイル構成とURL構造の関係</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -54,7 +55,7 @@ export function PublicPresentational({ renderTime }: PublicPresentationalProps) 
                 <div className="text-gray-800 ml-12">📄 page.tsx</div>
               </div>
             </div>
-            
+
             <div className="space-y-3">
               <h4 className="font-semibold text-gray-900">実際のURL</h4>
               <div className="space-y-2">
@@ -76,34 +77,26 @@ export function PublicPresentational({ renderTime }: PublicPresentationalProps) 
       <Card>
         <CardHeader>
           <CardTitle>Public Area 機能</CardTitle>
-          <CardDescription>
-            一般ユーザー向けの機能とコンテンツ
-          </CardDescription>
+          <CardDescription>一般ユーザー向けの機能とコンテンツ</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-green-50 rounded-lg">
               <Users className="h-12 w-12 text-green-600 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">ユーザー登録</h3>
-              <p className="text-sm text-gray-600">
-                新規ユーザーのアカウント作成機能
-              </p>
+              <p className="text-sm text-gray-600">新規ユーザーのアカウント作成機能</p>
             </div>
-            
+
             <div className="text-center p-6 bg-blue-50 rounded-lg">
               <Globe className="h-12 w-12 text-blue-600 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">コンテンツ閲覧</h3>
-              <p className="text-sm text-gray-600">
-                公開されているコンテンツの閲覧
-              </p>
+              <p className="text-sm text-gray-600">公開されているコンテンツの閲覧</p>
             </div>
-            
+
             <div className="text-center p-6 bg-orange-50 rounded-lg">
               <Activity className="h-12 w-12 text-orange-600 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">フィードバック</h3>
-              <p className="text-sm text-gray-600">
-                ユーザーからのフィードバック送信
-              </p>
+              <p className="text-sm text-gray-600">ユーザーからのフィードバック送信</p>
             </div>
           </div>
         </CardContent>
@@ -122,8 +115,11 @@ export function PublicPresentational({ renderTime }: PublicPresentationalProps) 
         </CardHeader>
         <CardContent>
           <EnhancedPerformanceDisplay />
-          
-          <div data-testid="render-time" className="flex items-center gap-2 text-sm mt-6 pt-6 border-t">
+
+          <div
+            data-testid="render-time"
+            className="flex items-center gap-2 text-sm mt-6 pt-6 border-t"
+          >
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>レンダリング時間: {renderTime.toFixed(2)} ms</span>
           </div>
@@ -154,7 +150,7 @@ export function PublicContainer() {
   }, []);
 
   return <PublicPresentational renderTime={renderTime} />;
-}`
+}`,
           },
           {
             filename: "_components/public.presentational.tsx",
@@ -162,7 +158,7 @@ export function PublicContainer() {
             description: "プレゼンテーションレイヤー（UI表示）",
             content: `import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-// ... UI コンポーネント`
+// ... UI コンポーネント`,
           },
           {
             filename: "page.tsx",
@@ -172,11 +168,11 @@ import { Badge } from '@/components/ui/badge';
 
 export default function PublicPage() {
   return <PublicContainer />;
-}`
+}`,
           },
           {
             filename: "layout.tsx",
-            language: "tsx", 
+            language: "tsx",
             description: "Route Groups共通レイアウト",
             content: `import { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -207,8 +203,8 @@ export default function RouteGroupLayout({ children }: RouteGroupLayoutProps) {
       </main>
     </div>
   );
-}`
-          }
+}`,
+          },
         ]}
       />
     </div>

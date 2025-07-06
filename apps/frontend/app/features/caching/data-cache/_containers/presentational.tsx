@@ -1,58 +1,52 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { 
-  Database, 
-  RefreshCw, 
-  Clock, 
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Database,
+  RefreshCw,
   Server,
   Tag,
-  Zap,
-  CheckCircle,
   XCircle,
-  AlertCircle
-} from 'lucide-react';
-import type { 
-  CacheTestData, 
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cacheTestApi, revalidationApi } from "../../_shared/cache-api-client";
+import { formatCacheSize, updateLayerMetrics } from "../../_shared/cache-metrics";
+import type {
   CacheApiResponse,
   CacheLayerMetrics,
-  RevalidationOperation 
-} from '../../_shared/types';
-import { 
-  cacheTestApi, 
-  revalidationApi
-} from '../../_shared/cache-api-client';
-import { 
-  formatCacheSize,
-  updateLayerMetrics
-} from '../../_shared/cache-metrics';
+  CacheTestData,
+  RevalidationOperation,
+} from "../../_shared/types";
 
 interface DataCachePresentationalProps {
   initialData: CacheTestData[];
-  initialMetadata: CacheApiResponse<CacheTestData[]>['metadata'] | null;
-  initialMetrics: CacheApiResponse<CacheTestData[]>['metrics'] | null;
+  initialMetadata: CacheApiResponse<CacheTestData[]>["metadata"] | null;
+  initialMetrics: CacheApiResponse<CacheTestData[]>["metrics"] | null;
   error: string | null;
 }
 
-export function DataCachePresentational({ 
-  initialData, 
+export function DataCachePresentational({
+  initialData,
   initialMetadata,
   initialMetrics,
-  error 
+  error,
 }: DataCachePresentationalProps) {
   const [data, setData] = useState(initialData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [layerMetrics, setLayerMetrics] = useState<CacheLayerMetrics>({
-    strategy: 'data-cache',
+    strategy: "data-cache",
     hits: initialMetadata?.cached ? 1 : 0,
     misses: initialMetadata?.cached ? 0 : 1,
     totalRequests: 1,
@@ -68,14 +62,14 @@ export function DataCachePresentational({
   const refreshData = async () => {
     setIsRefreshing(true);
     try {
-      const response = await cacheTestApi.getDataCacheDemo(['cache-demo', 'categories']);
+      const response = await cacheTestApi.getDataCacheDemo(["cache-demo", "categories"]);
       setData(response.data);
-      
+
       // メトリクスを更新
       const updatedMetrics = updateLayerMetrics(layerMetrics, response);
       setLayerMetrics(updatedMetrics);
     } catch (err) {
-      console.error('Refresh error:', err);
+      console.error("Refresh error:", err);
     } finally {
       setIsRefreshing(false);
     }
@@ -85,7 +79,7 @@ export function DataCachePresentational({
   const handleRevalidateTag = async (tag: string) => {
     const operation = await revalidationApi.revalidateTag(tag);
     setRevalidations([operation, ...revalidations]);
-    
+
     if (operation.success) {
       // リバリデート後にデータを再取得
       setTimeout(() => refreshData(), 1000);
@@ -139,21 +133,15 @@ async function getRealtimeData() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Data Cache Demo</h1>
-          <p className="text-muted-foreground mt-2">
-            Next.js fetch APIのキャッシュ機能を実演
-          </p>
+          <p className="text-muted-foreground mt-2">Next.js fetch APIのキャッシュ機能を実演</p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={refreshData}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshData} disabled={isRefreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh Data
           </Button>
           <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-            {showCode ? 'Hide Code' : 'Show Code'}
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
@@ -164,10 +152,10 @@ async function getRealtimeData() {
           description="Next.js fetch APIキャッシュの実装例"
           files={[
             {
-              filename: 'data-cache.ts',
-              language: 'typescript',
+              filename: "data-cache.ts",
+              language: "typescript",
               content: dataCacheCode,
-              description: 'Data Cacheの様々な使用パターン',
+              description: "Data Cacheの様々な使用パターン",
             },
           ]}
         />
@@ -190,8 +178,8 @@ async function getRealtimeData() {
                   <Database className="h-5 w-5" />
                   Cache Status
                 </span>
-                <Badge variant={initialMetadata?.cached ? 'default' : 'secondary'}>
-                  {initialMetadata?.cached ? 'HIT' : 'MISS'}
+                <Badge variant={initialMetadata?.cached ? "default" : "secondary"}>
+                  {initialMetadata?.cached ? "HIT" : "MISS"}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -201,13 +189,13 @@ async function getRealtimeData() {
                   <p className="text-sm text-muted-foreground">Source</p>
                   <p className="font-medium flex items-center gap-1">
                     <Server className="h-4 w-4" />
-                    {initialMetadata?.source || 'network'}
+                    {initialMetadata?.source || "network"}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Cache Tags</p>
                   <div className="flex gap-1">
-                    {initialMetadata?.tags?.map(tag => (
+                    {initialMetadata?.tags?.map((tag) => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         <Tag className="h-3 w-3 mr-1" />
                         {tag}
@@ -219,14 +207,12 @@ async function getRealtimeData() {
                   <p className="text-sm text-muted-foreground">TTL</p>
                   <p className="font-medium flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    {initialMetadata?.ttl ? `${initialMetadata.ttl}s` : 'Permanent'}
+                    {initialMetadata?.ttl ? `${initialMetadata.ttl}s` : "Permanent"}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Cache Size</p>
-                  <p className="font-medium">
-                    {formatCacheSize(initialMetrics?.dataSize || 0)}
-                  </p>
+                  <p className="font-medium">{formatCacheSize(initialMetrics?.dataSize || 0)}</p>
                 </div>
               </div>
             </CardContent>
@@ -254,19 +240,17 @@ async function getRealtimeData() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground">
-                            {item.description}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                  
+
                   {/* リバリデートアクション */}
                   <div className="mt-6 p-4 bg-muted rounded-lg">
                     <h4 className="font-semibold mb-3">Tag-based Revalidation</h4>
                     <div className="flex flex-wrap gap-2">
-                      {['categories', 'cache-demo'].map(tag => (
+                      {["categories", "cache-demo"].map((tag) => (
                         <Button
                           key={tag}
                           variant="outline"
@@ -281,9 +265,7 @@ async function getRealtimeData() {
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  No cached data available
-                </p>
+                <p className="text-center text-muted-foreground py-8">No cached data available</p>
               )}
             </CardContent>
           </Card>
@@ -362,7 +344,7 @@ async function getRealtimeData() {
                 <div className="space-y-2">
                   {revalidations.map((op, index) => (
                     <div
-                      key={index}
+                      key={`revalidation-${index}-${op.timestamp}`}
                       className="flex items-center justify-between p-3 rounded-lg border"
                     >
                       <div className="flex items-center gap-3">
@@ -373,15 +355,15 @@ async function getRealtimeData() {
                         )}
                         <div>
                           <p className="font-medium">
-                            {op.type === 'tag' ? 'Tag' : 'Path'}: {op.target}
+                            {op.type === "tag" ? "Tag" : "Path"}: {op.target}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(op.timestamp).toLocaleString()} · {op.duration?.toFixed(0)}ms
                           </p>
                         </div>
                       </div>
-                      <Badge variant={op.success ? 'success' : 'destructive'}>
-                        {op.success ? 'Success' : 'Failed'}
+                      <Badge variant={op.success ? "success" : "destructive"}>
+                        {op.success ? "Success" : "Failed"}
                       </Badge>
                     </div>
                   ))}
@@ -407,8 +389,8 @@ async function getRealtimeData() {
                   1. Automatic Caching
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Next.js automatically caches fetch requests on the server. 
-                  Data is stored in a persistent HTTP cache that survives across requests.
+                  Next.js automatically caches fetch requests on the server. Data is stored in a
+                  persistent HTTP cache that survives across requests.
                 </p>
               </div>
 
@@ -418,8 +400,8 @@ async function getRealtimeData() {
                   2. Cache Tags
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Tags allow selective cache invalidation. When you revalidate a tag, 
-                  all cached entries with that tag are marked as stale.
+                  Tags allow selective cache invalidation. When you revalidate a tag, all cached
+                  entries with that tag are marked as stale.
                 </p>
                 <pre className="mt-2 p-2 bg-muted rounded text-xs">
                   {`next: { tags: ['categories', 'posts'] }`}
@@ -432,9 +414,15 @@ async function getRealtimeData() {
                   3. Revalidation Strategies
                 </h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• <strong>Time-based:</strong> revalidate: 60</li>
-                  <li>• <strong>On-demand:</strong> revalidateTag()</li>
-                  <li>• <strong>Manual:</strong> cache: &apos;no-store&apos;</li>
+                  <li>
+                    • <strong>Time-based:</strong> revalidate: 60
+                  </li>
+                  <li>
+                    • <strong>On-demand:</strong> revalidateTag()
+                  </li>
+                  <li>
+                    • <strong>Manual:</strong> cache: &apos;no-store&apos;
+                  </li>
                 </ul>
               </div>
 
@@ -463,8 +451,8 @@ async function getRealtimeData() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Pro Tip:</strong> Use tags for granular cache control. 
-                  Combine multiple tags to create flexible invalidation strategies.
+                  <strong>Pro Tip:</strong> Use tags for granular cache control. Combine multiple
+                  tags to create flexible invalidation strategies.
                 </AlertDescription>
               </Alert>
             </CardContent>

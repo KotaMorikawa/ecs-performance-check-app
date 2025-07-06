@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import type { Category, DataFetchMetrics } from '../../_shared/types';
-import { formatDateTime } from '@/utils/date-formatter';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDateTime } from "@/utils/date-formatter";
+import type { Category, DataFetchMetrics } from "../../_shared/types";
 
 interface ClientSideState {
   categories: Category[];
@@ -31,30 +31,30 @@ export function ClientSidePresentational() {
   const loadingRef = useRef(false);
 
   // クライアントサイド データフェッチ
-  const fetchCategories = async (isRefresh = false) => {
+  const fetchCategories = useCallback(async (isRefresh = false) => {
     // 既にロード中の場合は重複リクエストを防ぐ
     if (loadingRef.current && !isRefresh) {
       return;
     }
 
     loadingRef.current = true;
-    setState(prev => ({ 
-      ...prev, 
-      loading: true, 
+    setState((prev) => ({
+      ...prev,
+      loading: true,
       error: null,
-      refreshCount: isRefresh ? prev.refreshCount + 1 : prev.refreshCount
+      refreshCount: isRefresh ? prev.refreshCount + 1 : prev.refreshCount,
     }));
 
     const startTime = performance.now();
 
     try {
-      const response = await fetch('/api/categories', {
-        method: 'GET',
+      const response = await fetch("/api/categories", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         // クライアントサイドでのキャッシュ制御
-        cache: 'no-cache',
+        cache: "no-cache",
       });
 
       if (!response.ok) {
@@ -66,7 +66,7 @@ export function ClientSidePresentational() {
       const duration = endTime - startTime;
 
       const metrics: DataFetchMetrics = {
-        source: 'client-side',
+        source: "client-side",
         duration,
         timestamp: new Date().toISOString(),
         dataSize: JSON.stringify(result).length,
@@ -74,7 +74,7 @@ export function ClientSidePresentational() {
         requestCount: 1,
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         categories: result.data || [],
         loading: false,
@@ -85,12 +85,12 @@ export function ClientSidePresentational() {
       const endTime = performance.now();
       const duration = endTime - startTime;
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         metrics: {
-          source: 'client-side',
+          source: "client-side",
           duration,
           timestamp: new Date().toISOString(),
           dataSize: 0,
@@ -100,12 +100,12 @@ export function ClientSidePresentational() {
       }));
       loadingRef.current = false;
     }
-  };
+  }, []);
 
   // 初回読み込み
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   // 定期的な更新（SWRライクな動作）
   useEffect(() => {
@@ -116,7 +116,11 @@ export function ClientSidePresentational() {
     }, 30000); // 30秒ごとに更新
 
     return () => clearInterval(interval);
-  }, []); // 依存配列は空にして一度だけ設定
+  }, [
+    // loadingステートをチェックしないで、毎回実行する
+    // fetchCategories内でloadingチェックを処理
+    fetchCategories,
+  ]); // 依存配列は空にして一度だけ設定
 
   const handleRefresh = () => {
     fetchCategories(true);
@@ -213,24 +217,17 @@ export function ClientSideWithSWR() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={state.loading}
-          >
-            {state.loading ? 'Loading...' : 'Refresh'}
+          <Button variant="outline" onClick={handleRefresh} disabled={state.loading}>
+            {state.loading ? "Loading..." : "Refresh"}
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setShowCode(!showCode)}
-          >
-            {showCode ? 'Hide Code' : 'Show Code'}
+          <Button variant="outline" onClick={() => setShowCode(!showCode)}>
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
 
       {showCode && (
-        <CodeDisplay 
+        <CodeDisplay
           title="Client-Side Fetch Implementation"
           description="クライアントサイドでのデータフェッチとリアルタイム更新の実装例"
           files={[
@@ -238,8 +235,8 @@ export function ClientSideWithSWR() {
               filename: "presentational.tsx",
               language: "typescript",
               content: clientSideExampleCode,
-              description: "Client Componenでのデータフェッチ実装"
-            }
+              description: "Client Componenでのデータフェッチ実装",
+            },
           ]}
         />
       )}
@@ -284,9 +281,7 @@ export function ClientSideWithSWR() {
                         <CardHeader className="pb-3">
                           <CardTitle className="text-lg flex items-center justify-between">
                             {category.name}
-                            <Badge variant="secondary">
-                              {category.postCount} posts
-                            </Badge>
+                            <Badge variant="secondary">{category.postCount} posts</Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -304,8 +299,9 @@ export function ClientSideWithSWR() {
 
                   <Alert>
                     <AlertDescription>
-                      <strong>Client-Side Behavior:</strong> This data is fetched in the browser after the page loads. 
-                      It automatically refreshes every 30 seconds to show real-time updates.
+                      <strong>Client-Side Behavior:</strong> This data is fetched in the browser
+                      after the page loads. It automatically refreshes every 30 seconds to show
+                      real-time updates.
                       {state.metrics && (
                         <span className="block mt-1">
                           Last fetch took {state.metrics.duration.toFixed(2)}ms
@@ -320,7 +316,7 @@ export function ClientSideWithSWR() {
                       <div>
                         <span className="text-muted-foreground">Loading State:</span>
                         <Badge variant={state.loading ? "default" : "outline"} className="ml-2">
-                          {state.loading ? 'Loading' : 'Idle'}
+                          {state.loading ? "Loading" : "Idle"}
                         </Badge>
                       </div>
                       <div>
@@ -353,7 +349,7 @@ export function ClientSideWithSWR() {
 
         <TabsContent value="performance">
           {state.metrics ? (
-            <EnhancedPerformanceDisplay 
+            <EnhancedPerformanceDisplay
               metrics={{
                 network: {
                   totalRequests: state.refreshCount + 1,
@@ -396,21 +392,29 @@ export function ClientSideWithSWR() {
               <div>
                 <h4 className="font-semibold mb-2">1. Browser-Based Execution</h4>
                 <p className="text-sm text-muted-foreground">
-                  Data is fetched after the page loads, using JavaScript in the browser. 
-                  This creates a loading state that users can see.
+                  Data is fetched after the page loads, using JavaScript in the browser. This
+                  creates a loading state that users can see.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">2. React Patterns</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• <strong>useEffect:</strong> Triggers data fetching after component mount</li>
-                  <li>• <strong>useState:</strong> Manages loading, data, and error states</li>
-                  <li>• <strong>Error boundaries:</strong> Handle fetch failures gracefully</li>
-                  <li>• <strong>Loading states:</strong> Provide immediate user feedback</li>
+                  <li>
+                    • <strong>useEffect:</strong> Triggers data fetching after component mount
+                  </li>
+                  <li>
+                    • <strong>useState:</strong> Manages loading, data, and error states
+                  </li>
+                  <li>
+                    • <strong>Error boundaries:</strong> Handle fetch failures gracefully
+                  </li>
+                  <li>
+                    • <strong>Loading states:</strong> Provide immediate user feedback
+                  </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">3. SWR (Stale-While-Revalidate)</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">

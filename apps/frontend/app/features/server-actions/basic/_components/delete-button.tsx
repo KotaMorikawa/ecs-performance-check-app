@@ -1,10 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useTransition } from 'react';
-import { useActionState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Trash2 } from "lucide-react";
+import { useActionState, useEffect, useState, useTransition } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -14,16 +12,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Trash2 } from 'lucide-react';
-import { deletePostWithState } from '../_actions/post-actions';
-import { INITIAL_DELETE_STATE } from '../_lib/validation';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { deletePostWithState } from "../_actions/post-actions";
+import { INITIAL_DELETE_STATE } from "../_lib/validation";
 
 interface DeleteButtonProps {
   postId: number;
   postTitle: string;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   onOptimisticDelete?: (postId: number) => void;
 }
@@ -31,8 +30,8 @@ interface DeleteButtonProps {
 export function DeleteButton({
   postId,
   postTitle,
-  variant = 'destructive',
-  size = 'default',
+  variant = "destructive",
+  size = "default",
   className,
   onOptimisticDelete,
 }: DeleteButtonProps) {
@@ -49,18 +48,18 @@ export function DeleteButton({
   // Server Actionの結果を監視してトースト通知とダイアログクローズ
   useEffect(() => {
     if (!deleteState.timestamp) return; // 初期状態では何もしない
-    
+
     if (deleteState.success && deleteState.message) {
       toast({
-        title: '成功',
+        title: "成功",
         description: deleteState.message,
       });
       setIsOpen(false);
     } else if (deleteState.error) {
       toast({
-        title: 'エラー',
+        title: "エラー",
         description: deleteState.error,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   }, [deleteState, toast]);
@@ -80,7 +79,7 @@ export function DeleteButton({
       <AlertDialogTrigger asChild>
         <Button variant={variant} size={size} className={className} onClick={() => setIsOpen(true)}>
           <Trash2 className="h-4 w-4" />
-          {size !== 'icon' && (size === 'sm' ? '' : '削除')}
+          {size !== "icon" && (size === "sm" ? "" : "削除")}
         </Button>
       </AlertDialogTrigger>
 
@@ -105,8 +104,13 @@ export function DeleteButton({
           {/* Server Action フォーム */}
           <form action={deleteAction} onSubmit={handleOptimisticDelete} className="w-full">
             <input type="hidden" name="id" value={postId} />
-            <Button type="submit" variant="destructive" disabled={isPending || isPendingTransition} className="w-full">
-              {(isPending || isPendingTransition) ? (
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={isPending || isPendingTransition}
+              className="w-full"
+            >
+              {isPending || isPendingTransition ? (
                 <>
                   <Trash2 className="mr-2 h-4 w-4 animate-spin" />
                   削除中...

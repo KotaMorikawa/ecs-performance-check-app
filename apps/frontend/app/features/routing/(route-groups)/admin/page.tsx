@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { Shield, Settings, Users, BarChart3, Activity, Clock, AlertTriangle } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, Clock, Settings, Shield, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AdminPage() {
   const [renderTime, setRenderTime] = useState<number>(0);
@@ -30,14 +30,12 @@ export default function AdminPage() {
             <AlertTriangle className="h-12 w-12 text-red-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">管理エリア</h1>
-          <p className="text-gray-600 mb-6">
-            このエリアにアクセスするには認証が必要です
-          </p>
+          <p className="text-gray-600 mb-6">このエリアにアクセスするには認証が必要です</p>
           <Button onClick={handleAuth} className="flex items-center gap-2 mx-auto">
             <Shield className="h-4 w-4" />
             管理者として認証 (デモ)
           </Button>
-          
+
           <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-md mx-auto">
             <p className="text-sm text-yellow-800">
               <strong>Route Groups Demo:</strong> このページは実際には認証を実装していません。
@@ -65,15 +63,13 @@ export default function AdminPage() {
           </div>
         </div>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          ルートグループ <code className="bg-gray-100 px-2 py-1 rounded text-sm">(route-groups)</code> 内の
-          管理エリア。URLパスは <code className="bg-gray-100 px-2 py-1 rounded text-sm">/features/routing/admin</code> になります。
+          ルートグループ{" "}
+          <code className="bg-gray-100 px-2 py-1 rounded text-sm">(route-groups)</code> 内の
+          管理エリア。URLパスは{" "}
+          <code className="bg-gray-100 px-2 py-1 rounded text-sm">/features/routing/admin</code>{" "}
+          になります。
         </p>
-        <Button 
-          onClick={handleAuth} 
-          variant="outline" 
-          size="sm" 
-          className="mt-4"
-        >
+        <Button onClick={handleAuth} variant="outline" size="sm" className="mt-4">
           ログアウト (デモ)
         </Button>
       </header>
@@ -133,40 +129,32 @@ export default function AdminPage() {
       <Card>
         <CardHeader>
           <CardTitle>管理機能</CardTitle>
-          <CardDescription>
-            システム管理者専用の機能とツール
-          </CardDescription>
+          <CardDescription>システム管理者専用の機能とツール</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-red-50 rounded-lg">
               <Users className="h-12 w-12 text-red-600 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">ユーザー管理</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                ユーザーアカウントの作成・編集・削除
-              </p>
+              <p className="text-sm text-gray-600 mb-4">ユーザーアカウントの作成・編集・削除</p>
               <Button size="sm" variant="outline">
                 管理画面へ
               </Button>
             </div>
-            
+
             <div className="text-center p-6 bg-orange-50 rounded-lg">
               <Settings className="h-12 w-12 text-orange-600 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">システム設定</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                アプリケーション設定の管理
-              </p>
+              <p className="text-sm text-gray-600 mb-4">アプリケーション設定の管理</p>
               <Button size="sm" variant="outline">
                 設定画面へ
               </Button>
             </div>
-            
+
             <div className="text-center p-6 bg-purple-50 rounded-lg">
               <BarChart3 className="h-12 w-12 text-purple-600 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">分析・レポート</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                使用状況の分析とレポート生成
-              </p>
+              <p className="text-sm text-gray-600 mb-4">使用状況の分析とレポート生成</p>
               <Button size="sm" variant="outline">
                 レポート画面へ
               </Button>
@@ -188,8 +176,11 @@ export default function AdminPage() {
         </CardHeader>
         <CardContent>
           <EnhancedPerformanceDisplay />
-          
-          <div data-testid="render-time" className="flex items-center gap-2 text-sm mt-6 pt-6 border-t">
+
+          <div
+            data-testid="render-time"
+            className="flex items-center gap-2 text-sm mt-6 pt-6 border-t"
+          >
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>レンダリング時間: {renderTime.toFixed(2)} ms</span>
           </div>
@@ -265,8 +256,8 @@ export default function AdminPage() {
       </div>
     </div>
   );
-}`
-          }
+}`,
+          },
         ]}
       />
     </div>

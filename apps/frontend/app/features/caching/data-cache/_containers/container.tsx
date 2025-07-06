@@ -1,24 +1,20 @@
-import { Suspense } from 'react';
-import { DataCachePresentational } from './presentational';
-import { cacheTestApi } from '../../_shared/cache-api-client';
+import { Suspense } from "react";
+import { cacheTestApi } from "../../_shared/cache-api-client";
 import {
-  CacheMetrics,
-  CacheLayerMetrics,
-  CacheTestData,
-} from '../../_shared/types';
-import {
-  updateLayerMetrics,
   calculateOverallMetrics,
   generatePerformanceMetrics,
-} from '../../_shared/cache-metrics';
+  updateLayerMetrics,
+} from "../../_shared/cache-metrics";
+import type { CacheLayerMetrics, CacheMetrics, CacheTestData } from "../../_shared/types";
+import { DataCachePresentational } from "./presentational";
 
 // Server Component（データ取得・統合レイヤー）
 export async function DataCacheContainer() {
   // 初期メトリクスの生成
   const initialMetrics: CacheMetrics = {
     layers: {
-      'data-cache': {
-        strategy: 'data-cache',
+      "data-cache": {
+        strategy: "data-cache",
         hits: 0,
         misses: 0,
         totalRequests: 0,
@@ -26,10 +22,42 @@ export async function DataCacheContainer() {
         avgResponseTime: 0,
         cacheSize: 0,
       } as CacheLayerMetrics,
-      'full-route-cache': { strategy: 'full-route-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'router-cache': { strategy: 'router-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'request-memoization': { strategy: 'request-memoization', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
-      'cloudfront-cache': { strategy: 'cloudfront-cache', hits: 0, misses: 0, totalRequests: 0, hitRate: 0, avgResponseTime: 0, cacheSize: 0 } as CacheLayerMetrics,
+      "full-route-cache": {
+        strategy: "full-route-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "router-cache": {
+        strategy: "router-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "request-memoization": {
+        strategy: "request-memoization",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
+      "cloudfront-cache": {
+        strategy: "cloudfront-cache",
+        hits: 0,
+        misses: 0,
+        totalRequests: 0,
+        hitRate: 0,
+        avgResponseTime: 0,
+        cacheSize: 0,
+      } as CacheLayerMetrics,
     },
     overall: {
       totalHits: 0,
@@ -53,33 +81,35 @@ export async function DataCacheContainer() {
   try {
     // 異なるキャッシュ戦略でデータを取得
     // 1. 通常のキャッシュ（60秒）
-    const cachedResponse = await cacheTestApi.getTestData({
-      next: {
-        revalidate: 60,
-        tags: ['cache-test'],
+    const cachedResponse = await cacheTestApi.getTestData(
+      {
+        next: {
+          revalidate: 60,
+          tags: ["cache-test"],
+        },
       },
-    }, 'data-cache');
+      "data-cache"
+    );
 
     testData = cachedResponse.data;
 
     // メトリクスを更新
     const updatedDataCacheMetrics = updateLayerMetrics(
-      initialMetrics.layers['data-cache'],
+      initialMetrics.layers["data-cache"],
       cachedResponse
     );
-    
-    initialMetrics.layers['data-cache'] = updatedDataCacheMetrics;
+
+    initialMetrics.layers["data-cache"] = updatedDataCacheMetrics;
     initialMetrics.overall = calculateOverallMetrics(initialMetrics.layers);
     initialMetrics.timestamp = new Date().toISOString();
-
   } catch (err) {
-    console.error('Data cache fetch error:', err);
-    error = err instanceof Error ? err.message : 'Unknown error';
+    console.error("Data cache fetch error:", err);
+    error = err instanceof Error ? err.message : "Unknown error";
   }
 
   return (
     <Suspense fallback={<div>Loading data cache demo...</div>}>
-      <DataCachePresentational 
+      <DataCachePresentational
         initialData={testData}
         initialMetadata={null}
         initialMetrics={null}

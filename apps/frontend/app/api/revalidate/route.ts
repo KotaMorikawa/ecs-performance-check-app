@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface RevalidateRequest {
   path?: string;
@@ -9,30 +9,24 @@ interface RevalidateRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as RevalidateRequest;
+    const body = (await request.json()) as RevalidateRequest;
     const { path, tag, secret } = body;
 
     // シークレットキーの検証
     const revalidateSecret = process.env.REVALIDATE_SECRET;
     if (!revalidateSecret || secret !== revalidateSecret) {
-      console.error('[Revalidate] Invalid or missing secret');
-      return NextResponse.json(
-        { error: 'Invalid secret' },
-        { status: 401 }
-      );
+      console.error("[Revalidate] Invalid or missing secret");
+      return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
     }
 
     // パスまたはタグのいずれかが必要
     if (!path && !tag) {
-      return NextResponse.json(
-        { error: 'Either path or tag must be provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Either path or tag must be provided" }, { status: 400 });
     }
 
     const results: { revalidated: string[]; errors: string[] } = {
       revalidated: [],
-      errors: []
+      errors: [],
     };
 
     // パスベースのリバリデート
@@ -42,9 +36,9 @@ export async function POST(request: NextRequest) {
         results.revalidated.push(`path: ${path}`);
         console.log(`[Revalidate] Successfully revalidated path: ${path}`);
       } catch (error) {
-        const errorMessage = `Failed to revalidate path ${path}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        const errorMessage = `Failed to revalidate path ${path}: ${error instanceof Error ? error.message : "Unknown error"}`;
         results.errors.push(errorMessage);
-        console.error('[Revalidate]', errorMessage);
+        console.error("[Revalidate]", errorMessage);
       }
     }
 
@@ -55,9 +49,9 @@ export async function POST(request: NextRequest) {
         results.revalidated.push(`tag: ${tag}`);
         console.log(`[Revalidate] Successfully revalidated tag: ${tag}`);
       } catch (error) {
-        const errorMessage = `Failed to revalidate tag ${tag}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        const errorMessage = `Failed to revalidate tag ${tag}: ${error instanceof Error ? error.message : "Unknown error"}`;
         results.errors.push(errorMessage);
-        console.error('[Revalidate]', errorMessage);
+        console.error("[Revalidate]", errorMessage);
       }
     }
 
@@ -72,14 +66,13 @@ export async function POST(request: NextRequest) {
     const statusCode = results.errors.length > 0 ? 207 : 200;
 
     return NextResponse.json(responseData, { status: statusCode });
-
   } catch (error) {
-    console.error('[Revalidate API Error]:', error);
-    
+    console.error("[Revalidate API Error]:", error);
+
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
@@ -90,14 +83,14 @@ export async function POST(request: NextRequest) {
 // GET メソッドで現在のリバリデート設定情報を取得
 export async function GET() {
   return NextResponse.json({
-    service: 'nextjs-revalidate-api',
-    version: '1.0.0',
-    supportedMethods: ['POST'],
-    requiredFields: ['secret', 'path or tag'],
+    service: "nextjs-revalidate-api",
+    version: "1.0.0",
+    supportedMethods: ["POST"],
+    requiredFields: ["secret", "path or tag"],
     example: {
-      path: '/features/data-fetching',
-      tag: 'posts',
-      secret: 'your-secret-key'
+      path: "/features/data-fetching",
+      tag: "posts",
+      secret: "your-secret-key",
     },
     timestamp: new Date().toISOString(),
   });

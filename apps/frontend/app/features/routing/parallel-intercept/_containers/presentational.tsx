@@ -1,26 +1,26 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import { 
-  Split, 
-  Layers, 
-  Activity, 
-  Clock, 
-  ArrowDown, 
+import {
+  Activity,
+  ArrowDown,
   ArrowRight,
+  Clock,
   Eye,
+  GitBranch,
+  Layers,
   Shuffle,
-  GitBranch
-} from 'lucide-react';
+  Split,
+} from "lucide-react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ParallelInterceptPresentationalProps {
   renderTime: number;
   showModal: boolean;
-  parallelContent: 'analytics' | 'team' | 'settings';
+  parallelContent: "analytics" | "team" | "settings";
   onShowModal: (show: boolean) => void;
-  onParallelContentChange: (content: 'analytics' | 'team' | 'settings') => void;
+  onParallelContentChange: (content: "analytics" | "team" | "settings") => void;
 }
 
 export function ParallelInterceptPresentational({
@@ -28,7 +28,7 @@ export function ParallelInterceptPresentational({
   showModal,
   parallelContent,
   onShowModal,
-  onParallelContentChange
+  onParallelContentChange,
 }: ParallelInterceptPresentationalProps) {
   return (
     <div className="min-h-screen bg-white p-8">
@@ -46,7 +46,8 @@ export function ParallelInterceptPresentational({
           </div>
         </div>
         <p className="text-lg text-gray-600">
-          Next.js 15.3.4の並列ルート（Parallel Routes）とインターセプトルート（Intercepting Routes）機能のデモ
+          Next.js 15.3.4の並列ルート（Parallel Routes）とインターセプトルート（Intercepting
+          Routes）機能のデモ
         </p>
       </header>
 
@@ -58,32 +59,30 @@ export function ParallelInterceptPresentational({
               <GitBranch className="h-5 w-5" />
               並列ルート（Parallel Routes）デモ
             </CardTitle>
-            <CardDescription>
-              複数のスロットを同時にレンダリングする並列ルート機能
-            </CardDescription>
+            <CardDescription>複数のスロットを同時にレンダリングする並列ルート機能</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {/* スロット切り替えボタン */}
               <div className="flex space-x-2">
                 <Button
-                  variant={parallelContent === 'analytics' ? 'default' : 'outline'}
+                  variant={parallelContent === "analytics" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => onParallelContentChange('analytics')}
+                  onClick={() => onParallelContentChange("analytics")}
                 >
                   Analytics
                 </Button>
                 <Button
-                  variant={parallelContent === 'team' ? 'default' : 'outline'}
+                  variant={parallelContent === "team" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => onParallelContentChange('team')}
+                  onClick={() => onParallelContentChange("team")}
                 >
                   Team
                 </Button>
                 <Button
-                  variant={parallelContent === 'settings' ? 'default' : 'outline'}
+                  variant={parallelContent === "settings" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => onParallelContentChange('settings')}
+                  onClick={() => onParallelContentChange("settings")}
                 >
                   Settings
                 </Button>
@@ -108,7 +107,7 @@ export function ParallelInterceptPresentational({
                 {/* 並列スロット */}
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-900">並列スロット (@{parallelContent})</h4>
-                  {parallelContent === 'analytics' && (
+                  {parallelContent === "analytics" && (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Activity className="h-4 w-4 text-green-600" />
@@ -121,7 +120,7 @@ export function ParallelInterceptPresentational({
                       </div>
                     </div>
                   )}
-                  {parallelContent === 'team' && (
+                  {parallelContent === "team" && (
                     <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Split className="h-4 w-4 text-purple-600" />
@@ -134,7 +133,7 @@ export function ParallelInterceptPresentational({
                       </div>
                     </div>
                   )}
-                  {parallelContent === 'settings' && (
+                  {parallelContent === "settings" && (
                     <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Shuffle className="h-4 w-4 text-orange-600" />
@@ -169,26 +168,23 @@ export function ParallelInterceptPresentational({
           <CardContent>
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button
-                  onClick={() => onShowModal(true)}
-                  className="flex items-center gap-2"
-                >
+                <Button onClick={() => onShowModal(true)} className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   画像をモーダルで表示
                 </Button>
-                
+
                 <Button
                   variant="outline"
-                  onClick={() => alert('通常のページ遷移をシミュレート')}
+                  onClick={() => alert("通常のページ遷移をシミュレート")}
                   className="flex items-center gap-2"
                 >
                   <ArrowRight className="h-4 w-4" />
                   通常のページ遷移
                 </Button>
-                
+
                 <Button
                   variant="secondary"
-                  onClick={() => alert('インターセプト無効化をシミュレート')}
+                  onClick={() => alert("インターセプト無効化をシミュレート")}
                   className="flex items-center gap-2"
                 >
                   <ArrowDown className="h-4 w-4" />
@@ -217,15 +213,11 @@ export function ParallelInterceptPresentational({
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">インターセプトルートモーダル</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onShowModal(false)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => onShowModal(false)}>
                 ×
               </Button>
             </div>
-            <div className="space-y-4">               
+            <div className="space-y-4">
               <div className="bg-gray-100 h-32 rounded-lg flex items-center justify-center">
                 <span className="text-gray-500">画像プレースホルダー</span>
               </div>
@@ -237,9 +229,7 @@ export function ParallelInterceptPresentational({
                 <Button variant="outline" onClick={() => onShowModal(false)}>
                   閉じる
                 </Button>
-                <Button onClick={() => alert('詳細ページに遷移')}>
-                  詳細を見る
-                </Button>
+                <Button onClick={() => alert("詳細ページに遷移")}>詳細を見る</Button>
               </div>
             </div>
           </div>
@@ -259,8 +249,11 @@ export function ParallelInterceptPresentational({
         </CardHeader>
         <CardContent>
           <EnhancedPerformanceDisplay />
-          
-          <div data-testid="render-time" className="flex items-center gap-2 text-sm mt-6 pt-6 border-t">
+
+          <div
+            data-testid="render-time"
+            className="flex items-center gap-2 text-sm mt-6 pt-6 border-t"
+          >
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>レンダリング時間: {renderTime.toFixed(2)} ms</span>
           </div>
@@ -288,7 +281,7 @@ export function ParallelInterceptPresentational({
                     <div>独立したエラーハンドリング</div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-semibold text-gray-900">インターセプトルート</h4>
                   <div className="space-y-1 text-sm text-gray-600">
@@ -320,7 +313,7 @@ export function ParallelInterceptPresentational({
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-semibold text-gray-900">インターセプト (.) (..) (...)</h4>
                   <div className="text-sm text-gray-600">
@@ -357,7 +350,7 @@ export function ParallelInterceptContainer() {
   const [parallelContent, setParallelContent] = useState<'analytics' | 'team' | 'settings'>('analytics');
 
   // 状態管理ロジック...
-}`
+}`,
             },
             {
               filename: "layout.tsx (並列ルート用)",
@@ -386,8 +379,8 @@ export default function ParallelLayout({
       </div>
     </div>
   );
-}`
-            }
+}`,
+            },
           ]}
         />
       </section>

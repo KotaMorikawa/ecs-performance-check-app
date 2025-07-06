@@ -62,18 +62,18 @@ export interface CombinedData {
 
 // データフェッチメトリクス型
 export interface DataFetchMetrics {
-  source: 'ssg' | 'ssr' | 'isr' | 'client-side' | 'parallel';
+  source: "ssg" | "ssr" | "isr" | "client-side" | "parallel";
   duration: number;
   timestamp: string;
   dataSize: number;
   cached?: boolean;
   requestCount?: number;
-  cacheStatus?: 'hit' | 'miss' | 'stale';
+  cacheStatus?: "hit" | "miss" | "stale";
 }
 
 // フェッチオプション型
 export interface FetchOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "DELETE";
   headers?: Record<string, string>;
   cache?: RequestCache;
   next?: {

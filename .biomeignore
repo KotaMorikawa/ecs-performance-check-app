@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+**/dist/
+**/build/
+**/out/
+
+# Next.js specific
+.next/
+**/.next/
+apps/frontend/.next/
+apps/frontend/.next/**/*
+
+# Backend build outputs
+apps/backend/dist/
+apps/backend/dist/**/*
+
+# Other generated files
+coverage/
+**/coverage/
+.cache/
+**/.cache/
+tmp/
+**/tmp/
+.vercel/
+**/.vercel/
+
+# Infrastructure
+infrastructure/
+
+# IDE
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+
+# Version control
+.git/
+**/.git/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+
+# TypeScript
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
+
+# Prisma
+prisma/migrations/
+**/prisma/migrations/
+
+# Minified files
+**/*.min.js
+**/*.min.css
+
+# Specific manifests
+**/build-manifest.json
+**/app-build-manifest.json
+**/app-path-routes-manifest.json
+**/build-diagnostics.json
+**/trace

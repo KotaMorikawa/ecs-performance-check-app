@@ -1,29 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { CodeDisplay } from '@/components/code-display';
-import { 
-  FileText, 
-  RefreshCw, 
-  Clock, 
+import {
+  Clock,
+  FileText,
   Globe,
   Layers,
-  Zap,
-  Timer,
+  Monitor,
+  RefreshCw,
   Server,
-  Monitor
-} from 'lucide-react';
-import type { 
-  CacheTestData, 
-  CacheMetrics 
-} from '../../_shared/types';
-import { revalidationApi } from '../../_shared/cache-api-client';
+  Timer,
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { revalidationApi } from "../../_shared/cache-api-client";
+import type { CacheMetrics, CacheTestData } from "../../_shared/types";
 
 interface FullRouteCachePresentationalProps {
   initialData: CacheTestData[];
@@ -36,11 +33,11 @@ interface FullRouteCachePresentationalProps {
   error: string | null;
 }
 
-export function FullRouteCachePresentational({ 
-  initialData, 
+export function FullRouteCachePresentational({
+  initialData,
   initialMetrics,
   cacheInfo,
-  error 
+  error,
 }: FullRouteCachePresentationalProps) {
   const [showCode, setShowCode] = useState(false);
   const [revalidateTime, setRevalidateTime] = useState(60);
@@ -50,14 +47,14 @@ export function FullRouteCachePresentational({
   // ページリバリデート
   const handleRevalidatePage = async () => {
     try {
-      const result = await revalidationApi.revalidatePath('/features/caching/full-route-cache');
+      const result = await revalidationApi.revalidatePath("/features/caching/full-route-cache");
       if (result.success) {
         setLastRevalidated(new Date().toISOString());
         // ページリロードで更新を確認
         setTimeout(() => window.location.reload(), 1000);
       }
     } catch (error) {
-      console.error('Revalidation error:', error);
+      console.error("Revalidation error:", error);
     }
   };
 
@@ -116,9 +113,9 @@ export const revalidate = 60; // ページ全体のリバリデート間隔
 // 6. 部分プリレンダリング
 export const experimental_ppr = true;`;
 
-  const cacheStatus = cacheInfo?.cached ? 'HIT' : 'MISS';
-  const cacheSource = cacheInfo?.cached ? 'cache' : 'generation';
-  
+  const cacheStatus = cacheInfo?.cached ? "HIT" : "MISS";
+  const cacheSource = cacheInfo?.cached ? "cache" : "generation";
+
   // TTL残り時間の計算
   const remainingTTL = 0; // cacheInfoからは取得できないため0に設定
   const ttlPercentage = remainingTTL > 0 ? (remainingTTL / revalidateTime) * 100 : 0;
@@ -133,15 +130,12 @@ export const experimental_ppr = true;`;
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleRevalidatePage}
-          >
+          <Button variant="outline" onClick={handleRevalidatePage}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Revalidate Page
           </Button>
           <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-            {showCode ? 'Hide Code' : 'Show Code'}
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
@@ -152,10 +146,10 @@ export const experimental_ppr = true;`;
           description="ページレベルキャッシュとISRの実装例"
           files={[
             {
-              filename: 'page.tsx',
-              language: 'typescript',
+              filename: "page.tsx",
+              language: "typescript",
               content: fullRouteCacheCode,
-              description: 'Full Route Cacheの各種パターン',
+              description: "Full Route Cacheの各種パターン",
             },
           ]}
         />
@@ -178,7 +172,7 @@ export const experimental_ppr = true;`;
                   <FileText className="h-5 w-5" />
                   Page Cache Status
                 </span>
-                <Badge variant={cacheStatus === 'HIT' ? 'success' : 'secondary'}>
+                <Badge variant={cacheStatus === "HIT" ? "success" : "secondary"}>
                   {cacheStatus}
                 </Badge>
               </CardTitle>
@@ -232,9 +226,12 @@ export const experimental_ppr = true;`;
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Revalidate Time (seconds)</label>
+                  <label htmlFor="revalidate-time" className="text-sm font-medium">
+                    Revalidate Time (seconds)
+                  </label>
                   <div className="mt-2 flex items-center gap-3">
                     <input
+                      id="revalidate-time"
                       type="range"
                       min="30"
                       max="300"
@@ -258,8 +255,8 @@ export const experimental_ppr = true;`;
                 <Alert>
                   <Globe className="h-4 w-4" />
                   <AlertDescription className="text-sm">
-                    This page will be statically regenerated every {revalidateTime} seconds 
-                    when accessed after the interval.
+                    This page will be statically regenerated every {revalidateTime} seconds when
+                    accessed after the interval.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -280,7 +277,7 @@ export const experimental_ppr = true;`;
                       </p>
                     </div>
                   </div>
-                  
+
                   {lastRevalidated && (
                     <div className="flex items-center gap-3 p-2 bg-green-50 rounded">
                       <div className="w-2 h-2 bg-green-600 rounded-full"></div>
@@ -333,9 +330,7 @@ export const experimental_ppr = true;`;
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {item.description}
-                          </p>
+                          <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
                           <div className="text-xs text-muted-foreground">
                             Cached at: {new Date(pageGenerated).toLocaleTimeString()}
                           </div>
@@ -347,8 +342,8 @@ export const experimental_ppr = true;`;
                   <Alert>
                     <Monitor className="h-4 w-4" />
                     <AlertDescription>
-                      <strong>Cache Behavior:</strong> This entire page is pre-rendered and cached. 
-                      Content updates happen during regeneration, providing excellent performance 
+                      <strong>Cache Behavior:</strong> This entire page is pre-rendered and cached.
+                      Content updates happen during regeneration, providing excellent performance
                       while maintaining data freshness.
                     </AlertDescription>
                   </Alert>
@@ -432,8 +427,8 @@ export const experimental_ppr = true;`;
                   1. Static Generation
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Pages are pre-rendered at build time or on-demand. The entire HTML, 
-                  including data, is cached and served instantly.
+                  Pages are pre-rendered at build time or on-demand. The entire HTML, including
+                  data, is cached and served instantly.
                 </p>
               </div>
 
@@ -443,8 +438,8 @@ export const experimental_ppr = true;`;
                   2. Incremental Static Regeneration (ISR)
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Pages are regenerated in the background based on time intervals or on-demand triggers.
-                  Users always get fast responses while content stays fresh.
+                  Pages are regenerated in the background based on time intervals or on-demand
+                  triggers. Users always get fast responses while content stays fresh.
                 </p>
               </div>
 
@@ -454,8 +449,8 @@ export const experimental_ppr = true;`;
                   3. CDN Distribution
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Static pages can be distributed globally via CDNs like CloudFront, 
-                  providing sub-100ms response times worldwide.
+                  Static pages can be distributed globally via CDNs like CloudFront, providing
+                  sub-100ms response times worldwide.
                 </p>
               </div>
 
@@ -472,9 +467,9 @@ export const experimental_ppr = true;`;
               <Alert>
                 <Layers className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Best Practice:</strong> Use ISR for content that changes periodically 
-                  but doesn&apos;t need real-time updates. Set appropriate revalidation intervals 
-                  based on your content update frequency.
+                  <strong>Best Practice:</strong> Use ISR for content that changes periodically but
+                  doesn&apos;t need real-time updates. Set appropriate revalidation intervals based
+                  on your content update frequency.
                 </AlertDescription>
               </Alert>
             </CardContent>

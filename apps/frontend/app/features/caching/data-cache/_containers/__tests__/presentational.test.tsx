@@ -1,51 +1,73 @@
 // DataCachePresentational Client Componentのテスト
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DataCachePresentational } from '../presentational';
-import { cacheTestApi, revalidationApi } from '../../../_shared/cache-api-client';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cacheTestApi, revalidationApi } from "../../../_shared/cache-api-client";
+import { DataCachePresentational } from "../presentational";
 
 // モック設定
-vi.mock('../../../_shared/cache-api-client');
-vi.mock('@/components/ui/card', () => ({
-  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className}>{children}</div>,
+vi.mock("../../../_shared/cache-api-client");
+vi.mock("@/components/ui/card", () => ({
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
 }));
-vi.mock('@/components/ui/badge', () => ({
+vi.mock("@/components/ui/badge", () => ({
   Badge: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
     <span data-variant={variant}>{children}</span>
   ),
 }));
-vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
-    <button onClick={onClick} disabled={disabled}>{children}</button>
+vi.mock("@/components/ui/button", () => ({
+  Button: ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
   ),
 }));
-vi.mock('@/components/ui/tabs', () => ({
+vi.mock("@/components/ui/tabs", () => ({
   Tabs: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  TabsContent: ({ children, value }: { children: React.ReactNode; value?: string }) => <div data-tab-content={value}>{children}</div>,
+  TabsContent: ({ children, value }: { children: React.ReactNode; value?: string }) => (
+    <div data-tab-content={value}>{children}</div>
+  ),
   TabsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  TabsTrigger: ({ children, value }: { children: React.ReactNode; value?: string }) => <button data-tab={value}>{children}</button>,
+  TabsTrigger: ({ children, value }: { children: React.ReactNode; value?: string }) => (
+    <button type="button" data-tab={value}>
+      {children}
+    </button>
+  ),
 }));
-vi.mock('@/components/ui/alert', () => ({
-  Alert: ({ children, variant }: { children: React.ReactNode; variant?: string }) => <div data-alert-variant={variant}>{children}</div>,
+vi.mock("@/components/ui/alert", () => ({
+  Alert: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
+    <div data-alert-variant={variant}>{children}</div>
+  ),
   AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
-vi.mock('@/components/ui/progress', () => ({
+vi.mock("@/components/ui/progress", () => ({
   Progress: ({ value }: { value?: number }) => <div data-progress={value} />,
 }));
-vi.mock('@/components/enhanced-performance-display', () => ({
-  EnhancedPerformanceDisplay: ({ title }: { title?: string }) => <div data-testid="performance-display">{title}</div>,
+vi.mock("@/components/enhanced-performance-display", () => ({
+  EnhancedPerformanceDisplay: ({ title }: { title?: string }) => (
+    <div data-testid="performance-display">{title}</div>
+  ),
 }));
-vi.mock('@/components/code-display', () => ({
+vi.mock("@/components/code-display", () => ({
   CodeDisplay: ({ title }: { title?: string }) => <div data-testid="code-display">{title}</div>,
 }));
 
 // console.error のモック
-vi.spyOn(console, 'error').mockImplementation(() => {});
+vi.spyOn(console, "error").mockImplementation(() => {});
 
 const mockCacheTestApi = vi.mocked(cacheTestApi);
 const mockRevalidationApi = vi.mocked(revalidationApi);
@@ -54,38 +76,38 @@ const mockRevalidationApi = vi.mocked(revalidationApi);
 const mockInitialData = [
   {
     id: 1,
-    title: 'Test Category 1',
-    content: 'Test content 1',
-    category: 'test',
-    timestamp: '2023-01-01T00:00:00Z',
+    title: "Test Category 1",
+    content: "Test content 1",
+    category: "test",
+    timestamp: "2023-01-01T00:00:00Z",
     size: 1024,
     views: 100,
-    name: 'Test Item 1',
+    name: "Test Item 1",
     postCount: 5,
-    description: 'Test description 1',
+    description: "Test description 1",
   },
   {
     id: 2,
-    title: 'Test Category 2',
-    content: 'Test content 2',
-    category: 'test',
-    timestamp: '2023-01-02T00:00:00Z',
+    title: "Test Category 2",
+    content: "Test content 2",
+    category: "test",
+    timestamp: "2023-01-02T00:00:00Z",
     size: 2048,
     views: 200,
-    name: 'Test Item 2',
+    name: "Test Item 2",
     postCount: 3,
-    description: 'Test description 2',
+    description: "Test description 2",
   },
 ];
 
 const mockInitialMetadata = {
   cached: true,
-  cacheStatus: 'fresh' as const,
-  strategy: 'data-cache' as const,
-  timestamp: '2023-01-01T00:00:00Z',
-  source: 'cache' as const,
+  cacheStatus: "fresh" as const,
+  strategy: "data-cache" as const,
+  timestamp: "2023-01-01T00:00:00Z",
+  source: "cache" as const,
   ttl: 3600,
-  tags: ['cache-test'],
+  tags: ["cache-test"],
 };
 
 const mockInitialMetrics = {
@@ -98,15 +120,15 @@ const mockRefreshResponse = {
   data: [
     {
       id: 3,
-      title: 'New Category',
-      content: 'New content',
-      category: 'new',
-      timestamp: '2023-01-03T00:00:00Z',
+      title: "New Category",
+      content: "New content",
+      category: "new",
+      timestamp: "2023-01-03T00:00:00Z",
       size: 1500,
       views: 150,
-      name: 'New Item',
+      name: "New Item",
       postCount: 2,
-      description: 'New description',
+      description: "New description",
     },
   ],
   metadata: mockInitialMetadata,
@@ -114,17 +136,17 @@ const mockRefreshResponse = {
 };
 
 const mockRevalidationOperation = {
-  id: 'revalidation-1',
-  type: 'tag' as const,
-  target: 'categories',
+  id: "revalidation-1",
+  type: "tag" as const,
+  target: "categories",
   success: true,
   timestamp: new Date().toISOString(),
   duration: 150,
-  strategy: 'on-demand' as const,
-  triggeredBy: 'user' as const,
+  strategy: "on-demand" as const,
+  triggeredBy: "user" as const,
 };
 
-describe('DataCachePresentational', () => {
+describe("DataCachePresentational", () => {
   const defaultProps = {
     initialData: mockInitialData,
     initialMetadata: mockInitialMetadata,
@@ -136,45 +158,45 @@ describe('DataCachePresentational', () => {
     vi.clearAllMocks();
   });
 
-  describe('初期レンダリング', () => {
-    it('should render with initial data', () => {
+  describe("初期レンダリング", () => {
+    it("should render with initial data", () => {
       // Act
       render(<DataCachePresentational {...defaultProps} />);
 
       // Assert
-      expect(screen.getByText('Data Cache Demo')).toBeInTheDocument();
-      expect(screen.getByText('Test Item 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Item 2')).toBeInTheDocument();
-      expect(screen.getByText('5 posts')).toBeInTheDocument();
-      expect(screen.getByText('3 posts')).toBeInTheDocument();
+      expect(screen.getByText("Data Cache Demo")).toBeInTheDocument();
+      expect(screen.getByText("Test Item 1")).toBeInTheDocument();
+      expect(screen.getByText("Test Item 2")).toBeInTheDocument();
+      expect(screen.getByText("5 posts")).toBeInTheDocument();
+      expect(screen.getByText("3 posts")).toBeInTheDocument();
     });
 
-    it('should display cache status correctly', () => {
+    it("should display cache status correctly", () => {
       // Act
       render(<DataCachePresentational {...defaultProps} />);
 
       // Assert
-      expect(screen.getByText('HIT')).toBeInTheDocument();
-      expect(screen.getByText('cache')).toBeInTheDocument();
-      expect(screen.getByText('3600s')).toBeInTheDocument();
-      expect(screen.getByText('cache-test')).toBeInTheDocument();
+      expect(screen.getByText("HIT")).toBeInTheDocument();
+      expect(screen.getByText("cache")).toBeInTheDocument();
+      expect(screen.getByText("3600s")).toBeInTheDocument();
+      expect(screen.getByText("cache-test")).toBeInTheDocument();
     });
 
-    it('should show error when provided', () => {
+    it("should show error when provided", () => {
       // Arrange
       const propsWithError = {
         ...defaultProps,
-        error: 'Test error message',
+        error: "Test error message",
       };
 
       // Act
       render(<DataCachePresentational {...propsWithError} />);
 
       // Assert
-      expect(screen.getByText('Test error message')).toBeInTheDocument();
+      expect(screen.getByText("Test error message")).toBeInTheDocument();
     });
 
-    it('should handle empty data', () => {
+    it("should handle empty data", () => {
       // Arrange
       const propsWithEmptyData = {
         ...defaultProps,
@@ -185,58 +207,61 @@ describe('DataCachePresentational', () => {
       render(<DataCachePresentational {...propsWithEmptyData} />);
 
       // Assert
-      expect(screen.getByText('No cached data available')).toBeInTheDocument();
+      expect(screen.getByText("No cached data available")).toBeInTheDocument();
     });
   });
 
-  describe('ユーザーインタラクション', () => {
-    it('should toggle code display', async () => {
+  describe("ユーザーインタラクション", () => {
+    it("should toggle code display", async () => {
       // Arrange
       const user = userEvent.setup();
       render(<DataCachePresentational {...defaultProps} />);
 
       // Act
-      const codeButton = screen.getByText('Show Code');
+      const codeButton = screen.getByText("Show Code");
       await user.click(codeButton);
 
       // Assert
-      expect(screen.getByTestId('code-display')).toBeInTheDocument();
-      expect(screen.getByText('Hide Code')).toBeInTheDocument();
+      expect(screen.getByTestId("code-display")).toBeInTheDocument();
+      expect(screen.getByText("Hide Code")).toBeInTheDocument();
     });
 
-    it('should refresh data when refresh button clicked', async () => {
+    it("should refresh data when refresh button clicked", async () => {
       // Arrange
       const user = userEvent.setup();
       mockCacheTestApi.getDataCacheDemo.mockResolvedValue(mockRefreshResponse);
       render(<DataCachePresentational {...defaultProps} />);
 
       // Act
-      const refreshButton = screen.getByText('Refresh Data');
+      const refreshButton = screen.getByText("Refresh Data");
       await user.click(refreshButton);
 
       // Assert
       await waitFor(() => {
-        expect(mockCacheTestApi.getDataCacheDemo).toHaveBeenCalledWith(['cache-demo', 'categories']);
+        expect(mockCacheTestApi.getDataCacheDemo).toHaveBeenCalledWith([
+          "cache-demo",
+          "categories",
+        ]);
       });
     });
 
-    it('should disable refresh button while loading', async () => {
+    it("should disable refresh button while loading", async () => {
       // Arrange
       const user = userEvent.setup();
       mockCacheTestApi.getDataCacheDemo.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(mockRefreshResponse), 100))
+        () => new Promise((resolve) => setTimeout(() => resolve(mockRefreshResponse), 100))
       );
       render(<DataCachePresentational {...defaultProps} />);
 
       // Act
-      const refreshButton = screen.getByText('Refresh Data');
+      const refreshButton = screen.getByText("Refresh Data");
       await user.click(refreshButton);
 
       // Assert
       expect(refreshButton).toBeDisabled();
     });
 
-    it('should handle revalidation button clicks', async () => {
+    it("should handle revalidation button clicks", async () => {
       // Arrange
       const user = userEvent.setup();
       mockRevalidationApi.revalidateTag.mockResolvedValue(mockRevalidationOperation);
@@ -249,23 +274,23 @@ describe('DataCachePresentational', () => {
 
       // Assert
       await waitFor(() => {
-        expect(mockRevalidationApi.revalidateTag).toHaveBeenCalledWith('categories');
+        expect(mockRevalidationApi.revalidateTag).toHaveBeenCalledWith("categories");
       });
     });
   });
 
-  describe('メトリクス表示', () => {
-    it('should calculate and display hit rate correctly', () => {
+  describe("メトリクス表示", () => {
+    it("should calculate and display hit rate correctly", () => {
       // Act
       render(<DataCachePresentational {...defaultProps} />);
 
       // Assert
-      expect(screen.getByText('100.0%')).toBeInTheDocument();
-      expect(screen.getByText('Hits: 1')).toBeInTheDocument();
-      expect(screen.getByText('Misses: 0')).toBeInTheDocument();
+      expect(screen.getByText("100.0%")).toBeInTheDocument();
+      expect(screen.getByText("Hits: 1")).toBeInTheDocument();
+      expect(screen.getByText("Misses: 0")).toBeInTheDocument();
     });
 
-    it('should display cache metrics with miss scenario', () => {
+    it("should display cache metrics with miss scenario", () => {
       // Arrange
       const propsWithMiss = {
         ...defaultProps,
@@ -279,24 +304,24 @@ describe('DataCachePresentational', () => {
       render(<DataCachePresentational {...propsWithMiss} />);
 
       // Assert
-      expect(screen.getByText('MISS')).toBeInTheDocument();
-      expect(screen.getByText('0.0%')).toBeInTheDocument();
-      expect(screen.getByText('Hits: 0')).toBeInTheDocument();
-      expect(screen.getByText('Misses: 1')).toBeInTheDocument();
+      expect(screen.getByText("MISS")).toBeInTheDocument();
+      expect(screen.getByText("0.0%")).toBeInTheDocument();
+      expect(screen.getByText("Hits: 0")).toBeInTheDocument();
+      expect(screen.getByText("Misses: 1")).toBeInTheDocument();
     });
 
-    it('should display performance metrics', () => {
+    it("should display performance metrics", () => {
       // Act
       render(<DataCachePresentational {...defaultProps} />);
 
       // Assert
-      expect(screen.getByTestId('performance-display')).toBeInTheDocument();
-      expect(screen.getByText('Data Cache Performance')).toBeInTheDocument();
+      expect(screen.getByTestId("performance-display")).toBeInTheDocument();
+      expect(screen.getByText("Data Cache Performance")).toBeInTheDocument();
     });
   });
 
-  describe('リバリデーション操作', () => {
-    it('should add revalidation to history after successful operation', async () => {
+  describe("リバリデーション操作", () => {
+    it("should add revalidation to history after successful operation", async () => {
       // Arrange
       const user = userEvent.setup();
       mockRevalidationApi.revalidateTag.mockResolvedValue(mockRevalidationOperation);
@@ -304,55 +329,55 @@ describe('DataCachePresentational', () => {
       render(<DataCachePresentational {...defaultProps} />);
 
       // Act - Operationsタブに切り替え（テスト環境では直接アクセス）
-      const operationsTab = screen.getByText('Operations');
+      const operationsTab = screen.getByText("Operations");
       await user.click(operationsTab);
-      
+
       // revalidationを実行
       const revalidateButton = screen.getByText('Revalidate "categories"');
       await user.click(revalidateButton);
 
       // Assert
       await waitFor(() => {
-        expect(screen.getByText('Tag: categories')).toBeInTheDocument();
-        expect(screen.getByText('Success')).toBeInTheDocument();
+        expect(screen.getByText("Tag: categories")).toBeInTheDocument();
+        expect(screen.getByText("Success")).toBeInTheDocument();
       });
     });
 
-    it('should show empty state when no revalidations', async () => {
+    it("should show empty state when no revalidations", async () => {
       // Arrange
       const user = userEvent.setup();
       render(<DataCachePresentational {...defaultProps} />);
 
       // Act
-      const operationsTab = screen.getByText('Operations');
+      const operationsTab = screen.getByText("Operations");
       await user.click(operationsTab);
 
       // Assert
-      expect(screen.getByText('No revalidation operations yet')).toBeInTheDocument();
+      expect(screen.getByText("No revalidation operations yet")).toBeInTheDocument();
     });
   });
 
-  describe('エラーハンドリング', () => {
-    it('should handle refresh errors gracefully', async () => {
+  describe("エラーハンドリング", () => {
+    it("should handle refresh errors gracefully", async () => {
       // Arrange
       const user = userEvent.setup();
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      mockCacheTestApi.getDataCacheDemo.mockRejectedValue(new Error('Network error'));
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      mockCacheTestApi.getDataCacheDemo.mockRejectedValue(new Error("Network error"));
       render(<DataCachePresentational {...defaultProps} />);
 
       // Act
-      const refreshButton = screen.getByText('Refresh Data');
+      const refreshButton = screen.getByText("Refresh Data");
       await user.click(refreshButton);
 
       // Assert
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Refresh error:', expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith("Refresh error:", expect.any(Error));
       });
 
       consoleSpy.mockRestore();
     });
 
-    it('should handle revalidation errors gracefully', async () => {
+    it("should handle revalidation errors gracefully", async () => {
       // Arrange
       const user = userEvent.setup();
       const failedOperation = {
@@ -374,27 +399,27 @@ describe('DataCachePresentational', () => {
     });
   });
 
-  describe('タブナビゲーション', () => {
-    it('should render all tabs', () => {
+  describe("タブナビゲーション", () => {
+    it("should render all tabs", () => {
       // Act
       render(<DataCachePresentational {...defaultProps} />);
 
       // Assert
-      expect(screen.getByText('Demo')).toBeInTheDocument();
-      expect(screen.getByText('Metrics')).toBeInTheDocument();
-      expect(screen.getByText('Operations')).toBeInTheDocument();
-      expect(screen.getByText('How It Works')).toBeInTheDocument();
+      expect(screen.getByText("Demo")).toBeInTheDocument();
+      expect(screen.getByText("Metrics")).toBeInTheDocument();
+      expect(screen.getByText("Operations")).toBeInTheDocument();
+      expect(screen.getByText("How It Works")).toBeInTheDocument();
     });
 
-    it('should display explanation content', () => {
+    it("should display explanation content", () => {
       // Act
       render(<DataCachePresentational {...defaultProps} />);
 
       // Assert
-      expect(screen.getByText('How Data Cache Works')).toBeInTheDocument();
-      expect(screen.getByText('1. Automatic Caching')).toBeInTheDocument();
-      expect(screen.getByText('2. Cache Tags')).toBeInTheDocument();
-      expect(screen.getByText('3. Revalidation Strategies')).toBeInTheDocument();
+      expect(screen.getByText("How Data Cache Works")).toBeInTheDocument();
+      expect(screen.getByText("1. Automatic Caching")).toBeInTheDocument();
+      expect(screen.getByText("2. Cache Tags")).toBeInTheDocument();
+      expect(screen.getByText("3. Revalidation Strategies")).toBeInTheDocument();
     });
   });
 });

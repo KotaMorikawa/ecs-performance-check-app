@@ -1,8 +1,8 @@
-import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
 // Node環境の場合は早期リターン
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   // ResizeObserverのモック（Radix UI用）
   global.ResizeObserver = vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
@@ -18,22 +18,22 @@ if (typeof window !== 'undefined') {
   }));
 
   // matchMediaのモック
-  Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
   });
 
   // Performance APIのモック
-  Object.defineProperty(window, 'performance', {
+  Object.defineProperty(window, "performance", {
     writable: true,
     value: {
       now: vi.fn(() => Date.now()),
@@ -45,14 +45,14 @@ if (typeof window !== 'undefined') {
   });
 
   // getComputedStyleのモック
-  Object.defineProperty(window, 'getComputedStyle', {
+  Object.defineProperty(window, "getComputedStyle", {
     value: () => ({
-      getPropertyValue: () => '',
+      getPropertyValue: () => "",
     }),
   });
 
   // HTMLElementプロトタイプのモック（Radix UI用）
-  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+  Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
     writable: true,
     value: vi.fn(),
   });
@@ -67,12 +67,12 @@ if (typeof window !== 'undefined') {
       super(type, props);
       this.button = props.button || 0;
       this.ctrlKey = props.ctrlKey || false;
-      this.pointerType = props.pointerType || 'mouse';
+      this.pointerType = props.pointerType || "mouse";
     }
-  } as any;
+  } as unknown as typeof globalThis.PointerEvent;
 
   // Next.js navigation hooks のモック
-  vi.mock('next/navigation', () => ({
+  vi.mock("next/navigation", () => ({
     useRouter: () => ({
       push: vi.fn(),
       replace: vi.fn(),
@@ -82,7 +82,7 @@ if (typeof window !== 'undefined') {
       refresh: vi.fn(),
     }),
     useSearchParams: () => new URLSearchParams(),
-    usePathname: () => '/test-path',
+    usePathname: () => "/test-path",
     useParams: () => ({}),
   }));
 }

@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import React, { Component, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import type React from "react";
+import { Component, type ReactNode } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -25,7 +26,7 @@ interface ErrorFallbackProps {
 
 // デフォルトのエラー表示コンポーネント
 function DefaultErrorFallback({ error, resetError, goHome }: ErrorFallbackProps) {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
     <div className="min-h-screen bg-white p-8 flex items-center justify-center">
@@ -46,9 +47,7 @@ function DefaultErrorFallback({ error, resetError, goHome }: ErrorFallbackProps)
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               <div className="font-medium mb-2">エラーの詳細:</div>
-              <div className="text-sm break-words">
-                {error.message || 'Unknown error occurred'}
-              </div>
+              <div className="text-sm break-words">{error.message || "Unknown error occurred"}</div>
             </AlertDescription>
           </Alert>
 
@@ -106,7 +105,7 @@ function DefaultErrorFallback({ error, resetError, goHome }: ErrorFallbackProps)
 
 /**
  * Server Actions用のError Boundary
- * 
+ *
  * Features:
  * - React 18のエラーバウンダリー機能を活用
  * - Server Actionsでの予期しないエラーをキャッチ
@@ -138,14 +137,14 @@ export class ServerActionsErrorBoundary extends Component<ErrorBoundaryProps, Er
     });
 
     // エラーログを送信（プロダクション環境では外部サービスに送信）
-    console.error('Server Actions Error Boundary caught an error:', error, errorInfo);
+    console.error("Server Actions Error Boundary caught an error:", error, errorInfo);
 
     // 開発環境では詳細ログを出力
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🚨 Server Actions Error Details');
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
-      console.error('Component Stack:', errorInfo.componentStack);
+    if (process.env.NODE_ENV === "development") {
+      console.group("🚨 Server Actions Error Details");
+      console.error("Error:", error);
+      console.error("Error Info:", errorInfo);
+      console.error("Component Stack:", errorInfo.componentStack);
       console.groupEnd();
     }
   }
@@ -161,13 +160,13 @@ export class ServerActionsErrorBoundary extends Component<ErrorBoundaryProps, Er
   };
 
   goHome = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   render() {
     if (this.state.hasError && this.state.error) {
       const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-      
+
       return (
         <FallbackComponent
           error={this.state.error}
@@ -195,7 +194,7 @@ export function withErrorBoundary<P extends object>(
   );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }
 

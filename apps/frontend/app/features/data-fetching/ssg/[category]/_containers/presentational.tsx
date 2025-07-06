@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedPerformanceDisplay } from '@/components/enhanced-performance-display';
-import { CodeDisplay } from '@/components/code-display';
-import type { Category, DataFetchMetrics } from '../../../_shared/types';
-import { formatDateTime } from '@/utils/date-formatter';
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { EnhancedPerformanceDisplay } from "@/components/enhanced-performance-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDateTime } from "@/utils/date-formatter";
+import type { Category, DataFetchMetrics } from "../../../_shared/types";
 
 interface SsgPresentationalProps {
   categories: Category[];
@@ -19,12 +19,12 @@ interface SsgPresentationalProps {
   error: string | null;
 }
 
-export function SsgPresentational({ 
-  categories, 
+export function SsgPresentational({
+  categories,
   selectedCategory,
   currentSlug,
-  metrics, 
-  error 
+  metrics,
+  error,
 }: SsgPresentationalProps) {
   const [showCode, setShowCode] = useState(false);
 
@@ -72,21 +72,16 @@ async function getAll(options: FetchOptions = {}) {
             Static Site Generation with build-time data pre-rendering
           </p>
           {selectedCategory && (
-            <p className="text-sm text-blue-600 mt-1">
-              Showing category: {selectedCategory.name}
-            </p>
+            <p className="text-sm text-blue-600 mt-1">Showing category: {selectedCategory.name}</p>
           )}
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowCode(!showCode)}
-        >
-          {showCode ? 'Hide Code' : 'Show Code'}
+        <Button variant="outline" onClick={() => setShowCode(!showCode)}>
+          {showCode ? "Hide Code" : "Show Code"}
         </Button>
       </div>
 
       {showCode && (
-        <CodeDisplay 
+        <CodeDisplay
           title="SSG Implementation"
           description="Static Site Generation の実装例"
           files={[
@@ -94,8 +89,8 @@ async function getAll(options: FetchOptions = {}) {
               filename: "ssg-page.tsx",
               language: "typescript",
               content: ssgExampleCode,
-              description: "SSGを使用したページの実装"
-            }
+              description: "SSGを使用したページの実装",
+            },
           ]}
         />
       )}
@@ -122,9 +117,7 @@ async function getAll(options: FetchOptions = {}) {
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg flex items-center justify-between">
                         {selectedCategory.name}
-                        <Badge variant="secondary">
-                          {selectedCategory.postCount} posts
-                        </Badge>
+                        <Badge variant="secondary">{selectedCategory.postCount} posts</Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -139,20 +132,20 @@ async function getAll(options: FetchOptions = {}) {
                   </Card>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <h3 className="col-span-full text-lg font-semibold">All Categories (for reference):</h3>
+                    <h3 className="col-span-full text-lg font-semibold">
+                      All Categories (for reference):
+                    </h3>
                     {categories.map((category) => (
-                      <Card 
-                        key={category.id} 
+                      <Card
+                        key={category.id}
                         className={`hover:shadow-md transition-shadow ${
-                          category.slug === currentSlug ? 'border-blue-500 bg-blue-50' : ''
+                          category.slug === currentSlug ? "border-blue-500 bg-blue-50" : ""
                         }`}
                       >
                         <CardHeader className="pb-3">
                           <CardTitle className="text-lg flex items-center justify-between">
                             {category.name}
-                            <Badge variant="secondary">
-                              {category.postCount} posts
-                            </Badge>
+                            <Badge variant="secondary">{category.postCount} posts</Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -172,14 +165,13 @@ async function getAll(options: FetchOptions = {}) {
             </Card>
           ) : error ? (
             <Alert variant="destructive">
-              <AlertDescription>
-                Error loading SSG content: {error}
-              </AlertDescription>
+              <AlertDescription>Error loading SSG content: {error}</AlertDescription>
             </Alert>
           ) : (
             <Alert variant="destructive">
               <AlertDescription>
-                Category &quot;{currentSlug}&quot; not found. This page was statically generated but the category doesn&apos;t exist.
+                Category &quot;{currentSlug}&quot; not found. This page was statically generated but
+                the category doesn&apos;t exist.
               </AlertDescription>
             </Alert>
           )}
@@ -187,8 +179,8 @@ async function getAll(options: FetchOptions = {}) {
           {selectedCategory && (
             <Alert>
               <AlertDescription>
-                <strong>SSG Behavior:</strong> This content was pre-rendered at build time 
-                and served as static HTML. Perfect for content that doesn&apos;t change frequently.
+                <strong>SSG Behavior:</strong> This content was pre-rendered at build time and
+                served as static HTML. Perfect for content that doesn&apos;t change frequently.
               </AlertDescription>
             </Alert>
           )}
@@ -224,7 +216,7 @@ async function getAll(options: FetchOptions = {}) {
 
         <TabsContent value="performance">
           {metrics ? (
-            <EnhancedPerformanceDisplay 
+            <EnhancedPerformanceDisplay
               metrics={{
                 network: {
                   totalRequests: 1,
@@ -251,9 +243,7 @@ async function getAll(options: FetchOptions = {}) {
             />
           ) : (
             <Alert>
-              <AlertDescription>
-                Performance metrics not available
-              </AlertDescription>
+              <AlertDescription>Performance metrics not available</AlertDescription>
             </Alert>
           )}
         </TabsContent>
@@ -267,11 +257,11 @@ async function getAll(options: FetchOptions = {}) {
               <div>
                 <h4 className="font-semibold mb-2">1. Build-Time Generation</h4>
                 <p className="text-sm text-muted-foreground">
-                  Pages are pre-rendered at build time with all data fetched and HTML generated. 
-                  The result is served as static files from CDN.
+                  Pages are pre-rendered at build time with all data fetched and HTML generated. The
+                  result is served as static files from CDN.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">2. generateStaticParams</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
@@ -281,7 +271,7 @@ async function getAll(options: FetchOptions = {}) {
                   <li>• Enables pre-rendering of dynamic pages</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">3. Benefits</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">

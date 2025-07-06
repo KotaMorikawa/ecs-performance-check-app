@@ -1,6 +1,6 @@
-import { Suspense } from 'react';
-import { ServerActionsPresentational } from './presentational';
-import { ServerActionsErrorBoundary } from '../_components/error-boundary';
+import { Suspense } from "react";
+import { ServerActionsErrorBoundary } from "../_components/error-boundary";
+import { ServerActionsPresentational } from "./presentational";
 
 interface Post {
   id: number;
@@ -25,20 +25,20 @@ interface Post {
 // バックエンドから投稿一覧を取得
 async function fetchPosts(): Promise<Post[]> {
   try {
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.API_URL || "http://localhost:8000";
     const response = await fetch(`${apiUrl}/api/posts?published=false`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       // Next.js のキャッシュ設定
       next: {
-        tags: ['getPosts'], // キャッシュタグ for revalidateTag
+        tags: ["getPosts"], // キャッシュタグ for revalidateTag
       },
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch posts:', response.status);
+      console.error("Failed to fetch posts:", response.status);
       return [];
     }
 
@@ -47,10 +47,10 @@ async function fetchPosts(): Promise<Post[]> {
   } catch (error) {
     // ビルド時以外はエラーログを出力
     if (
-      process.env.NODE_ENV !== 'production' ||
-      process.env.NEXT_PHASE !== 'phase-production-build'
+      process.env.NODE_ENV !== "production" ||
+      process.env.NEXT_PHASE !== "phase-production-build"
     ) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
     }
     return [];
   }
@@ -60,7 +60,6 @@ async function fetchPosts(): Promise<Post[]> {
 export async function ServerActionsContainer() {
   // 投稿データを取得
   const posts = await fetchPosts();
-
 
   return (
     <ServerActionsErrorBoundary>

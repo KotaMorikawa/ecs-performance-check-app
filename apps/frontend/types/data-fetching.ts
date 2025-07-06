@@ -1,13 +1,13 @@
 // 並行データフェッチング用の型定義
 
 export interface ParallelFetchResult {
-  categories: import('@/features/data-fetching/_shared/types').Category[];
-  userProfile: import('@/features/data-fetching/_shared/types').UserProfile | null;
-  dashboardStats: import('@/features/data-fetching/_shared/types').DashboardStats;
+  categories: import("@/features/data-fetching/_shared/types").Category[];
+  userProfile: import("@/features/data-fetching/_shared/types").UserProfile | null;
+  dashboardStats: import("@/features/data-fetching/_shared/types").DashboardStats;
 }
 
 export interface ParallelFetchMetrics {
-  source: 'parallel';
+  source: "parallel";
   duration: number;
   timestamp: string;
   dataSize: number;

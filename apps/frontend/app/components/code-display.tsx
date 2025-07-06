@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Copy, Check, Eye, EyeOff, Code2, FileText } from 'lucide-react';
+import { Check, Code2, Copy, Eye, EyeOff, FileText } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CodeFile {
   filename: string;
@@ -27,27 +27,23 @@ export function CodeDisplay({ title, description, files }: CodeDisplayProps) {
   const copyToClipboard = async (content: string, index: number) => {
     try {
       await navigator.clipboard.writeText(content);
-      setCopiedStates(prev => ({ ...prev, [index]: true }));
+      setCopiedStates((prev) => ({ ...prev, [index]: true }));
       setTimeout(() => {
-        setCopiedStates(prev => ({ ...prev, [index]: false }));
+        setCopiedStates((prev) => ({ ...prev, [index]: false }));
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy code:', err);
+      console.error("Failed to copy code:", err);
     }
   };
 
   const formatCode = (code: string) => {
     // シンプルなコードフォーマット（本来はsyntax highlighterを使用）
-    return code
-      .split('\n')
-      .map((line, index) => (
-        <div key={index} className="flex">
-          <span className="text-gray-400 select-none w-8 text-right pr-2 text-xs">
-            {index + 1}
-          </span>
-          <span className="flex-1 font-mono text-sm">{line || ' '}</span>
-        </div>
-      ));
+    return code.split("\n").map((line, index) => (
+      <div key={`line-${index}-${line.slice(0, 20)}`} className="flex">
+        <span className="text-gray-400 select-none w-8 text-right pr-2 text-xs">{index + 1}</span>
+        <span className="flex-1 font-mono text-sm">{line || " "}</span>
+      </div>
+    ));
   };
 
   if (!isVisible) {
@@ -59,15 +55,10 @@ export function CodeDisplay({ title, description, files }: CodeDisplayProps) {
               <Code2 className="h-6 w-6 text-blue-600" />
               <div>
                 <h3 className="font-semibold text-gray-900">ソースコード</h3>
-                <p className="text-sm text-gray-600">
-                  この機能の実装コードを確認できます
-                </p>
+                <p className="text-sm text-gray-600">この機能の実装コードを確認できます</p>
               </div>
             </div>
-            <Button 
-              onClick={() => setIsVisible(true)}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={() => setIsVisible(true)} className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
               コードを表示
             </Button>
@@ -88,7 +79,7 @@ export function CodeDisplay({ title, description, files }: CodeDisplayProps) {
             </CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
-          <Button 
+          <Button
             onClick={() => setIsVisible(false)}
             variant="outline"
             size="sm"
@@ -105,7 +96,7 @@ export function CodeDisplay({ title, description, files }: CodeDisplayProps) {
           <div className="flex flex-wrap gap-2">
             {files.map((file, index) => (
               <Button
-                key={index}
+                key={file.filename}
                 onClick={() => setSelectedFile(index)}
                 variant={selectedFile === index ? "default" : "outline"}
                 size="sm"
@@ -125,12 +116,8 @@ export function CodeDisplay({ title, description, files }: CodeDisplayProps) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-medium text-gray-900">
-                    {files[selectedFile].filename}
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    {files[selectedFile].description}
-                  </p>
+                  <h4 className="font-medium text-gray-900">{files[selectedFile].filename}</h4>
+                  <p className="text-sm text-gray-600">{files[selectedFile].description}</p>
                 </div>
                 <Button
                   onClick={() => copyToClipboard(files[selectedFile].content, selectedFile)}
@@ -164,9 +151,7 @@ export function CodeDisplay({ title, description, files }: CodeDisplayProps) {
                   </div>
                 </div>
                 <div className="bg-white p-4 overflow-x-auto max-h-96">
-                  <div className="text-sm">
-                    {formatCode(files[selectedFile].content)}
-                  </div>
+                  <div className="text-sm">{formatCode(files[selectedFile].content)}</div>
                 </div>
               </div>
             </div>

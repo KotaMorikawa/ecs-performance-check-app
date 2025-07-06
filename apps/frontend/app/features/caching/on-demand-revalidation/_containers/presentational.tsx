@@ -1,48 +1,44 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CodeDisplay } from '@/components/code-display';
-import { 
-  RefreshCw, 
-  Tag, 
-  Route,
-  Zap,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Webhook,
+import {
   AlertTriangle,
+  ArrowRight,
+  CheckCircle,
+  Clock,
   Play,
-  ArrowRight
-} from 'lucide-react';
-import type { 
-  CacheTestData, 
-  CacheApiResponse,
-  RevalidationOperation 
-} from '../../_shared/types';
-import { revalidationApi } from '../../_shared/cache-api-client';
+  RefreshCw,
+  Route,
+  Tag,
+  Webhook,
+  XCircle,
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import { CodeDisplay } from "@/components/code-display";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { revalidationApi } from "../../_shared/cache-api-client";
+import type { CacheApiResponse, CacheTestData, RevalidationOperation } from "../../_shared/types";
 
 interface OnDemandRevalidationPresentationalProps {
   initialData: CacheTestData[];
-  initialMetadata: CacheApiResponse<CacheTestData[]>['metadata'] | null;
-  initialMetrics: CacheApiResponse<CacheTestData[]>['metrics'] | null;
+  initialMetadata: CacheApiResponse<CacheTestData[]>["metadata"] | null;
+  initialMetrics: CacheApiResponse<CacheTestData[]>["metrics"] | null;
   error: string | null;
 }
 
-export function OnDemandRevalidationPresentational({ 
+export function OnDemandRevalidationPresentational({
   initialMetadata,
-  initialMetrics
+  initialMetrics,
 }: OnDemandRevalidationPresentationalProps) {
   const [showCode, setShowCode] = useState(false);
-  const [customPath, setCustomPath] = useState('/features/caching');
-  const [customTag, setCustomTag] = useState('categories');
+  const [customPath, setCustomPath] = useState("/features/caching");
+  const [customTag, setCustomTag] = useState("categories");
   const [operations, setOperations] = useState<RevalidationOperation[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -54,7 +50,7 @@ export function OnDemandRevalidationPresentational({
       const result = await revalidationApi.revalidatePath(targetPath);
       setOperations([result, ...operations]);
     } catch (error) {
-      console.error('Path revalidation error:', error);
+      console.error("Path revalidation error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -68,7 +64,7 @@ export function OnDemandRevalidationPresentational({
       const result = await revalidationApi.revalidateTag(targetTag);
       setOperations([result, ...operations]);
     } catch (error) {
-      console.error('Tag revalidation error:', error);
+      console.error("Tag revalidation error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -78,11 +74,11 @@ export function OnDemandRevalidationPresentational({
   const handleBatchRevalidation = async () => {
     setIsProcessing(true);
     try {
-      const tags = ['categories', 'revalidation-demo', 'on-demand'];
+      const tags = ["categories", "revalidation-demo", "on-demand"];
       const results = await revalidationApi.revalidateMultipleTags(tags);
       setOperations([...results, ...operations]);
     } catch (error) {
-      console.error('Batch revalidation error:', error);
+      console.error("Batch revalidation error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -92,10 +88,10 @@ export function OnDemandRevalidationPresentational({
   const handleBackendSimulation = async () => {
     setIsProcessing(true);
     try {
-      const result = await revalidationApi.simulateBackendRevalidation('data-updated');
+      const result = await revalidationApi.simulateBackendRevalidation("data-updated");
       setOperations([result, ...operations]);
     } catch (error) {
-      console.error('Backend simulation error:', error);
+      console.error("Backend simulation error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -196,16 +192,12 @@ async function cascadeRevalidation() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleBatchRevalidation}
-            disabled={isProcessing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={handleBatchRevalidation} disabled={isProcessing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isProcessing ? "animate-spin" : ""}`} />
             Batch Revalidate
           </Button>
           <Button variant="outline" onClick={() => setShowCode(!showCode)}>
-            {showCode ? 'Hide Code' : 'Show Code'}
+            {showCode ? "Hide Code" : "Show Code"}
           </Button>
         </div>
       </div>
@@ -216,10 +208,10 @@ async function cascadeRevalidation() {
           description="オンデマンドリバリデートの実装パターン"
           files={[
             {
-              filename: 'revalidation.ts',
-              language: 'typescript',
+              filename: "revalidation.ts",
+              language: "typescript",
               content: onDemandCode,
-              description: '各種リバリデート手法の実装例',
+              description: "各種リバリデート手法の実装例",
             },
           ]}
         />
@@ -254,14 +246,14 @@ async function cascadeRevalidation() {
                     placeholder="/features/caching"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Quick Actions:</p>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePathRevalidation('/features/caching')}
+                      onClick={() => handlePathRevalidation("/features/caching")}
                       disabled={isProcessing}
                     >
                       Current Page
@@ -269,16 +261,16 @@ async function cascadeRevalidation() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePathRevalidation('/features/data-fetching')}
+                      onClick={() => handlePathRevalidation("/features/data-fetching")}
                       disabled={isProcessing}
                     >
                       Data Fetching
                     </Button>
                   </div>
                 </div>
-                
-                <Button 
-                  className="w-full" 
+
+                <Button
+                  className="w-full"
                   onClick={() => handlePathRevalidation()}
                   disabled={isProcessing}
                 >
@@ -306,11 +298,11 @@ async function cascadeRevalidation() {
                     placeholder="categories"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Available Tags:</p>
                   <div className="flex flex-wrap gap-1">
-                    {['categories', 'revalidation-demo', 'on-demand', 'posts'].map(tag => (
+                    {["categories", "revalidation-demo", "on-demand", "posts"].map((tag) => (
                       <Button
                         key={tag}
                         variant="outline"
@@ -324,9 +316,9 @@ async function cascadeRevalidation() {
                     ))}
                   </div>
                 </div>
-                
-                <Button 
-                  className="w-full" 
+
+                <Button
+                  className="w-full"
                   onClick={() => handleTagRevalidation()}
                   disabled={isProcessing}
                 >
@@ -350,11 +342,11 @@ async function cascadeRevalidation() {
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    This simulates a backend service triggering cache revalidation 
-                    after data updates (e.g., CMS updates, database changes).
+                    This simulates a backend service triggering cache revalidation after data
+                    updates (e.g., CMS updates, database changes).
                   </AlertDescription>
                 </Alert>
-                
+
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <p className="font-medium">Backend Data Update Event</p>
@@ -362,10 +354,7 @@ async function cascadeRevalidation() {
                       Simulates webhook notification from backend service
                     </p>
                   </div>
-                  <Button 
-                    onClick={handleBackendSimulation}
-                    disabled={isProcessing}
-                  >
+                  <Button onClick={handleBackendSimulation} disabled={isProcessing}>
                     <Webhook className="h-4 w-4 mr-2" />
                     Simulate Update
                   </Button>
@@ -383,14 +372,14 @@ async function cascadeRevalidation() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Cache Status</p>
-                  <Badge variant={initialMetadata?.cached ? 'success' : 'secondary'}>
-                    {initialMetadata?.cached ? 'CACHED' : 'FRESH'}
+                  <Badge variant={initialMetadata?.cached ? "success" : "secondary"}>
+                    {initialMetadata?.cached ? "CACHED" : "FRESH"}
                   </Badge>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Tags</p>
                   <div className="flex gap-1">
-                    {initialMetadata?.tags?.slice(0, 2).map(tag => (
+                    {initialMetadata?.tags?.slice(0, 2).map((tag) => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         {tag}
                       </Badge>
@@ -400,10 +389,9 @@ async function cascadeRevalidation() {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Last Updated</p>
                   <p className="text-sm font-mono">
-                    {initialMetadata?.timestamp ? 
-                      new Date(initialMetadata.timestamp).toLocaleTimeString() : 
-                      'Unknown'
-                    }
+                    {initialMetadata?.timestamp
+                      ? new Date(initialMetadata.timestamp).toLocaleTimeString()
+                      : "Unknown"}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -425,9 +413,9 @@ async function cascadeRevalidation() {
             <CardContent>
               {operations.length > 0 ? (
                 <div className="space-y-3">
-                  {operations.map((op, index) => (
+                  {operations.map((op) => (
                     <div
-                      key={index}
+                      key={`${op.type}-${op.target}-${op.timestamp}`}
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div className="flex items-center gap-4">
@@ -436,16 +424,16 @@ async function cascadeRevalidation() {
                         ) : (
                           <XCircle className="h-5 w-5 text-red-600" />
                         )}
-                        
+
                         <div>
                           <div className="flex items-center gap-2">
-                            {op.type === 'tag' ? (
+                            {op.type === "tag" ? (
                               <Tag className="h-4 w-4" />
                             ) : (
                               <Route className="h-4 w-4" />
                             )}
                             <p className="font-medium">
-                              {op.type === 'tag' ? 'Tag' : 'Path'}: {op.target}
+                              {op.type === "tag" ? "Tag" : "Path"}: {op.target}
                             </p>
                           </div>
                           <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -456,19 +444,15 @@ async function cascadeRevalidation() {
                             <span>{op.duration?.toFixed(0)}ms</span>
                             <span>by {op.triggeredBy}</span>
                           </div>
-                          {op.error && (
-                            <p className="text-sm text-red-600 mt-1">{op.error}</p>
-                          )}
+                          {op.error && <p className="text-sm text-red-600 mt-1">{op.error}</p>}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
-                        <Badge variant={op.success ? 'success' : 'destructive'}>
-                          {op.success ? 'Success' : 'Failed'}
+                        <Badge variant={op.success ? "success" : "destructive"}>
+                          {op.success ? "Success" : "Failed"}
                         </Badge>
-                        <Badge variant="outline">
-                          {op.strategy}
-                        </Badge>
+                        <Badge variant="outline">{op.strategy}</Badge>
                       </div>
                     </div>
                   ))}
@@ -503,7 +487,7 @@ async function cascadeRevalidation() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <Route className="h-5 w-5 mt-0.5 text-green-600" />
                     <div>
@@ -513,7 +497,7 @@ async function cascadeRevalidation() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <Webhook className="h-5 w-5 mt-0.5 text-purple-600" />
                     <div>
@@ -523,7 +507,7 @@ async function cascadeRevalidation() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <Clock className="h-5 w-5 mt-0.5 text-orange-600" />
                     <div>
@@ -581,8 +565,8 @@ async function cascadeRevalidation() {
                   1. Triggered Invalidation
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Unlike time-based revalidation, on-demand revalidation occurs immediately 
-                  when triggered by user actions, API calls, or external webhooks.
+                  Unlike time-based revalidation, on-demand revalidation occurs immediately when
+                  triggered by user actions, API calls, or external webhooks.
                 </p>
               </div>
 
@@ -592,8 +576,8 @@ async function cascadeRevalidation() {
                   2. Selective Cache Invalidation
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Tags allow you to invalidate related content across multiple pages. 
-                  For example, updating a category can invalidate all pages using the &quot;categories&quot; tag.
+                  Tags allow you to invalidate related content across multiple pages. For example,
+                  updating a category can invalidate all pages using the &quot;categories&quot; tag.
                 </p>
               </div>
 
@@ -603,8 +587,8 @@ async function cascadeRevalidation() {
                   3. External Integration
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Content Management Systems, databases, or other services can trigger 
-                  revalidation via webhooks when data changes occur.
+                  Content Management Systems, databases, or other services can trigger revalidation
+                  via webhooks when data changes occur.
                 </p>
               </div>
 
@@ -622,9 +606,9 @@ async function cascadeRevalidation() {
               <Alert>
                 <RefreshCw className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Performance Note:</strong> On-demand revalidation provides the best 
-                  balance between performance and freshness. Use it for content that needs 
-                  immediate updates while maintaining the benefits of static generation.
+                  <strong>Performance Note:</strong> On-demand revalidation provides the best
+                  balance between performance and freshness. Use it for content that needs immediate
+                  updates while maintaining the benefits of static generation.
                 </AlertDescription>
               </Alert>
             </CardContent>
